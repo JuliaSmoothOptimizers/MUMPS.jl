@@ -26,14 +26,16 @@ At the Julia prompt, type
 
 ````JULIA
 julia> Pkg.clone("https://github.com/dpo/MUMPS.jl.git")
+julia> Pkg.build("MUMPS")
 ````
 
-Once MUMPS is cloned, building the interface is a matter of
+In order for Julia to find the MUMPS interface library, its location must
+appear on your `LD_LIBRARY_PATH`:
 ````
-cd ~/.julia/v0.x/MUMPS/src  # replace version number
-make
-export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH  # Put this in your ~/.bashrc
+export LD_LIBRARY_PATH=~/.julia/v0.x/MUMPS/src:$LD_LIBRARY_PATH
 ````
+
+Place the above in your `~/.bashrc` to make it permanent.
 
 ## How to Use
 
@@ -55,7 +57,17 @@ julia> ierr = mumps_finalize_mpi();  # if you're finished
 It is possible to separate the initialization, the analysis/factorization,
 and the solve phases. It is also possible to access the information reported by
 MUMPS after the factorization and solve phases, and to modify this information
-(e.g., to perform iterative refinement). See the test examples.
+(e.g., to perform iterative refinement). For instance,
+
+````JULIA
+mumps = Mumps(0, icntl);  # General unsymmetric.
+A = sparse(rand(4,4)); rhs = rand(4);
+factorize(mumps, A);
+x = solve(mumps, rhs);
+finalize(mumps);
+````
+
+See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
 
 ## Parallel Execution
 
