@@ -1,3 +1,4 @@
+using Base.Test
 using MUMPS
 
 # Initialize MPI. Could use MPI.jl here?
@@ -17,6 +18,7 @@ factorize(mumps, A);  # Analyze and factorize.
 rhs = [1., 4., 9., 16.];
 x = solve(mumps, rhs);
 finalize(mumps);
+@test(norm(x - [1, 2, 3, 4]) <= 1.0e-14);
 
 mumps = Mumps(2, icntl);  # General symmetric.
 
@@ -25,7 +27,7 @@ factorize(mumps, A);
 
 rhs = rand(4);
 x = solve(mumps, rhs);
-@printf("Error: %7.1e\n", norm(x - A\rhs)/norm(x));
+@test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
 finalize(mumps);
 
 mumps = Mumps(0, icntl);  # General unsymmetric.
@@ -35,7 +37,7 @@ factorize(mumps, A);
 
 rhs = rand(4);
 x = solve(mumps, rhs);
-@printf("Error: %7.1e\n", norm(x - A\rhs)/norm(x));
+@test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
 finalize(mumps);
 
 mumps_finalize_mpi();
