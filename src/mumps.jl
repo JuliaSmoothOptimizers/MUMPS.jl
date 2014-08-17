@@ -122,6 +122,9 @@ function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
 end
 
 
+factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
+
+
 function solve(mumps :: Mumps, rhs :: Array{Float64})
   n = size(rhs, 1);
   if n != mumps.n
