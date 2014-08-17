@@ -46,6 +46,7 @@ type Mumps
   valtype :: Union(Type{Float64}, Type{Complex64})
   infog   :: Array{Int32,1}
   rinfog  :: Array{Float64,1}
+  nnz     :: Int               # Number of nonzeros in factors.
   err     :: Int
 
   # Constructor.
@@ -71,7 +72,7 @@ type Mumps
     infog = zeros(Int32, 40);
     rinfog = zeros(Float64, 20);
 
-    self = new(id, int32(sym), icntl, cntl, 0, Float64, infog, rinfog, 0);
+    self = new(id, int32(sym), icntl, cntl, 0, Float64, infog, rinfog, 0, 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
@@ -115,6 +116,7 @@ function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
 
   mumps.n = n;
   mumps.valtype = valtype;
+  mumps.nnz = mumps.infog[29];
   mumps.err = mumps.infog[1];
   return;
 end
