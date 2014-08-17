@@ -47,7 +47,7 @@ int mumps_finalize_mpi(void) {
 void* mumps_initialize(int sym, int* icntl, double* cntl) {
 
   DMUMPS_STRUC_C* pmumps;
-  int taskid, ierr, mpi_initialized;
+  int mpi_initialized, ierr;
   int i;
 
   MPI_Initialized(&mpi_initialized);
@@ -56,35 +56,36 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
     return NULL;
   }
 
+#ifdef JMUMPS_DEBUG
+  int taskid, np;
+  ierr = MPI_Comm_size(MPI_COMM_WORLD, &np);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
+  printf("MPI process %d out of %d\n", np);
+#endif
 
   // Initialize MUMPS.
-  if (taskid == 0) {
-    mumps_alloc(&pmumps);
-    if (pmumps == NULL) {
-      ierr = MPI_Finalize();
-      return NULL;
-    }
-
-    pmumps->sym = sym;
-    pmumps->job = JOB_INIT;
-    pmumps->par = 1;
-    pmumps->comm_fortran = USE_COMM_WORLD;
-
-    pmumps->n   = -1;
-    pmumps->nz  = -1;
+  mumps_alloc(&pmumps);
+  if (pmumps == NULL) {
+    ierr = MPI_Finalize();
+    return NULL;
   }
+
+  pmumps->sym = sym;
+  pmumps->job = JOB_INIT;
+  pmumps->par = 1;
+  pmumps->comm_fortran = USE_COMM_WORLD;
+
+  pmumps->n   = -1;
+  pmumps->nz  = -1;
 
   dmumps_c(pmumps);
 
-  if (taskid == 0) {
-    // Fill in default parameter values.
-    for (i = 0; i < 40; i++)
-      (pmumps->icntl)[i] = icntl[i];
+  // Fill in default parameter values.
+  for (i = 0; i < 40; i++)
+    (pmumps->icntl)[i] = icntl[i];
 
-    for (i = 0; i < 5; i++)
-      (pmumps->cntl)[i] = cntl[i];
-  }
+  for (i = 0; i < 5; i++)
+    (pmumps->cntl)[i] = cntl[i];
 
   return (void*)pmumps;
 }
@@ -101,11 +102,11 @@ void mumps_factorize(void *jmumps, int n, int nz,
 
   // Analyze and factorize.
   if (taskid == 0) {
+
 #ifdef JMUMPS_DEBUG
     printf("MUMPS struct initialized at %p\n", pmumps);
 #endif
 
-    pmumps->job = JOB_ANALYZE_FACTORIZE;
     pmumps->n  = n;
     pmumps->nz = nz;
 
@@ -120,6 +121,7 @@ void mumps_factorize(void *jmumps, int n, int nz,
 #endif
   }
 
+  pmumps->job = JOB_ANALYZE_FACTORIZE;
   dmumps_c(pmumps);
 }
 
@@ -131,6 +133,7 @@ void mumps_solve(void* jmumps, int nrhs, double* rhs) {
   int taskid, ierr;
 
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
+
   if (taskid == 0) {
 
 #ifdef JMUMPS_DEBUG
@@ -150,12 +153,12 @@ void mumps_solve(void* jmumps, int nrhs, double* rhs) {
              k, (pmumps->irn)[k], k, (pmumps->jcn)[k], k, (pmumps->a)[k]);
 #endif
 
-    pmumps->job  = JOB_SOLVE;
     pmumps->nrhs = nrhs;
     pmumps->lrhs = pmumps->n;
     pmumps->rhs  = rhs;  // Will be overwritten with the solution.
   }
 
+  pmumps->job  = JOB_SOLVE;
   dmumps_c(pmumps);
   return;
 }
@@ -193,21 +196,19 @@ void mumps_finalize(void* jmumps) {
   if (!mpi_finalized)
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
 
-  if (taskid == 0) {
 #ifdef JMUMPS_DEBUG
+  if (taskid == 0)
     printf("Terminating MUMPS struct at %p\n", pmumps);
 #endif
-    pmumps->job = JOB_END;
-  }
 
+  pmumps->job = JOB_END;
   dmumps_c(pmumps);
+  mumps_free(&pmumps);
 
-  if (taskid == 0) {
-    mumps_free(&pmumps);
 #ifdef JMUMPS_DEBUG
+  if (taskid == 0)
     printf("MUMPS instance terminated\n");
 #endif
-  }
 
   return;
 }
