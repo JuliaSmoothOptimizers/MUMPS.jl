@@ -50,9 +50,9 @@ type Mumps
   err     :: Int
 
   # Constructor.
-  function Mumps(sym :: Int=0,
+  function Mumps(sym   :: Int=0;
                  icntl :: Array{Int32,1}=default_icntl,
-                 cntl :: Array{Float64,1}=default_cntl)
+                 cntl  :: Array{Float64,1}=default_cntl)
     # sym = 0 (unsymmetric), 1 (symmetric definite), 2 (symmetric indefinite).
     # There is currently no facility to exploit hermicity of complex matrices.
 
