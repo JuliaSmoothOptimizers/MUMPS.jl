@@ -1,18 +1,17 @@
-top    = $(PWD)
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+top := $(patsubst %/,%,$(dir $(mkfile_path)))
 
 prefix = $(shell brew --prefix mumps)
 libdir = $(prefix)/lib
 incdir = $(prefix)/include # parallel MUMPS
 mpiincdir = $(shell brew --prefix open-mpi)/include
-#incdir = $(prefix)/libexec/include  # sequential MUMPS
-seqlib = #-lmpiseq
 
 # Set the following if your Mumps was built --with-scotch5
 scotch_libdir = $(shell brew --prefix scotch5)/lib
 scotch_libs = -lptesmumps -lptscotch -lptscotcherr
 
 src = jmumps.c
-lib = -L$(libdir) $(seqlib) -ldmumps -lzmumps -lmumps_common -lpord -L$(scotch_libdir) $(scotch_libs)
+lib = -L$(libdir) -ldmumps -lzmumps -lmumps_common -lpord -L$(scotch_libdir) $(scotch_libs)
 debug_flag = #-DJMUMPS_DEBUG
 
 %.o: %.c
