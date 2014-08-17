@@ -58,7 +58,7 @@ type Mumps
 
     # Set default pivot threshold if required.
     if cntl[1] == -1
-      cntl[1] = (sym > 0) ? 0.0 : 0.01
+      cntl[1] = (sym == 1) ? 0.0 : 0.01
     end
 
     id = @mumps_call(:mumps_initialize, Ptr{Void},
