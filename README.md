@@ -57,6 +57,18 @@ and the solve phases. It is also possible to access the information reported by
 MUMPS after the factorization and solve phases, and to modify this information
 (e.g., to perform iterative refinement). See the test examples.
 
+## Parallel Execution
+
+This package features two simple wrappers to intialize and finalize MPI.
+Alternatively, it is possible to use [MPI.jl](https://github.com/lcw/MPI.jl)
+for more fine-grained control. Look for the lines that say `NUMBER OF WORKING
+PROCESSES` in the output of
+
+````
+mpirun -np 4 examples/mumps_mpi.jl   # Uses MPI.jl
+mpirun -np 4 examples/mumps_mpi2.jl  # Uses the basic wrapper
+````
+
 ## To Do (Pull Requests Welcome!)
 
 * [ ] Support complex arithmetic
