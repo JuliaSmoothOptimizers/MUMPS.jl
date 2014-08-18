@@ -60,7 +60,7 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
   int taskid, np;
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &np);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-  printf("MPI process %d out of %d\n", np);
+  printf("MPI process %d out of %d\n", taskid, np);
 #endif
 
   // Initialize MUMPS.
