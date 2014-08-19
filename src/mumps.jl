@@ -47,6 +47,7 @@ type Mumps
   infog   :: Array{Int32,1}
   rinfog  :: Array{Float64,1}
   nnz     :: Int               # Number of nonzeros in factors.
+  det     :: Int
   err     :: Int
 
   # Constructor.
@@ -72,10 +73,32 @@ type Mumps
     infog = zeros(Int32, 40);
     rinfog = zeros(Float64, 20);
 
-    self = new(id, int32(sym), icntl, cntl, 0, Float64, infog, rinfog, 0, 0);
+    self = new(id, int32(sym), icntl, cntl, 0, Float64, infog, rinfog, 0, 0, 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
+end
+
+
+# Convenience constructor.
+# Note that every argument is a keyword.
+function Mumps(;sym :: Int=0,
+               det :: Bool=false,       # Compute determinant.
+               verbose :: Bool=false,   # Output intermediate info.
+               ooc :: Bool=false,       # Store factors out of core.
+               itref :: Int=0,          # Max steps of iterative refinement.
+               cntl :: Array{Float64,1}=default_cntl
+               )
+
+  icntl = default_icntl[:];
+  icntl[33] = det ? 1 : 0;
+  if !verbose
+    icntl[1:4] = 0;
+  end
+  icntl[22] = ooc ? 1 : 0;
+  icntl[10] = itref;
+
+  return Mumps(sym, icntl=icntl, cntl=cntl);
 end
 
 
@@ -117,6 +140,9 @@ function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
   mumps.n = n;
   mumps.valtype = valtype;
   mumps.nnz = mumps.infog[29];
+  if mumps.icntl[33] == 1
+    mumps.det = mumps.rinfog[12] * 2^(mumps.infog[34]);
+  end
   mumps.err = mumps.infog[1];
   return;
 end
@@ -125,7 +151,7 @@ end
 factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
 
 
-function solve(mumps :: Mumps, rhs :: Array{Float64})
+function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
   n = size(rhs, 1);
   if n != mumps.n
     error("rhs has incompatible dimension");
@@ -137,8 +163,8 @@ function solve(mumps :: Mumps, rhs :: Array{Float64})
   nrhs = size(rhs, 2);
   x = rhs[:];
   @mumps_call(:mumps_solve, Void,
-              (Ptr{Void}, Int32, Ptr{Float64}),
-              mumps.__id,  nrhs,            x);
+              (Ptr{Void}, Int32, Ptr{Float64},              Int32),
+              mumps.__id,  nrhs,            x, transposed ? 1 : 0);
 
   @mumps_call(:mumps_get_info, Void,
               (Ptr{Void}, Ptr{Int32}, Ptr{Float64}),

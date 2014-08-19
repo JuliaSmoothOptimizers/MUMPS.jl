@@ -127,7 +127,7 @@ void mumps_factorize(void *jmumps, int n, int nz,
 
 // Solve
 // Solve a linear system using the factorization computed previously.
-void mumps_solve(void* jmumps, int nrhs, double* rhs) {
+void mumps_solve(void* jmumps, int nrhs, double* rhs, int* transposed) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -156,6 +156,8 @@ void mumps_solve(void* jmumps, int nrhs, double* rhs) {
     pmumps->nrhs = nrhs;
     pmumps->lrhs = pmumps->n;
     pmumps->rhs  = rhs;  // Will be overwritten with the solution.
+    if (transposed != 0)
+      pmumps->icntl[8] = 0;
   }
 
   pmumps->job  = JOB_SOLVE;
