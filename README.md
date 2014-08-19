@@ -86,10 +86,10 @@ mpirun -np 4 examples/mumps_mpi2.jl  # Uses the basic wrapper
 * [ ] Support complex arithmetic
 * [ ] Support distributed matrices / vectors
 * [ ] User-selected permutation
-* [ ] Out-of-core option
-* [ ] Determinant
+* [X] Out-of-core option (in 73e829b)
+* [X] Determinant (in 73e829b)
 * [ ] Compute entries of the inverse
-* [ ] Control iterative refinement
+* [X] Control iterative refinement (in 73e829b)
 * [ ] Obtain a Schur complement
 
 [![GPLv3](http://www.gnu.org/graphics/gplv3-88x31.png)](http://www.gnu.org/licenses/gpl.html "GPLv3")
