@@ -86,10 +86,10 @@ mpirun -np 4 examples/mumps_mpi2.jl  # Uses the basic wrapper
 * [ ] Support complex arithmetic
 * [ ] Support distributed matrices / vectors
 * [ ] User-selected permutation
-* [X] Out-of-core option (in 73e829b)
-* [X] Determinant (in 73e829b)
+* [X] Out-of-core option (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
+* [X] Determinant (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Compute entries of the inverse
-* [X] Control iterative refinement (in 73e829b)
+* [X] Control iterative refinement (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Obtain a Schur complement
 
 [![GPLv3](http://www.gnu.org/graphics/gplv3-88x31.png)](http://www.gnu.org/licenses/gpl.html "GPLv3")
