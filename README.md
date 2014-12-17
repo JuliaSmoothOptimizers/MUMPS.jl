@@ -77,8 +77,8 @@ for more fine-grained control. Look for the lines that say `NUMBER OF WORKING
 PROCESSES` in the output of
 
 ````
-mpirun -np 4 examples/mumps_mpi.jl   # Uses MPI.jl
-mpirun -np 4 examples/mumps_mpi2.jl  # Uses the basic wrapper
+mpirun -np 4 julia examples/mumps_mpi.jl   # Uses MPI.jl
+mpirun -np 4 julia examples/mumps_mpi2.jl  # Uses the basic wrapper
 ````
 
 ## To Do (Pull Requests Welcome!)
