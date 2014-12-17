@@ -4,7 +4,7 @@ export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
        mumps_initialize_mpi, mumps_finalize_mpi
 
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
-mumps_lib = "libjmumps.dylib";
+mumps_lib = "libjmumps";
 macro mumps_call(func, args...)
   quote
     ccall(($func, $mumps_lib), $(args...))
