@@ -3,15 +3,15 @@ import MPI
 
 function main(A, rhs)
 
-  MPI.init()
+  MPI.Init()
 
   mumps = Mumps(2);  # General symmetric.
   factorize(mumps, A);
   x = solve(mumps, rhs);
   finalize(mumps);
 
-  MPI.barrier(MPI.COMM_WORLD)
-  MPI.finalize()
+  MPI.Barrier(MPI.COMM_WORLD)
+  MPI.Finalize()
   return x
 end
 
