@@ -15,13 +15,6 @@ brew tap homebrew/science  # if not already done
 brew install mumps --with-mpi --with-scotch5 [--with-openblas]  # use openblas at your option
 ````
 
-Whether it uses the Accelerate framework or OpenBLAS, MUMPS links with 32 bit
-versions of the BLAS and LAPACK libraries.
-
-**You must make sure that Julia also uses 32 bit versions of the BLAS and
-LAPACK**. In particular, if you use Homebrew to build Julia, **do not use** the
-`--64` command-line argument to `brew install julia`.
-
 At the Julia prompt, type
 
 ````JULIA
@@ -91,5 +84,6 @@ mpirun -np 4 julia examples/mumps_mpi2.jl  # Uses the basic wrapper
 * [ ] Compute entries of the inverse
 * [X] Control iterative refinement (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Obtain a Schur complement
+* [ ] Solve with sparse right-hand sides
 
 [![GPLv3](http://www.gnu.org/graphics/gplv3-88x31.png)](http://www.gnu.org/licenses/gpl.html "GPLv3")
