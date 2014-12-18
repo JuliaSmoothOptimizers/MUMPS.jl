@@ -92,7 +92,7 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
 
 // Factorize
 // Factorize input matrix.
-void mumps_factorize(void *jmumps, int n, int nz,
+void mumps_factorize(void* jmumps, int n, int nz,
                      double* vals, int* irow, int* jcol) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
@@ -123,6 +123,7 @@ void mumps_factorize(void *jmumps, int n, int nz,
 
   pmumps->job = JOB_ANALYZE_FACTORIZE;
   dmumps_c(pmumps);
+  return;
 }
 
 // Solve
