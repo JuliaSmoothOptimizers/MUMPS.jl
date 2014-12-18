@@ -1,7 +1,8 @@
 module MUMPS
 
 export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
-       mumps_initialize_mpi, mumps_finalize_mpi
+       mumps_initialize_mpi, mumps_finalize_mpi, mumps_unsymmetric,
+       mumps_definite, mumps_symmetric
 
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
 mumps_lib = "libjmumps";
@@ -35,6 +36,11 @@ default_icntl = convert(Array{Int32,1},
 # See MUMPS User's Manual Section 5.2.
 # icnt[1] will be set to its default value if left at -1.
 default_cntl = [-1, sqrt(eps(1.0)), 0.0, -1.0, 0.0];
+
+# Symbols for symmetry
+mumps_unsymmetric = 0;
+mumps_definite    = 1;
+mumps_symmetric   = 2;
 
 
 type Mumps
