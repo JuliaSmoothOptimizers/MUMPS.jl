@@ -86,4 +86,6 @@ mpirun -np 4 julia examples/mumps_mpi2.jl  # Uses the basic wrapper
 * [ ] Obtain a Schur complement
 * [ ] Solve with sparse right-hand sides
 
-[![GPLv3](http://www.gnu.org/graphics/gplv3-88x31.png)](http://www.gnu.org/licenses/gpl.html "GPLv3")
+This content is released under the [MIT](http://opensource.org/licenses/MIT) License.
+<a rel="license" href="http://opensource.org/licenses/MIT">
+<img alt="MIT license" height="40" src="http://upload.wikimedia.org/wikipedia/commons/c/c3/License_icon-mit.svg" /></a>
