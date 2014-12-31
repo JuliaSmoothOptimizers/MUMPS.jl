@@ -224,9 +224,6 @@ void mumps_alloc(DMUMPS_STRUC_C** mumps){
 
 void mumps_free(DMUMPS_STRUC_C** mumps){
   if (*mumps != NULL){
-    // Free( (*mumps)->irn );
-    // Free( (*mumps)->jcn  );
-    // Free( (*mumps)->a );
     Free( (*mumps)->irn_loc );
     Free( (*mumps)->jcn_loc );
     Free( (*mumps)->a_loc );
@@ -243,7 +240,6 @@ void mumps_free(DMUMPS_STRUC_C** mumps){
     Free( (*mumps)->irhs_ptr);
     Free( (*mumps)->irhs_sparse);
     Free( (*mumps)->rhs_sparse);
-    // Free( (*mumps)->rhs);
     Free( (*mumps)->redrhs);
     Free(*mumps);
   }
