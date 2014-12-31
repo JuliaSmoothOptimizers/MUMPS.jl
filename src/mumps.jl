@@ -1,8 +1,7 @@
 module MUMPS
 
 export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
-       mumps_initialize_mpi, mumps_finalize_mpi, mumps_unsymmetric,
-       mumps_definite, mumps_symmetric
+       mumps_unsymmetric, mumps_definite, mumps_symmetric
 
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
 mumps_lib = "libjmumps";
@@ -10,19 +9,6 @@ macro mumps_call(func, args...)
   quote
     ccall(($func, $mumps_lib), $(args...))
   end
-end
-
-
-# MPI-related functions.
-function mumps_initialize_mpi()
-  ierr = @mumps_call(:mumps_initialize_mpi, Int32, ());
-  return ierr
-end
-
-
-function mumps_finalize_mpi()
-  ierr = @mumps_call(:mumps_finalize_mpi, Int32, ())
-  return ierr
 end
 
 

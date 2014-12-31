@@ -13,35 +13,6 @@
 
 #define USE_COMM_WORLD -987654
 
-// Initialize MPI.
-int mumps_initialize_mpi(void) {
-
-  int    argc = 1;
-  char** argv = NULL;
-  int    taskid, np, ierr;
-
-  ierr = MPI_Init(&argc, &argv);
-  if (ierr != MPI_SUCCESS) {
-    printf("Error initializing MPI. Terminating.\n");
-    MPI_Abort(MPI_COMM_WORLD, ierr);
-    return ierr;
-  }
-
-  ierr = MPI_Comm_size(MPI_COMM_WORLD, &np);
-  ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-  if (taskid == 0) printf("MPI initialized with %d processes\n", np);
-  return ierr;
-}
-
-// Finalize MPI.
-int mumps_finalize_mpi(void) {
-
-  int ierr;
-
-  ierr = MPI_Finalize();
-  return ierr;
-}
-
 // Initialize
 // Initialize MUMPS data structure, store default parameters.
 void* mumps_initialize(int sym, int* icntl, double* cntl) {

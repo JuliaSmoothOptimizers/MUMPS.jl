@@ -1,8 +1,6 @@
 #include "mpi.h"
 #include "dmumps_c.h"
 
-int   mumps_initialize_mpi(void);
-int   mumps_finalize_mpi(void);
 void* mumps_initialize(int, int*, double*);
 void  mumps_factorize(void*, int, int, double*, int*, int*);
 void  mumps_solve(void*, int, double*, int*);
