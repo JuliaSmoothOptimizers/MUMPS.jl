@@ -13,15 +13,57 @@ end
 
 
 # See MUMPS User's Manual Section 5.1.
-default_icntl = convert(Array{Int32,1},
-                        [6, 0,  6, 2, 0, 7,  7, 77, 1, 0,
-                         0, 0, 0, 20, 0, 0,  0,  0, 0, 0,
-                         0, 0, 0,  0, 0, 0, -8,  0, 0, 0,
-                         0, 0, 0,  0, 0, 0,  0,  0, 0, 0]);
+default_icntl = zeros(Int32, 40);
+default_icntl[1]  =  6;  # Output stream for error messages
+default_icntl[2]  =  0;  # Output stream for diagonstics/stats/warnings
+default_icntl[3]  =  6;  # Output stream for global info on host
+default_icntl[4]  =  2;  # Output level for errors/warnings/diagnostics
+default_icntl[5]  =  0;  # 0 = assembled matrix, 1 = elemental format
+default_icntl[6]  =  7;  # permutation/scaling in analysis (7 = automatic)
+default_icntl[7]  =  7;  # pivot order for factorization (7 = automatic)
+default_icntl[8]  = 77;  # scaling in analysis/factorization (77 = automatic)
+default_icntl[9]  =  1;  # 1: solve Ax=b, otherwise A'x=b
+default_icntl[10] =  0;  # max number of iterative refinement steps
+default_icntl[11] =  0;  # > 0: return stats collected during solve
+default_icntl[12] =  0;  # ordering during analysis
+default_icntl[13] =  0;  # >0: do not use ScaLapack on root frontal matrix
+default_icntl[14] = 20;  # % workspace increase during analysis/fact
+default_icntl[15] =  0;  # (not used)
+default_icntl[16] =  0;  # (not used)
+default_icntl[17] =  0;  # (not used)
+default_icntl[18] =  0;  # 0 = matrix assembled on host
+default_icntl[19] =  0;  # 1 = return Schur complement on host
+default_icntl[20] =  0;  # 0 = dense rhs, 1 = sparse rhs
+default_icntl[21] =  0;  # 0 = solution overwrites rhs, 1 = keep distributed
+default_icntl[22] =  0;  # 0 = in core, 1 = out of core
+default_icntl[23] =  0;  # max working memory
+default_icntl[24] =  0;  # 0: null pivot=error
+default_icntl[25] =  0;  # -1: compute nullspace basis
+default_icntl[26] =  0;  # condense rhs on Schur variables (see 19)
+default_icntl[27] = -8;  # blocking size for multiple rhs (<0: value * (-2))
+default_icntl[28] =  0;  # 1: sequential analysis, 2: parallel, 0: automatic
+default_icntl[29] =  0;  # ordering for parallel analysis (see 28)
+default_icntl[30] =  0;  # compute entries of the inverse
+default_icntl[31] =  0;  # discard factors after factorization (can't solve!)
+default_icntl[32] =  0;  # (not used)
+default_icntl[33] =  0;  # compute determinant
+default_icntl[34] =  0;  # (not used)
+default_icntl[35] =  0;  # (not used)
+default_icntl[36] =  0;  # (not used)
+default_icntl[37] =  0;  # (not used)
+default_icntl[38] =  0;  # (not used)
+default_icntl[39] =  0;  # (not used)
+default_icntl[40] =  0;  # (not used)
 
 # See MUMPS User's Manual Section 5.2.
-# icnt[1] will be set to its default value if left at -1.
-default_cntl = [-1, sqrt(eps(1.0)), 0.0, -1.0, 0.0];
+# icntl[1] will be set to its default value if left at -1.
+default_cntl = zeros(Float64, 15);
+default_cntl[1] = -1;    # relative threshold for numerical pivoting
+default_cntl[2] = sqrt(eps(Float64));  # tolerance for iterative refinement
+default_cntl[3] =  0.0;  # threshold to detect null pivots
+default_cntl[4] = -1.0;  # threshold for static pivoting (<0: disable)
+default_cntl[5] =  0.0;  # what null pivots are reset to
+# default_cntl[6-15] are not used.
 
 # Symbols for symmetry
 mumps_unsymmetric = 0;
