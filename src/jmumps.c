@@ -61,45 +61,66 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
   return (void*)pmumps;
 }
 
-// Factorize
-// Factorize input matrix.
-void mumps_factorize(void* jmumps, int n, int nz,
-                     double* vals, int* irow, int* jcol) {
+
+// Associate matrix
+// Associate pointers to matrix in Mumps data structure.
+// This is a separate function so users can call it
+// only on the host if necessary.
+void mumps_associate_matrix(void* jmumps, int n, int nz,
+                            double* vals, int* irow, int* jcol) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
-  int taskid, ierr;
-
-  ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
-
-  // Analyze and factorize.
-  if (taskid == 0) {
 
 #ifdef JMUMPS_DEBUG
     printf("MUMPS struct initialized at %p\n", pmumps);
 #endif
 
-    pmumps->n  = n;
-    pmumps->nz = nz;
+  pmumps->n  = n;
+  pmumps->nz = nz;
 
-    // irow/jcol are 1-based in Julia, as in Fortran.
-    pmumps->irn = irow;
-    pmumps->jcn = jcol;
-    pmumps->a   = vals;
+  // irow/jcol are 1-based in Julia, as in Fortran.
+  pmumps->irn = irow;
+  pmumps->jcn = jcol;
+  pmumps->a   = vals;
+
+  return;
+}
+
+
+// Factorize
+// Factorize input matrix.
+void mumps_factorize(void* jmumps) {
+
+  DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
+
+  pmumps->job = JOB_ANALYZE_FACTORIZE;
+  dmumps_c(pmumps);
 
 #ifdef JMUMPS_DEBUG
     printf("MUMPS factorized a matrix of size %d with %d nonzeros\n",
            pmumps->n, pmumps->nz);
 #endif
-  }
 
-  pmumps->job = JOB_ANALYZE_FACTORIZE;
-  dmumps_c(pmumps);
-  return;
+    return;
+}
+
+
+// Associate RHS
+// Associate pointer to right-hand side in Mumps data structure.
+// This is a separate function so users can call it
+// only on the host if necessary.
+void mumps_associate_rhs(void* jmumps, int nrhs, double* rhs) {
+
+  DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
+
+  pmumps->nrhs = nrhs;
+  pmumps->lrhs = pmumps->n;
+  pmumps->rhs  = rhs;  // Will be overwritten with the solution.
 }
 
 // Solve
 // Solve a linear system using the factorization computed previously.
-void mumps_solve(void* jmumps, int nrhs, double* rhs, int* transposed) {
+void mumps_solve(void* jmumps, int* transposed) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -125,9 +146,6 @@ void mumps_solve(void* jmumps, int nrhs, double* rhs, int* transposed) {
              k, (pmumps->irn)[k], k, (pmumps->jcn)[k], k, (pmumps->a)[k]);
 #endif
 
-    pmumps->nrhs = nrhs;
-    pmumps->lrhs = pmumps->n;
-    pmumps->rhs  = rhs;  // Will be overwritten with the solution.
     if (transposed != 0)
       pmumps->icntl[8] = 0;
   }
@@ -135,6 +153,31 @@ void mumps_solve(void* jmumps, int nrhs, double* rhs, int* transposed) {
   pmumps->job  = JOB_SOLVE;
   dmumps_c(pmumps);
   return;
+}
+
+
+// Get solution
+// Retrieve solution from Mumps data structure.
+// This is a separate function so users can call it
+// only on the host if necessary.
+void mumps_get_solution(void* jmumps, double* x) {
+
+  DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
+  int i;
+
+  for (i=0; i < pmumps->n * pmumps->nrhs; i++)
+    x[i] = pmumps->rhs[i];
+
+  return;
+}
+
+
+// Get nrhs
+// Obtain the number of rhs associated with Mumps data structure.
+int mumps_get_nrhs(void* jmumps) {
+
+  DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
+  return pmumps->nrhs;
 }
 
 // Get info

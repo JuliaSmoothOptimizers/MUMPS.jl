@@ -1,6 +1,7 @@
 module MUMPS
 
 export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
+       associate_matrix, associate_rhs, get_solution,
        mumps_unsymmetric, mumps_definite, mumps_symmetric
 
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
@@ -143,7 +144,7 @@ function finalize(mumps :: Mumps)
 end
 
 
-function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
+function associate_matrix(mumps :: Mumps, A :: SparseMatrixCSC)
 
   n = size(A, 1);
   if size(A, 2) != n
@@ -163,17 +164,28 @@ function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
     jcol[B.colptr[i] : B.colptr[i+1]-1] = i;
   end
 
-  @mumps_call(:mumps_factorize, Void,
+  @mumps_call(:mumps_associate_matrix, Void,
               (Ptr{Void}, Int32, Int32, Ptr{Float64}, Ptr{Int32}, Ptr{Int32}),
               mumps.__id,     n,    nz,         vals,       irow,       jcol);
+
+  mumps.n = n;
+  mumps.valtype = valtype;
+  mumps.nnz = mumps.infog[29];
+  return;
+end
+
+
+associate_matrix(mumps :: Mumps, A :: Array{Float64}) = associate_matrix(mumps, sparse(A));
+
+
+function factorize(mumps :: Mumps)
+
+  @mumps_call(:mumps_factorize, Void, (Ptr{Void},), mumps.__id);
 
   @mumps_call(:mumps_get_info, Void,
               (Ptr{Void}, Ptr{Int32}, Ptr{Float64}),
               mumps.__id, mumps.infog, mumps.rinfog)
 
-  mumps.n = n;
-  mumps.valtype = valtype;
-  mumps.nnz = mumps.infog[29];
   if mumps.icntl[33] == 1
     mumps.det = mumps.rinfog[12] * 2^(mumps.infog[34]);
   end
@@ -182,10 +194,8 @@ function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
 end
 
 
-factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
+function associate_rhs(mumps :: Mumps, rhs :: Array{Float64})
 
-
-function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
   n = size(rhs, 1);
   if n != mumps.n
     error("rhs has incompatible dimension");
@@ -195,17 +205,38 @@ function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
   end
 
   nrhs = size(rhs, 2);
-  x = rhs[:];
+  x = rhs[:];  # Make a copy; will be overwritten with solution.
+
+  @mumps_call(:mumps_associate_rhs, Void,
+              (Ptr{Void}, Int32, Ptr{Float64}),
+              mumps.__id,  nrhs,            x);
+  return;
+end
+
+
+function solve(mumps :: Mumps; transposed :: Bool=false)
+
   @mumps_call(:mumps_solve, Void,
-              (Ptr{Void}, Int32, Ptr{Float64},              Int32),
-              mumps.__id,  nrhs,            x, transposed ? 1 : 0);
+              (Ptr{Void}, Int32),
+              mumps.__id, transposed ? 1 : 0);
 
   @mumps_call(:mumps_get_info, Void,
               (Ptr{Void}, Ptr{Int32}, Ptr{Float64}),
               mumps.__id, mumps.infog, mumps.rinfog)
 
   mumps.err = mumps.infog[1];
-  return reshape(x, n, nrhs);
+  return;
+end
+
+
+function get_solution(mumps :: Mumps)
+  nrhs = int(@mumps_call(:mumps_get_nrhs, Int32, (Ptr{Void},), mumps.__id));
+
+  x = zeros(Float64, mumps.n * nrhs);
+  @mumps_call(:mumps_get_solution, Void,
+              (Ptr{Void}, Ptr{Float64}),
+              mumps.__id,            x);
+  return reshape(x, int(mumps.n), nrhs);
 end
 
 
