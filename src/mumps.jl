@@ -57,7 +57,7 @@ type Mumps
   err     :: Int
 
   # Constructor.
-  function Mumps(sym   :: Int=0;
+  function Mumps(sym   :: Int=mumps_unsymmetric;
                  icntl :: Array{Int32,1}=default_icntl,
                  cntl  :: Array{Float64,1}=default_cntl)
     # sym = 0 (unsymmetric), 1 (symmetric definite), 2 (symmetric indefinite).
@@ -65,7 +65,7 @@ type Mumps
 
     # Set default pivot threshold if required.
     if cntl[1] == -1
-      cntl[1] = (sym == 1) ? 0.0 : 0.01
+      cntl[1] = (sym == mumps_definite) ? 0.0 : 0.01
     end
 
     id = @mumps_call(:mumps_initialize, Ptr{Void},
@@ -88,7 +88,7 @@ end
 
 # Convenience constructor.
 # Note that every argument is a keyword.
-function Mumps(;sym :: Int=0,
+function Mumps(;sym :: Int=mumps_unsymmetric,
                det :: Bool=false,       # Compute determinant.
                verbose :: Bool=false,   # Output intermediate info.
                ooc :: Bool=false,       # Store factors out of core.
@@ -192,8 +192,10 @@ end
 
 
 ## Combined initialize / analyze / factorize / solve.
-function solve(A :: SparseMatrixCSC, rhs :: Array{Float64}, sym :: Int=0)
-  mumps = Mumps(sym);  # Assume non-symmetric.
+function solve(A :: SparseMatrixCSC, rhs :: Array{Float64};
+               sym :: Int=mumps_unsymmetric)
+
+  mumps = Mumps(sym);
   x = solve(mumps, A, rhs);
   return x;
 end
