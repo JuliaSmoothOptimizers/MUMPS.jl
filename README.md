@@ -4,6 +4,10 @@ MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
 definiteness. The factorization and solve phases can be performed in parallel.
 
+## Documentation
+
+See http://dpo.github.io/MUMPS.jl/MUMPS.html for preliminary documentation.
+
 ## How to Install
 
 We recommend using [Homebrew](https://brew.sh). Currently, only OSX is
