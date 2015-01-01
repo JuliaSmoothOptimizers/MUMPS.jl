@@ -240,14 +240,35 @@ function get_solution(mumps :: Mumps)
 end
 
 
+function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
+  associate_rhs(mumps, rhs);
+  solve(mumps, transposed=transposed);
+  return get_solution(mumps);
+end
+
+
 # Convenience functions.
+
+# Combined associate_matrix / factorize.
+function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
+  associate_matrix(mumps, A);
+  factorize(mumps);
+  return;
+end
+
+factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
+
 
 ## Combined analyze / factorize / solve.
 function solve(mumps :: Mumps, A :: SparseMatrixCSC, rhs :: Array{Float64})
+
   factorize(mumps, A);
-  x = solve(mumps, rhs);
-  return x;
+  associate_rhs(mumps, rhs);
+  solve(mumps);
+  return get_solution(mumps);
 end
+
+solve(mumps :: Mumps, A :: Array{Float64}, rhs :: Array{Float64}) = solve(mumps, sparse(A), rhs);
 
 
 ## Combined initialize / analyze / factorize / solve.
@@ -256,7 +277,10 @@ function solve(A :: SparseMatrixCSC, rhs :: Array{Float64};
 
   mumps = Mumps(sym);
   x = solve(mumps, A, rhs);
+  finalize(mumps);
   return x;
 end
+
+solve(A :: Array{Float64}, rhs :: Array{Float64}; sym :: Int=mumps_unsymmetric) = solve(sparse(A), rhs, sym=sym);
 
 end  # Module MUMPS
