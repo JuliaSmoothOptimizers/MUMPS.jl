@@ -38,13 +38,13 @@ session is as follows:
 
 ````JULIA
 julia> using MUMPS
-julia> ierr = mumps_initialize_mpi();
-julia> A = sprand(10, 10, .2) + speye(10);
-julia> rhs = rand(10);
-julia> x = solve(A, rhs);
+julia> using MPI
+julia> MPI.Init()
+julia> A = sprand(10, 10, .2) + speye(10); rhs = rand(10);
+julia> x = solve(A, rhs);  # Mumps object is created and destroyed
 julia> norm(x - A \ rhs) / norm(x)
 2.640677159735313e-16
-julia> ierr = mumps_finalize_mpi();  # if you're finished
+julia> MPI.Finalize();     # if you're finished
 ````
 
 It is possible to separate the initialization, the analysis/factorization,
@@ -53,25 +53,27 @@ MUMPS after the factorization and solve phases, and to modify this information
 (e.g., to perform iterative refinement). For instance,
 
 ````JULIA
-mumps = Mumps(0, icntl);  # General unsymmetric.
-A = sparse(rand(4,4)); rhs = rand(4);
-factorize(mumps, A);
-x = solve(mumps, rhs);
-finalize(mumps);
+julia> MPI.Init();
+julia> mumps = Mumps(mumps_unsymmetric);  # General unsymmetric
+julia> A = sparse(rand(4,4)); rhs = rand(4);  # Happens on all cores
+julia> associate_matrix(mumps, A);
+julia> factorize(mumps);
+julia> associate_matrix(mumps, rhs);
+julia> solve(mumps);
+julia> x = get_solution(mumps);
+julia> finalize(mumps);
+julia> MPI.Finalize();
 ````
 
 See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
 
 ## Parallel Execution
 
-This package features two simple wrappers to intialize and finalize MPI.
-Alternatively, it is possible to use [MPI.jl](https://github.com/lcw/MPI.jl)
-for more fine-grained control. Look for the lines that say `NUMBER OF WORKING
-PROCESSES` in the output of
+MPI is controled by way of [MPI.jl](https://github.com/lcw/MPI.jl).
+Look for the lines that say `NUMBER OF WORKING PROCESSES` in the output of
 
 ````
-mpirun -np 4 julia examples/mumps_mpi.jl   # Uses MPI.jl
-mpirun -np 4 julia examples/mumps_mpi2.jl  # Uses the basic wrapper
+mpirun -np 4 julia examples/mumps_mpi.jl
 ````
 
 ## To Do (Pull Requests Welcome!)
