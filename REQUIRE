@@ -1,1 +1,5 @@
+julia 0.3
 MPI
+AnsiColor
+Docile
+Markdown
