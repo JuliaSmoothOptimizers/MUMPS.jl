@@ -4,6 +4,9 @@ export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
        associate_matrix, associate_rhs, get_solution,
        mumps_unsymmetric, mumps_definite, mumps_symmetric
 
+using Docile
+@docstrings(manual = ["../doc/manual.md"])
+
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
 mumps_lib = "libjmumps";
 macro mumps_call(func, args...)
@@ -14,6 +17,7 @@ end
 
 
 # See MUMPS User's Manual Section 5.1.
+@doc "Default integer parameters." ->
 default_icntl = zeros(Int32, 40);
 default_icntl[1]  =  6;  # Output stream for error messages
 default_icntl[2]  =  0;  # Output stream for diagonstics/stats/warnings
@@ -58,6 +62,7 @@ default_icntl[40] =  0;  # (not used)
 
 # See MUMPS User's Manual Section 5.2.
 # icntl[1] will be set to its default value if left at -1.
+@doc "Default real parameters" ->
 default_cntl = zeros(Float64, 15);
 default_cntl[1] = -1;    # relative threshold for numerical pivoting
 default_cntl[2] = sqrt(eps(Float64));  # tolerance for iterative refinement
@@ -67,11 +72,23 @@ default_cntl[5] =  0.0;  # what null pivots are reset to
 # default_cntl[6-15] are not used.
 
 # Symbols for symmetry
+@doc """Constant indicating that a general unsymmetric matrix will be
+analyzed and factorized""" ->
 mumps_unsymmetric = 0;
+
+@doc """Constant indicating that a symmetric definite matrix will be
+analyzed and factorized""" ->
 mumps_definite    = 1;
+
+@doc """Constant indicating that a general symmetric matrix will be
+analyzed and factorized""" ->
 mumps_symmetric   = 2;
 
 
+@doc """Abstract type representing a factorization with MUMPS.
+All constructor arguments are optional. By default a general
+unsymmetric matrix will be analyzed/factorized with default
+integer and real parameters""" ->
 type Mumps
   __id    :: Ptr{Void}         # Pointer to MUMPS struct. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
@@ -117,6 +134,14 @@ end
 
 # Convenience constructor.
 # Note that every argument is a keyword.
+@doc """Convenience constructor. All arguments are optional.
+* sym: one of mumps_unsymmetric, mumps_definite, mumps_symmetric
+* verbose: true or false
+* det: true or false, compute determinant
+* ooc: true or false, store factors out of core
+* itref: number of iterative refinement steps
+* cntl: real parameters array
+""" ->
 function Mumps(;sym :: Int=mumps_unsymmetric,
                det :: Bool=false,       # Compute determinant.
                verbose :: Bool=false,   # Output intermediate info.
@@ -137,13 +162,17 @@ function Mumps(;sym :: Int=mumps_unsymmetric,
 end
 
 
+@doc "Terminate a Mumps instance." ->
 function finalize(mumps :: Mumps)
-  # Terminate a Mumps instance.
   @mumps_call(:mumps_finalize, Void, (Ptr{Void},), mumps.__id);
   mumps.__id = C_NULL;
 end
 
 
+@doc """Register the matrix `A` with the `Mumps` object `mumps`.
+This function makes it possible to define the matrix on the host
+only. If the matrix is defined on all nodes, there is no need to
+use this function.""" ->
 function associate_matrix(mumps :: Mumps, A :: SparseMatrixCSC)
 
   n = size(A, 1);
@@ -178,6 +207,12 @@ end
 associate_matrix(mumps :: Mumps, A :: Array{Float64}) = associate_matrix(mumps, sparse(A));
 
 
+import Base.LinAlg.factorize
+
+@doc """Factorize the matrix registered with the `Mumps` instance.
+The matrix must have been previously registered with `associate_matrix()`.
+After the factorization, the determinant, if requested, is stored in
+`mumps.det`. The MUMPS error code is stored in `mumps.err`. """ ->
 function factorize(mumps :: Mumps)
 
   @mumps_call(:mumps_factorize, Void, (Ptr{Void},), mumps.__id);
@@ -194,6 +229,10 @@ function factorize(mumps :: Mumps)
 end
 
 
+@doc """Register the right-hand side(s) `rhs` with the `Mumps`
+object `mumps`. This function makes it possible to define the right-
+-hand side(s) on the host only. If the right-hand side(s) are defined
+on all nodes, there is no need to use this function.""" ->
 function associate_rhs(mumps :: Mumps, rhs :: Array{Float64})
 
   n = size(rhs, 1);
@@ -214,6 +253,12 @@ function associate_rhs(mumps :: Mumps, rhs :: Array{Float64})
 end
 
 
+@doc """Solve the system registered with the `Mumps` object `mumps`.
+The matrix and right-hand side(s) must have been previously registered
+with `associate_matrix()` and `associate_rhs()`. The optional keyword
+argument `transposed` indicates whether the user wants to solve the
+forward or transposed system. The solution is stored internally and must
+be retrieved with `get_solution()`.""" ->
 function solve(mumps :: Mumps; transposed :: Bool=false)
 
   @mumps_call(:mumps_solve, Void,
@@ -229,6 +274,9 @@ function solve(mumps :: Mumps; transposed :: Bool=false)
 end
 
 
+@doc """Retrieve the solution of the system solved by `solve()`. This
+function makes it possible to ask MUMPS to assemble the final solution
+on the host only, and to retrieve it there.""" ->
 function get_solution(mumps :: Mumps)
   nrhs = int(@mumps_call(:mumps_get_nrhs, Int32, (Ptr{Void},), mumps.__id));
 
@@ -240,6 +288,26 @@ function get_solution(mumps :: Mumps)
 end
 
 
+# Convenience functions.
+
+@doc """Combined associate_matrix / factorize.
+Presume that `A` is available on all nodes.""" ->
+function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
+  associate_matrix(mumps, A);
+  factorize(mumps);
+  return;
+end
+
+@doc """Combined associate_matrix / factorize.
+Presume that `A` is available on all nodes.""" ->
+factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
+
+
+@doc meta("""Combined associate_rhs / solve.
+Presume that `rhs` is available on all nodes.
+The optional keyword argument `transposed` indicates whether
+the user wants to solve the forward or transposed system.
+The solution is retrieved and returned.""", returns=(Array{Float64},)) ->
 function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
   associate_rhs(mumps, rhs);
   solve(mumps, transposed=transposed);
@@ -247,31 +315,25 @@ function solve(mumps :: Mumps, rhs :: Array{Float64}; transposed :: Bool=false)
 end
 
 
-# Convenience functions.
-
-# Combined associate_matrix / factorize.
-function factorize(mumps :: Mumps, A :: SparseMatrixCSC)
-  associate_matrix(mumps, A);
-  factorize(mumps);
-  return;
-end
-
-factorize(mumps :: Mumps, A :: Array{Float64}) = factorize(mumps, sparse(A));
-
-
-## Combined analyze / factorize / solve.
-function solve(mumps :: Mumps, A :: SparseMatrixCSC, rhs :: Array{Float64})
+@doc meta("""Combined analyze / factorize / solve.
+Presume that `A` and `rhs` are available on all nodes.
+The optional keyword argument `transposed` indicates whether
+the user wants to solve the forward or transposed system.
+The solution is retrieved and returned.""", returns=(Array{Float64},)) ->
+function solve(mumps :: Mumps, A :: SparseMatrixCSC, rhs :: Array{Float64};
+  transposed :: Bool=false)
 
   factorize(mumps, A);
-  associate_rhs(mumps, rhs);
-  solve(mumps);
-  return get_solution(mumps);
+  return solve(mumps, rhs, transposed=transposed);
 end
 
 solve(mumps :: Mumps, A :: Array{Float64}, rhs :: Array{Float64}) = solve(mumps, sparse(A), rhs);
 
 
-## Combined initialize / analyze / factorize / solve.
+@doc meta("""Combined initialize / analyze / factorize / solve.
+Presume that `A` and `rhs` are available on all nodes.
+The optional keyword argument `sym` indicates the symmetry of `A`.
+The solution is retrieved and returned.""", returns=(Array{Float64},)) ->
 function solve(A :: SparseMatrixCSC, rhs :: Array{Float64};
                sym :: Int=mumps_unsymmetric)
 

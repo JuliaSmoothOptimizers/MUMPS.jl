@@ -67,6 +67,57 @@ julia> MPI.Finalize();
 
 See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
 
+## Constants and Methods Exposed
+
+### Constants
+
+The following convenience constants may be used when initializing a `Mumps`
+object:
+
+Constant            | Meaning
+--------------------|--------
+`mumps_unsymmetric` | matrix is general unsymmetric (or symmetry is unknown)
+`mumps_definite`    | matrix is symmetric and (positive or negative) definite
+`mumps_symmetric`   | matrix is symmetric but indefinite (or definiteness is unknown)
+`default_icntl`     | array of default integer parameters
+`default_cntl`      | array of default real parameters
+
+
+See Sections 5.1 and 5.2 of the [MUMPS User's Manual](http://mumps.enseeiht.fr/doc/userguide_4.10.0.pdf) for a description of the integer and real control arrays.
+
+### Methods
+
+A `Mumps` object can be created in two ways
+
+1. The convenience constructor has no required argument, but may optionally
+   be supplied with the following keyword arguments:
+
+    * `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or `mumps_symmetric`
+    * `det`: a boolean indicating whether the determinant should be computed
+    * `verbose`: a boolean
+    * `ooc`: a boolean indicating whether factors should stored out of core
+    * `itref`: the number of iterative refinement steps
+    * `cntl`: a real parameters array (see the MUMPS Users's Manual)
+
+2. The standard constructor must be supplied with:
+
+    * `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or `mumps_symmetric`
+    * `icntl`: an integer parameters array (see the MUMPS Users's Manual)
+    * `cntl`: a real parameters array (see the MUMPS Users's Manual)
+
+A `Mumps` object is destroyed by calling the `finalize()` method. Because
+`finalize` still issues MPI commands, it is important to call `finalize()`
+before calling `MPI.Finalize()`.
+
+Method             | Description
+-------------------|------------
+`finalize`         | Finalize a `Mumps` object. Must be done before calling `MPI.Finalize()`
+`associate_matrix` | Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
+`factorize`        | Factorize the matrix registered with the `Mumps` object.
+`associate_rhs`    | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
+`solve`            | Solve the linear system for the given right-hand side.
+`get_solution`     | Retrieve the solution from the `Mumps` object. This function makes it possible for the solution to be assembled on the host only.
+
 ## Parallel Execution
 
 MPI is controled by way of [MPI.jl](https://github.com/lcw/MPI.jl).
