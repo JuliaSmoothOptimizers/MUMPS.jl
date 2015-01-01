@@ -21,8 +21,18 @@ else
 	scotch_libs = -L$(scotch_libdir) -lptesmumps -lptscotch -lptscotcherr
 endif
 
+# See if Mumps was built --with-openblas
+with_openblas = $(shell brew info mumps | grep 'openblas ✔')
+ifeq ($(strip $(with_openblas)),)
+	openblas_libdir =
+	openblas_libs =
+else
+	openblas_libdir = $(shell brew --prefix openblas)/lib
+	openblas_libs = -L$(openblas_libdir) -lopenblas
+endif
+
 src = jmumps.c
-lib = $(mumps_libs) $(scotch_libs) $(mpi_libs)
+lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(mpi_libs)
 debug_flag = #-DJMUMPS_DEBUG
 
 %.o: %.c
