@@ -25,7 +25,7 @@ endif
 with_openblas = $(shell brew info mumps | grep 'openblas ✔')
 ifeq ($(strip $(with_openblas)),)
 	openblas_libdir =
-	openblas_libs =
+	openblas_libs = -lblas -llapack
 else
 	openblas_libdir = $(shell brew --prefix openblas)/lib
 	openblas_libs = -L$(openblas_libdir) -lopenblas
