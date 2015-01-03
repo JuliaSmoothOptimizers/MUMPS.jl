@@ -25,6 +25,7 @@ trap 'error_handler' ERR
 bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 
+brew install cmake --env=std >> $BUILD_OUTPUT 2>&1  # CMake is cranky
 brew install mumps >> $BUILD_OUTPUT 2>&1
 
 # The build was successful dump a tail of the output
