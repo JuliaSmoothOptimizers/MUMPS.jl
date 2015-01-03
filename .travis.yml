@@ -7,7 +7,10 @@ julia:
   - release
 
 before_install:
-  # Install LinuxBrew
+  # Ensure BLAS and LAPACK are available.
+  - sudo apt-get update
+  - sudo apt-get -y install libblas-dev liblapack-dev
+  # Install LinuxBrew.
   - unset DYLD_LIBRARY_PATH
   - export PATH="$HOME/.linuxbrew/bin:$PATH"
   - export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
@@ -17,9 +20,13 @@ before_install:
 install:
   - brew update
   - brew install pkg-config
-  # Install MUMPS
+  # Install MUMPS.
   - brew tap homebrew/science
-  - bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
+  #- bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
+  - brew install cmake --env=std
+  - travis_wait brew install gcc       # Can stay silent for longer than 10 mins.
+  - brew install -v scalapack          # Request verbose output.
+  - brew install mumps
 
 # Then run default Julia script.
 
