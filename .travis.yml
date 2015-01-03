@@ -20,7 +20,7 @@ install:
   - brew doctor
   # Install MUMPS
   - brew tap homebrew/science
-  - brew doctor
+  # - brew doctor
   - bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
 
 # Then run default Julia script.
