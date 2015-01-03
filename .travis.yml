@@ -17,7 +17,6 @@ before_install:
 install:
   - brew update
   - brew install pkg-config
-  - brew doctor
   # Install MUMPS
   - brew tap homebrew/science
   - bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
