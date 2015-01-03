@@ -1,24 +1,27 @@
 language: julia
+
 #os:
 #  - osx
+
 julia:
   - release
+
 before_install:
   # Install LinuxBrew
-  #   Warning: Setting DYLD_* vars can break dynamic linking.
   - unset DYLD_LIBRARY_PATH
-  #   Warning: You have a non-Homebrew 'pkg-config' in your PATH
-  #- sudo rm -f /usr/bin/pkg-config
-  #   Warning: "config" scripts exist outside your system or Homebrew directories.
-  #- sudo rm -f /usr/local/clang-3.4/bin/llvm-config
-  - SRCDIR=$PWD
-  - cd ..
-  - git clone https://github.com/Homebrew/linuxbrew.git
-  - PATH=$PWD/linuxbrew/bin:$PATH
+  - export PATH="$HOME/.linuxbrew/bin:$PATH"
+  - export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
+  - export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
+  - echo -ne '\n' | ruby -e "$(wget -O- https://raw.github.com/Homebrew/linuxbrew/go/install)"
+
+install:
   - brew update
   - brew install pkg-config
+  - brew doctor
   # Install MUMPS
   - brew tap homebrew/science
-  - bash $SRCDIR/travis.sh  # To keep logs small and periodic output.
+  - brew doctor
+  - bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
+
 # Then run default Julia script.
 
