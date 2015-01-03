@@ -9,6 +9,7 @@ julia:
 before_install:
   # Ensure BLAS and LAPACK are available.
   - sudo apt-get update
+  - sudo apt-get install build-essential curl git m4 ruby texinfo libbz2-dev libcurl4-openssl-dev libexpat-dev libncurses-dev zlib1g-dev
   - sudo apt-get -y install libblas-dev liblapack-dev
   # Install LinuxBrew.
   - unset DYLD_LIBRARY_PATH
@@ -24,6 +25,7 @@ install:
   - brew tap homebrew/science
   #- bash $TRAVIS_BUILD_DIR/travis.sh  # To keep logs small and periodic output.
   - brew install cmake --env=std
+  - brew install $(brew deps gcc)
   - travis_wait brew install gcc       # Can stay silent for longer than 10 mins.
   - brew install -v scalapack          # Request verbose output.
   - brew install mumps
