@@ -18,7 +18,6 @@ before_install:
   - brew install pkg-config
   # Install MUMPS
   - brew tap homebrew/science
-  - brew install $(brew deps gcc)  # To keep the logs reasonable.
-  - brew install -v gcc            # To avoid a timeout.
-  - brew install mumps
+  - bash travis.sh  # To keep logs small and periodic output.
+# Then run default Julia script.
 
