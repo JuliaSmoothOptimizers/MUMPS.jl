@@ -10,7 +10,7 @@ before_install:
   #   Warning: You have a non-Homebrew 'pkg-config' in your PATH
   #- sudo rm -f /usr/bin/pkg-config
   #   Warning: "config" scripts exist outside your system or Homebrew directories.
-  - sudo rm -f /usr/local/clang-3.4/bin/llvm-config
+  #- sudo rm -f /usr/local/clang-3.4/bin/llvm-config
   - cd ..
   - git clone https://github.com/Homebrew/linuxbrew.git
   - PATH=$PWD/linuxbrew/bin:$PATH
@@ -18,5 +18,6 @@ before_install:
   - brew install pkg-config
   # Install MUMPS
   - brew tap homebrew/science
+  - brew install -v gcc
   - brew install mumps
 
