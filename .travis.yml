@@ -27,6 +27,7 @@ install:
   - brew install cmake --env=std
   - brew install $(brew deps gcc)
   - travis_wait brew install gcc       # Can stay silent for longer than 10 mins.
+  - brew install $(brew deps scalapack)
   - brew install -v scalapack          # Request verbose output.
   - brew install mumps
 
