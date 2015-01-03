@@ -1,9 +1,13 @@
 language: julia
-os:
-    - osx
+#os:
+#  - osx
 julia:
-    - release
+  - release
 before_install:
-    - brew update
-    - brew tap homebrew/science
-    - brew install -v mumps
+  - cd ..
+  - git clone https://github.com/Homebrew/linuxbrew.git
+  - PATH=$PWD/linuxbrew/bin:$PATH
+  - brew update
+  - brew tap homebrew/science
+  - brew install -v mumps
+
