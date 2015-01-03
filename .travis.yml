@@ -1,0 +1,9 @@
+language: julia
+os:
+    - osx
+julia:
+    - release
+before_install:
+    - brew update
+    - brew tap homebrew/science
+    - brew install -v mumps
