@@ -9,6 +9,7 @@ install:
   - brew tap homebrew/science
   - brew install mumps
   - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
+  - mkdir -vp $JULIA_PKG_DIR
   - ln -s $TRAVIS_BUILD_DIR $JULIA_PKG_DIR/MUMPS
   - export LD_LIBRARY_PATH=$JULIA_PKG_DIR/MUMPS/src:$LD_LIBRARY_PATH
   - julia -E 'Pkg.build("MUMPS");'
