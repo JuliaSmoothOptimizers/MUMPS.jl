@@ -1,5 +1,9 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
+OSX: [![Build
+Status](https://travis-ci.org/dpo/MUMPS.jl.svg?branch=master)](https://travis-ci.org/dpo/MUMPS.jl)
+Linux: Coming up...
+
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
 definiteness. The factorization and solve phases can be performed in parallel.
@@ -16,7 +20,7 @@ supported. The procedure below may work if you use
 
 ````
 brew tap homebrew/science  # if not already done
-brew install mumps --with-mpi --with-scotch5 [--with-openblas]  # use openblas at your option
+brew install mumps [--with-scotch5] [--with-openblas]  # use scotch/openblas at your option
 ````
 
 At the Julia prompt, type
@@ -29,7 +33,7 @@ julia> Pkg.build("MUMPS")
 In order for Julia to find the MUMPS interface library, its location must
 appear on your `LD_LIBRARY_PATH`:
 ````
-export LD_LIBRARY_PATH=~/.julia/v0.x/MUMPS/src:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')/MUMPS/src:$LD_LIBRARY_PATH
 ````
 
 Place the above in your `~/.bashrc` to make it permanent.

@@ -1,6 +1,7 @@
 language: objective-c
 
 before_install:
+  - brew --config
   - brew update
   - brew tap staticfloat/julia
   - brew install julia
@@ -9,12 +10,11 @@ install:
   - brew tap homebrew/science
   - brew install mumps
   - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
-  #- mkdir -vp $JULIA_PKG_DIR
-  #- ln -s $TRAVIS_BUILD_DIR $JULIA_PKG_DIR/MUMPS
   - export LD_LIBRARY_PATH=$JULIA_PKG_DIR/MUMPS/src:$LD_LIBRARY_PATH
   - julia -E 'Pkg.clone(pwd())';
   - julia -E 'Pkg.build("MUMPS");'
 
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS")'
+  - mpirun -np 2 julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
 
