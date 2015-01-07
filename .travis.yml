@@ -15,7 +15,7 @@ before_install:
   - brew --config
   - brew update
   - if [ `uname` = "Linux" ]; then brew install pkg-config; fi
-  - if [ `uname` = "Linux" ]; then brew install cmake; brew gist-logs cmake fi
+  - if [ `uname` = "Linux" ]; then brew install cmake; brew gist-logs cmake; fi
 
 install:
   # Install MUMPS.
