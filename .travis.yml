@@ -1,12 +1,23 @@
-language: objective-c
+language: julia
+
+os:
+  - osx
+  - linux
+
+julia:
+  - release
 
 before_install:
+  # Install Linuxbrew.
+  - unset DYLD_LIBRARY_PATH
+  - if [ `uname` = "Linux" ]; then bash setup_travis_linux.sh; fi
+  - if [ `uname` = "Linux" ]; then export PATH="$HOME/.linuxbrew/bin:$PATH"; fi
   - brew --config
   - brew update
-  - brew tap staticfloat/julia
-  - brew install julia
+  - if [ `uname` = "Linux" ]; then brew install pkg-config; fi
 
 install:
+  # Install MUMPS.
   - brew tap homebrew/science
   - brew install mumps
   - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
