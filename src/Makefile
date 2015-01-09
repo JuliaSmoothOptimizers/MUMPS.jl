@@ -35,14 +35,22 @@ src = jmumps.c
 lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(mpi_libs)
 debug_flag = #-DJMUMPS_DEBUG
 
+ifeq ($(strip $(shell uname)),Darwin)
+	soname = dylib
+	makeso = libtool -dynamic -undefined dynamic_lookup -macosx_version_min 10.8 -install_name $(top)/libjmumps.$(soname)
+else
+	soname = so
+	makeso = $(CC) -shared
+endif
+
 %.o: %.c
-	clang -g -c $(debug_flag) -I$(mumps_incdir) -I$(mpi_incdir) -fPIC $<
+	$(CC) -g -c $(debug_flag) -I$(mumps_incdir) -I$(mpi_incdir) -fPIC $<
 
 all: ${src:.c=.o}
-	libtool -dynamic -undefined dynamic_lookup -macosx_version_min 10.8 $< -o $(top)/libjmumps.dylib -install_name $(top)/libjmumps.dylib $(lib)
+	$(makeso) $< -o $(top)/libjmumps.$(soname) $(lib)
 
 clean:
 	rm -f $(top)/*.o
 
 veryclean: clean
-	rm -f $(top)/libjmumps.dylib
+	rm -f $(top)/libjmumps.$(soname)
