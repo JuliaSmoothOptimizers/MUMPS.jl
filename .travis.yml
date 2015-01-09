@@ -19,8 +19,8 @@ before_install:
 install:
   # Install MUMPS.
   - brew tap homebrew/science
-  - brew install cmake --without-docs  # On Linux, must happen before openssl.
-  - if [ `uname` = "Linux" ]; then brew install scalapack; fi
+  # On Linux, cmake must be installed before openssl.
+  - if [ `uname` = "Linux" ]; then brew install cmake --without-docs; fi
   - brew install mumps
   - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
   - export LD_LIBRARY_PATH=$JULIA_PKG_DIR/MUMPS/src:$LD_LIBRARY_PATH
