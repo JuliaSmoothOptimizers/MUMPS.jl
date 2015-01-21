@@ -131,7 +131,7 @@ void mumps_solve(void* jmumps, int* transposed) {
 
 #ifdef JMUMPS_DEBUG
     printf("Solving linear system at %p\n", pmumps);
-    printf("  nrhs=%d\n", nrhs);
+    printf("  nrhs=%d\n", pmumps->nrhs);
     printf("     n=%d\n", pmumps->n);
     printf("    nz=%d\n", pmumps->nz);
     printf("   irn=%p\n", pmumps->irn);
@@ -139,7 +139,7 @@ void mumps_solve(void* jmumps, int* transposed) {
     printf("     a=%p\n", pmumps->a);
     int k;
     for (k = 0; k < pmumps->n; k++) {
-      printf("  rhs[%d]=%8.1e\n", k, rhs[k]);
+      printf("  rhs[%d]=%8.1e\n", k, pmumps->rhs[k]);
     }
     for (k = 0; k < pmumps->nz; k++)
       printf("  irow[%d]=%d  jcol[%d]=%d  a[%d]=%8.1e\n",
