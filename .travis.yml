@@ -24,10 +24,12 @@ install:
   # On Linux, cmake must be installed before openssl.
   - if [ `uname` = "Linux" ]; then brew install cmake --without-docs; fi
   - brew install mumps
+  - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
+  - export LD_LIBRARY_PATH=$JULIA_PKG_DIR/MUMPS/src:$LD_LIBRARY_PATH
   - julia -e 'versioninfo()'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
 
 script:
-  - bash script_travis.sh
-
+  - julia --check-bounds=yes -E 'Pkg.test("MUMPS")'
+  - mpirun -np 2 julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
