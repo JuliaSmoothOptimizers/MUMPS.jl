@@ -11,6 +11,9 @@ mpi_incdir = $(mpi_prefix)/include
 mpi_libdir = $(mpi_prefix)/lib
 mpi_libs   = -L$(mpi_libdir) -lmpi -lmpi_mpifh
 
+scalapack_libdir = $(shell brew --prefix scalapack)/lib
+scalapack_libs   = -L$(scalapack_libdir) -lscalapack
+
 # See if Mumps was built --with-scotch5
 with_scotch = $(shell brew info mumps | grep 'scotch5 ✔')
 ifeq ($(strip $(with_scotch)),)
@@ -32,7 +35,7 @@ else
 endif
 
 src = jmumps.c
-lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(mpi_libs)
+lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(mpi_libs) $(scalapack_libs) -ldl
 debug_flag = #-DJMUMPS_DEBUG
 
 ifeq ($(strip $(shell uname)),Darwin)
@@ -40,7 +43,7 @@ ifeq ($(strip $(shell uname)),Darwin)
 	makeso = libtool -dynamic -undefined dynamic_lookup -macosx_version_min 10.8 -install_name $(top)/libjmumps.$(soname)
 else
 	soname = so
-	makeso = $(CC) -shared
+	makeso = $(CC) -shared -Wl,-soname,libjmumps.$(soname)
 endif
 
 %.o: %.c
