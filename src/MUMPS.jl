@@ -23,6 +23,8 @@ type MUMPSException <: Exception
   msg :: ASCIIString
 end
 
+MUMPSDataType = Union(Type{Float64}, Type{Complex128})
+
 
 # See MUMPS User's Manual Section 5.1.
 @doc "Default integer parameters." ->
@@ -103,7 +105,7 @@ type Mumps
   icntl   :: Array{Int32,1}    # Integer control parameters.
   cntl    :: Array{Float64,1}  # Real control parameters.
   n       :: Int32             # Order of the matrix factorized.
-  valtype :: Union(Type{Float64}, Type{Complex64})
+  valtype :: MUMPSDataType     # Real or complex.
   infog   :: Array{Int32,1}
   rinfog  :: Array{Float64,1}
   nnz     :: Int               # Number of nonzeros in factors.
@@ -190,7 +192,7 @@ function associate_matrix(mumps :: Mumps, A :: SparseMatrixCSC)
 
   # Obtain B in coordinate format.
   nz = nnz(B);
-  valtype = isreal(B.nzval[1]) ? Float64 : Complex64;
+  valtype = isreal(B.nzval[1]) ? Float64 : Complex128;
   vals = convert(Array{valtype,1}, B.nzval);
   irow = convert(Array{Int32,1}, B.rowval);
   jcol = zeros(Int32, nz, 1);
