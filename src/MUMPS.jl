@@ -5,6 +5,7 @@ export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
        mumps_unsymmetric, mumps_definite, mumps_symmetric,
        MUMPSException
 
+using MPI
 using Docile
 @docstrings(manual = ["../doc/manual.md"])
 
@@ -115,6 +116,8 @@ type Mumps
                  cntl  :: Array{Float64,1}=default_cntl)
     # sym = 0 (unsymmetric), 1 (symmetric definite), 2 (symmetric indefinite).
     # There is currently no facility to exploit hermicity of complex matrices.
+
+    MPI.Initialized() || throw(MUMPSException("Initialize MPI first"));
 
     # Set default pivot threshold if required.
     if cntl[1] == -1

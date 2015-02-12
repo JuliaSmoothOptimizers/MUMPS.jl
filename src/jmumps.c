@@ -18,14 +18,7 @@
 void* mumps_initialize(int sym, int* icntl, double* cntl) {
 
   DMUMPS_STRUC_C* pmumps;
-  int mpi_initialized;
   int i;
-
-  MPI_Initialized(&mpi_initialized);
-  if (!mpi_initialized) {
-    printf("Please initialize MPI first\n");
-    return NULL;
-  }
 
 #ifdef JMUMPS_DEBUG
   int ierr, taskid, np;
