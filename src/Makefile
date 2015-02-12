@@ -1,15 +1,12 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 top := $(patsubst %/,%,$(dir $(mkfile_path)))
 
+CC = mpicc
+
 mumps_prefix = $(shell brew --prefix mumps)
 mumps_incdir = $(mumps_prefix)/include # parallel MUMPS
 mumps_libdir = $(mumps_prefix)/lib
 mumps_libs   = -L$(mumps_libdir) -ldmumps -lzmumps -lmumps_common -lpord
-
-mpi_prefix = $(shell brew --prefix open-mpi)
-mpi_incdir = $(mpi_prefix)/include
-mpi_libdir = $(mpi_prefix)/lib
-mpi_libs   = -L$(mpi_libdir) -lmpi -lmpi_mpifh
 
 scalapack_libdir = $(shell brew --prefix scalapack)/lib
 scalapack_libs   = -L$(scalapack_libdir) -lscalapack
@@ -35,7 +32,7 @@ else
 endif
 
 src = jmumps.c
-lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(mpi_libs) $(scalapack_libs) -ldl
+lib = $(mumps_libs) $(scotch_libs) $(openblas_libs) $(scalapack_libs) -ldl
 debug_flag = #-DJMUMPS_DEBUG
 
 ifeq ($(strip $(shell uname)),Darwin)
@@ -47,7 +44,7 @@ else
 endif
 
 %.o: %.c
-	$(CC) -g -c $(debug_flag) -I$(mumps_incdir) -I$(mpi_incdir) -fPIC $<
+	$(CC) -g -c $(debug_flag) -I$(mumps_incdir) -fPIC $<
 
 all: ${src:.c=.o}
 	$(makeso) $< -o $(top)/libjmumps.$(soname) $(lib)
