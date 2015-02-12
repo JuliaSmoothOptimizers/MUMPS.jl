@@ -2,7 +2,8 @@ module MUMPS
 
 export default_icntl, default_cntl, Mumps, finalize, factorize, solve,
        associate_matrix, associate_rhs, get_solution,
-       mumps_unsymmetric, mumps_definite, mumps_symmetric
+       mumps_unsymmetric, mumps_definite, mumps_symmetric,
+       MUMPSException
 
 using Docile
 @docstrings(manual = ["../doc/manual.md"])
@@ -13,6 +14,12 @@ macro mumps_call(func, args...)
   quote
     ccall(($func, $mumps_lib), $(args...))
   end
+end
+
+
+@doc "Exception type raised in case of error." ->
+type MUMPSException <: Exception
+  msg :: ASCIIString
 end
 
 
@@ -117,10 +124,7 @@ type Mumps
     id = @mumps_call(:mumps_initialize, Ptr{Void},
                      (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
 
-    if id == C_NULL
-      msg = "Error allocating MUMPS structure"
-      error(msg)
-    end
+    id == C_NULL && throw(MUMPSException("Error allocating MUMPS structure"))
 
     infog = zeros(Int32, 40);
     rinfog = zeros(Float64, 20);
@@ -176,9 +180,7 @@ use this function.""" ->
 function associate_matrix(mumps :: Mumps, A :: SparseMatrixCSC)
 
   n = size(A, 1);
-  if size(A, 2) != n
-    error("Input matrix must be square");
-  end
+  size(A, 2) == n || throw(MUMPSException("Input matrix must be square"))
 
   # Symmetric factorization only accesses the lower triangle.
   B = mumps.__sym > 0 ? tril(A) : A;
@@ -236,12 +238,8 @@ on all nodes, there is no need to use this function.""" ->
 function associate_rhs(mumps :: Mumps, rhs :: Array{Float64})
 
   n = size(rhs, 1);
-  if n != mumps.n
-    error("rhs has incompatible dimension");
-  end
-  if typeof(rhs[1]) != mumps.valtype
-    error("rhs has incompatible data type");
-  end
+  n == mumps.n || throw(MUMPSException("rhs has incompatible dimension"))
+  typeof(rhs[1]) == mumps.valtype || throw(MUMPSException("rhs has incompatible data type"))
 
   nrhs = size(rhs, 2);
   x = rhs[:];  # Make a copy; will be overwritten with solution.
