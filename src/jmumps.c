@@ -194,16 +194,16 @@ void mumps_get_info(void* jmumps, int* infog, double* rinfog) {
 void mumps_finalize(void* jmumps) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
-  int taskid = 0, mpi_finalized = 0;
 
   if (pmumps == NULL) return;
 
+#ifdef JMUMPS_DEBUG
+  int taskid = 0, mpi_finalized = 0;
   MPI_Finalized(&mpi_finalized);
 
   if (!mpi_finalized)
     MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
 
-#ifdef JMUMPS_DEBUG
   if (taskid == 0)
     printf("Terminating MUMPS struct at %p\n", pmumps);
 #endif
