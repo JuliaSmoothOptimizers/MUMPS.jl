@@ -18,7 +18,7 @@
 void* mumps_initialize(int sym, int* icntl, double* cntl) {
 
   DMUMPS_STRUC_C* pmumps;
-  int mpi_initialized, ierr;
+  int mpi_initialized;
   int i;
 
   MPI_Initialized(&mpi_initialized);
@@ -28,7 +28,7 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
   }
 
 #ifdef JMUMPS_DEBUG
-  int taskid, np;
+  int ierr, taskid, np;
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &np);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &taskid);
   printf("MPI process %d out of %d\n", taskid, np);
@@ -36,10 +36,7 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
 
   // Initialize MUMPS.
   mumps_alloc(&pmumps);
-  if (pmumps == NULL) {
-    ierr = MPI_Finalize();
-    return NULL;
-  }
+  if (pmumps == NULL) return NULL;
 
   pmumps->sym = sym;
   pmumps->job = JOB_INIT;
