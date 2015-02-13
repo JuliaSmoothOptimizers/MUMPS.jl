@@ -15,7 +15,7 @@ icntl = default_icntl[:];
 #=icntl[3] = 0;=#
 #=icntl[4] = 0;=#
 
-mumps1 = Mumps(mumps_definite, icntl=icntl);
+mumps1 = Mumps{Float64}(mumps_definite, icntl, default_cntl);
 A = spdiagm([1., 2., 3., 4.]);
 factorize(mumps1, A);  # Analyze and factorize.
 rhs = [1., 4., 9., 16.];
@@ -24,7 +24,7 @@ finalize(mumps1);
 MPI.Barrier(comm)
 @test(norm(x - [1, 2, 3, 4]) <= 1.0e-14);
 
-mumps2 = Mumps(mumps_symmetric, icntl=icntl);
+mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl);
 A = rand(4,4); A = sparse(A + A');
 factorize(mumps2, A);
 rhs = rand(4);
@@ -33,7 +33,7 @@ finalize(mumps2);
 MPI.Barrier(comm)
 @test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
 
-mumps3 = Mumps(mumps_unsymmetric, icntl=icntl);
+mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl);
 A = sparse(rand(4,4));
 factorize(mumps3, A);
 rhs = rand(4);
