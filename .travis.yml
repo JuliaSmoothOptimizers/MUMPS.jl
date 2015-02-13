@@ -5,7 +5,7 @@ os:
   - linux
 
 julia:
-  - release
+  - nightly
 
 before_install:
   # Install Linuxbrew.
