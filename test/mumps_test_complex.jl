@@ -1,14 +1,3 @@
-using Base.Test
-using MUMPS
-using MPI
-
-include("get_div_grad.jl");
-root = 0;
-
-# Initialize MPI.
-MPI.Init()
-comm = MPI.COMM_WORLD
-
 icntl = default_icntl[:];
 icntl[1] = 0;
 icntl[2] = 0;
@@ -71,7 +60,7 @@ MPI.Barrier(comm)
 relres = zeros(nrhs)
 for i = 1 : nrhs
   relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]);
-  @test(relres[i] <= 1.0e-12);
+  @test(relres[i] <= 1.0e-8);
 end
 
 # Test a mixed-type example
@@ -81,7 +70,3 @@ x = solve(A, rhs, sym=mumps_unsymmetric);
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs);
 @test(relres <= 1.0e-12);
-
-MPI.Barrier(comm)
-MPI.Finalize()
-
