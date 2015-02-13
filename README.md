@@ -58,12 +58,19 @@ julia> MPI.Finalize();     # if you're finished
 It is possible to separate the initialization, the analysis/factorization,
 and the solve phases. It is also possible to access the information reported by
 MUMPS after the factorization and solve phases, and to modify this information
-(e.g., to perform iterative refinement). For instance,
+(e.g., to perform iterative refinement).
+
+When creating an instance of a `Mumps` object explicitly, it is important to
+specify in advance what arithmetic should be used. Currently, only double
+precision real (`Float64`) and complex (`Complex128`) arithmetics are
+supported.
+
+For instance,
 
 ````JULIA
 julia> MPI.Init();
-julia> mumps = Mumps(mumps_unsymmetric);  # General unsymmetric
-julia> A = sparse(rand(4,4)); rhs = rand(4);  # Happens on all cores
+julia> mumps = Mumps{Float64}(mumps_unsymmetric);  # Real, general unsymmetric
+julia> A = sparse(rand(4,4)); rhs = rand(4);       # Happens on all cores
 julia> associate_matrix(mumps, A);
 julia> factorize(mumps);
 julia> associate_matrix(mumps, rhs);
@@ -72,6 +79,21 @@ julia> x = get_solution(mumps);
 julia> finalize(mumps);
 julia> MPI.Finalize();
 ````
+
+Once the arithmetic of the `Mumps` instance has been specified, it cannot be
+changed. The module is flexible in that various data types may be used to
+define the matrix to be factorized and the right-hand side, and appropriate
+conversions will take place. Dense matrices may be used, and they will be
+converted to sparse format.
+
+For intance,
+
+```JULIA
+julia> mumps = Mumps{Complex128}(mumps_unsymmetric);
+julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4);
+julia> associate_matrix(mumps, A);  # A is converted to a sparse Float64 matrix
+julia> associate_rhs(mumps, rhs);   # rhs is converted to a Float64 array
+```
 
 See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
 
@@ -95,23 +117,27 @@ See Sections 5.1 and 5.2 of the [MUMPS User's Manual](http://mumps.enseeiht.fr/d
 
 ### Methods
 
-A `Mumps` object can be created in two ways
+A `Mumps` object is created using the default constructor, which must be
+supplied with:
 
-1. The convenience constructor has no required argument, but may optionally
-   be supplied with the following keyword arguments:
+* the data type for the arithmetic to be used, as a type parameter, i.e.,
+  `Mumps{Float64}(...)` or `Mumps{Complex128}(...)`
+* `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or
+  `mumps_symmetric`. Note that there is no support for Hermitian complex
+  matrices in MUMPS. Therefore, we recommend to always use `mumps_unsymmetric`
+  for complex data.
+* `icntl`: an integer parameters array (see the MUMPS Users's Manual)
+* `cntl`: a real parameters array (see the MUMPS Users's Manual)
 
-    * `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or `mumps_symmetric`
-    * `det`: a boolean indicating whether the determinant should be computed
-    * `verbose`: a boolean
-    * `ooc`: a boolean indicating whether factors should stored out of core
-    * `itref`: the number of iterative refinement steps
-    * `cntl`: a real parameters array (see the MUMPS Users's Manual)
+The convenience function `get_icntl()` returns an array of integer parameters
+corresponding to certain commonly-used options. Its arguments are all optional:
 
-2. The standard constructor must be supplied with:
-
-    * `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or `mumps_symmetric`
-    * `icntl`: an integer parameters array (see the MUMPS Users's Manual)
-    * `cntl`: a real parameters array (see the MUMPS Users's Manual)
+* `det`: a boolean indicating whether the determinant should be computed
+  (default: `false`)
+* `verbose`: a boolean (default: `false`)
+* `ooc`: a boolean indicating whether factors should be stored out of core
+  (default: `false`)
+* `itref`: the number of iterative refinement steps (default: 0).
 
 A `Mumps` object is destroyed by calling the `finalize()` method. Because
 `finalize` still issues MPI commands, it is important to call `finalize()`
