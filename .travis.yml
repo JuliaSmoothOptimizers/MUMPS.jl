@@ -5,7 +5,7 @@ os:
   - linux
 
 julia:
-  - nightly
+  - release
 
 before_install:
   # Install Linuxbrew.
@@ -27,6 +27,7 @@ install:
   - brew install mumps
   - export JULIA_PKG_DIR=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')
   - export LD_LIBRARY_PATH=$JULIA_PKG_DIR/MUMPS/src:$LD_LIBRARY_PATH
+  - if [ `uname` = "Linux" ]; then rm ~/julia/lib/julia/libgfortran.so.3; fi
   - julia -e 'versioninfo()'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
