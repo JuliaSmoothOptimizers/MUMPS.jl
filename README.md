@@ -163,7 +163,8 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 
 ## To Do (Pull Requests Welcome!)
 
-* [ ] Support complex arithmetic
+* [ ] Support double precision complex arithmetic
+* [ ] Support single precision real and complex arithmetic
 * [ ] Support distributed matrices / vectors
 * [ ] User-selected permutation
 * [X] Out-of-core option (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
