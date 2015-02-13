@@ -62,7 +62,7 @@ void mumps_associate_matrix_double(void* jmumps, int n, int nz,
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
 
 #ifdef JMUMPS_DEBUG
-    printf("MUMPS struct initialized at %p\n", pmumps);
+    printf("Associating matrix with MUMPS struct initialized at %p\n", pmumps);
 #endif
 
   pmumps->n  = n;
