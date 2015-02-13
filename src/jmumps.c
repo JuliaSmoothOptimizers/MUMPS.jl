@@ -15,7 +15,7 @@
 
 // Initialize
 // Initialize MUMPS data structure, store default parameters.
-void* mumps_initialize(int sym, int* icntl, double* cntl) {
+void* mumps_initialize_double(int sym, int* icntl, double* cntl) {
 
   DMUMPS_STRUC_C* pmumps;
   int i;
@@ -28,7 +28,7 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
 #endif
 
   // Initialize MUMPS.
-  mumps_alloc(&pmumps);
+  mumps_alloc_double(&pmumps);
   if (pmumps == NULL) return NULL;
 
   pmumps->sym = sym;
@@ -56,8 +56,8 @@ void* mumps_initialize(int sym, int* icntl, double* cntl) {
 // Associate pointers to matrix in Mumps data structure.
 // This is a separate function so users can call it
 // only on the host if necessary.
-void mumps_associate_matrix(void* jmumps, int n, int nz,
-                            double* vals, int* irow, int* jcol) {
+void mumps_associate_matrix_double(void* jmumps, int n, int nz,
+                                   double* vals, int* irow, int* jcol) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
 
@@ -79,7 +79,7 @@ void mumps_associate_matrix(void* jmumps, int n, int nz,
 
 // Factorize
 // Factorize input matrix.
-void mumps_factorize(void* jmumps) {
+void mumps_factorize_double(void* jmumps) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
 
@@ -99,7 +99,7 @@ void mumps_factorize(void* jmumps) {
 // Associate pointer to right-hand side in Mumps data structure.
 // This is a separate function so users can call it
 // only on the host if necessary.
-void mumps_associate_rhs(void* jmumps, int nrhs, double* rhs) {
+void mumps_associate_rhs_double(void* jmumps, int nrhs, double* rhs) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
 
@@ -110,7 +110,7 @@ void mumps_associate_rhs(void* jmumps, int nrhs, double* rhs) {
 
 // Solve
 // Solve a linear system using the factorization computed previously.
-void mumps_solve(void* jmumps, int* transposed) {
+void mumps_solve_double(void* jmumps, int* transposed) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -150,7 +150,7 @@ void mumps_solve(void* jmumps, int* transposed) {
 // Retrieve solution from Mumps data structure.
 // This is a separate function so users can call it
 // only on the host if necessary.
-void mumps_get_solution(void* jmumps, double* x) {
+void mumps_get_solution_double(void* jmumps, double* x) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   int i;
@@ -164,7 +164,7 @@ void mumps_get_solution(void* jmumps, double* x) {
 
 // Get nrhs
 // Obtain the number of rhs associated with Mumps data structure.
-int mumps_get_nrhs(void* jmumps) {
+int mumps_get_nrhs_double(void* jmumps) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   return pmumps->nrhs;
@@ -172,7 +172,7 @@ int mumps_get_nrhs(void* jmumps) {
 
 // Get info
 // Obtain analysis / factorization / solve integer and real info vectors.
-void mumps_get_info(void* jmumps, int* infog, double* rinfog) {
+void mumps_get_info_double(void* jmumps, int* infog, double* rinfog) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -191,7 +191,7 @@ void mumps_get_info(void* jmumps, int* infog, double* rinfog) {
 
 // Finalize
 // Destroy MUMPS data structure.
-void mumps_finalize(void* jmumps) {
+void mumps_finalize_double(void* jmumps) {
 
   DMUMPS_STRUC_C* pmumps = (DMUMPS_STRUC_C*)jmumps;
 
@@ -210,7 +210,7 @@ void mumps_finalize(void* jmumps) {
 
   pmumps->job = JOB_END;
   dmumps_c(pmumps);
-  mumps_free(&pmumps);
+  mumps_free_double(&pmumps);
 
 #ifdef JMUMPS_DEBUG
   if (taskid == 0)
@@ -223,7 +223,7 @@ void mumps_finalize(void* jmumps) {
 
 // Helper functions, strongly inspired by the MUMPS MATLAB interface.
 
-void mumps_alloc(DMUMPS_STRUC_C** mumps){
+void mumps_alloc_double(DMUMPS_STRUC_C** mumps){
 
   (*mumps) = malloc(sizeof(DMUMPS_STRUC_C));
   if (*mumps == NULL) return;
@@ -255,7 +255,7 @@ void mumps_alloc(DMUMPS_STRUC_C** mumps){
 
 #define Free(ptr) if (ptr) {free(ptr); ptr=NULL;}
 
-void mumps_free(DMUMPS_STRUC_C** mumps){
+void mumps_free_double(DMUMPS_STRUC_C** mumps){
   if (*mumps != NULL){
     Free( (*mumps)->irn_loc );
     Free( (*mumps)->jcn_loc );

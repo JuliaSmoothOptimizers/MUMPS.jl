@@ -126,7 +126,7 @@ type Mumps
       cntl[1] = (sym == mumps_definite) ? 0.0 : 0.01
     end
 
-    id = @mumps_call(:mumps_initialize, Ptr{Void},
+    id = @mumps_call(:mumps_initialize_double, Ptr{Void},
                      (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
 
     id == C_NULL && throw(MUMPSException("Error allocating MUMPS structure"))
@@ -173,7 +173,7 @@ end
 
 @doc "Terminate a Mumps instance." ->
 function finalize(mumps :: Mumps)
-  @mumps_call(:mumps_finalize, Void, (Ptr{Void},), mumps.__id);
+  @mumps_call(:mumps_finalize_double, Void, (Ptr{Void},), mumps.__id);
   mumps.__id = C_NULL;
 end
 
@@ -200,7 +200,7 @@ function associate_matrix(mumps :: Mumps, A :: SparseMatrixCSC)
     jcol[B.colptr[i] : B.colptr[i+1]-1] = i;
   end
 
-  @mumps_call(:mumps_associate_matrix, Void,
+  @mumps_call(:mumps_associate_matrix_double, Void,
               (Ptr{Void}, Int32, Int32, Ptr{Float64}, Ptr{Int32}, Ptr{Int32}),
               mumps.__id,     n,    nz,         vals,       irow,       jcol);
 
@@ -222,10 +222,10 @@ After the factorization, the determinant, if requested, is stored in
 `mumps.det`. The MUMPS error code is stored in `mumps.err`. """ ->
 function factorize(mumps :: Mumps)
 
-  @mumps_call(:mumps_factorize, Void, (Ptr{Void},), mumps.__id);
+  @mumps_call(:mumps_factorize_double, Void, (Ptr{Void},), mumps.__id);
 
-  @mumps_call(:mumps_get_info, Void,
-              (Ptr{Void}, Ptr{Int32}, Ptr{Float64}),
+  @mumps_call(:mumps_get_info_double, Void,
+              (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
               mumps.__id, mumps.infog, mumps.rinfog)
 
   if mumps.icntl[33] == 1
@@ -249,7 +249,7 @@ function associate_rhs(mumps :: Mumps, rhs :: Array{Float64})
   nrhs = size(rhs, 2);
   x = rhs[:];  # Make a copy; will be overwritten with solution.
 
-  @mumps_call(:mumps_associate_rhs, Void,
+  @mumps_call(:mumps_associate_rhs_double, Void,
               (Ptr{Void}, Int32, Ptr{Float64}),
               mumps.__id,  nrhs,            x);
   return;
@@ -264,12 +264,12 @@ forward or transposed system. The solution is stored internally and must
 be retrieved with `get_solution()`.""" ->
 function solve(mumps :: Mumps; transposed :: Bool=false)
 
-  @mumps_call(:mumps_solve, Void,
+  @mumps_call(:mumps_solve_double, Void,
               (Ptr{Void}, Int32),
               mumps.__id, transposed ? 1 : 0);
 
-  @mumps_call(:mumps_get_info, Void,
-              (Ptr{Void}, Ptr{Int32}, Ptr{Float64}),
+  @mumps_call(:mumps_get_info_double, Void,
+              (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
               mumps.__id, mumps.infog, mumps.rinfog)
 
   mumps.err = mumps.infog[1];
@@ -281,7 +281,12 @@ end
 function makes it possible to ask MUMPS to assemble the final solution
 on the host only, and to retrieve it there.""" ->
 function get_solution(mumps :: Mumps)
-  nrhs = int(@mumps_call(:mumps_get_nrhs, Int32, (Ptr{Void},), mumps.__id));
+  nrhs = int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), mumps.__id));
+
+  x = zeros(Float64, mumps.n * nrhs);
+  @mumps_call(:mumps_get_solution_double, Void,
+              (Ptr{Void}, Ptr{Float64}),
+              mumps.__id,            x);
 
   x = zeros(Float64, mumps.n * nrhs);
   @mumps_call(:mumps_get_solution, Void,
