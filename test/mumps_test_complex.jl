@@ -15,7 +15,7 @@ icntl[2] = 0;
 icntl[3] = 0;
 icntl[4] = 0;
 
-mumps1 = Mumps{Float64}(mumps_definite, icntl, default_cntl);
+mumps1 = Mumps{Complex128}(mumps_definite, icntl, default_cntl);
 A = spdiagm([1., 2., 3., 4.]);
 factorize(mumps1, A);  # Analyze and factorize.
 rhs = [1., 4., 9., 16.];
@@ -24,7 +24,7 @@ finalize(mumps1);
 MPI.Barrier(comm)
 @test(norm(x - [1, 2, 3, 4]) <= 1.0e-14);
 
-mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl);
+mumps2 = Mumps{Complex128}(mumps_symmetric, icntl, default_cntl);
 A = rand(4,4); A = sparse(A + A');
 factorize(mumps2, A);
 rhs = rand(4);
@@ -33,20 +33,19 @@ finalize(mumps2);
 MPI.Barrier(comm)
 @test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
 
-mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl);
-A = sparse(rand(4,4));
+mumps3 = Mumps{Complex128}(mumps_unsymmetric, icntl, default_cntl);
+A = sparse(rand(4,4)) + im * sparse(rand(4,4));
 factorize(mumps3, A);
-rhs = rand(4);
+rhs = rand(4) + im * rand(4);
 x = solve(mumps3, rhs);
 finalize(mumps3);
 MPI.Barrier(comm)
 @test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
 
-# Test for solving real div-grad system with single and multiple rhs.
-# Based on Lars Ruthotto's initial implementation.
+# Test convenience interface.
 
-A = get_div_grad(32, 32, 32);
-n = size(A, 1);
+n = 100;
+A = sprand(100, 100, .2) + im * sprand(100, 100, .2);
 
 # Test with single rhs
 if MPI.Comm_rank(comm) == root
@@ -54,7 +53,7 @@ if MPI.Comm_rank(comm) == root
 end
 rhs = randn(n);
 
-x = solve(A, rhs, sym=mumps_definite);
+x = solve(A, rhs, sym=mumps_unsymmetric);
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs);
 @test(relres <= 1.0e-12);
@@ -66,7 +65,7 @@ end
 nrhs = 10;
 rhs = randn(n, nrhs);
 
-x = solve(A, rhs, sym=mumps_definite);
+x = solve(A, rhs, sym=mumps_unsymmetric);
 
 MPI.Barrier(comm)
 relres = zeros(nrhs)
@@ -76,10 +75,10 @@ for i = 1 : nrhs
 end
 
 # Test a mixed-type example
-A = rand(Float32, 4, 4);
+A = rand(Complex32, 4, 4);
 rhs = rand(Int16, 4);
 x = solve(A, rhs, sym=mumps_unsymmetric);
-MPI.Barrier(comm);
+MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs);
 @test(relres <= 1.0e-12);
 
