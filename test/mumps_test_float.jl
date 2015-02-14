@@ -1,8 +1,4 @@
-icntl = default_icntl[:];
-icntl[1] = 0;
-icntl[2] = 0;
-icntl[3] = 0;
-icntl[4] = 0;
+icntl = get_icntl(det=true, ooc=true, itref=1);
 
 mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
 A = spdiagm(float32([1., 2., 3., 4.]));
