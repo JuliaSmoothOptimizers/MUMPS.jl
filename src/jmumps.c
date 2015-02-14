@@ -51,7 +51,7 @@ void* mumps_initialize_double(int sym, int* icntl, double* cntl) {
   return (void*)pmumps;
 }
 
-void* mumps_initialize_complex(int sym, int* icntl, double* cntl) {
+void* mumps_initialize_double_complex(int sym, int* icntl, double* cntl) {
 
   ZMUMPS_STRUC_C* pmumps;
   int i;
@@ -64,7 +64,7 @@ void* mumps_initialize_complex(int sym, int* icntl, double* cntl) {
 #endif
 
   // Initialize MUMPS.
-  mumps_alloc_complex(&pmumps);
+  mumps_alloc_double_complex(&pmumps);
   if (pmumps == NULL) return NULL;
 
   pmumps->sym = sym;
@@ -112,8 +112,8 @@ void mumps_associate_matrix_double(void* jmumps, int n, int nz,
   return;
 }
 
-void mumps_associate_matrix_complex(void* jmumps, int n, int nz,
-                                    double complex* vals, int* irow, int* jcol) {
+void mumps_associate_matrix_double_complex(void* jmumps, int n, int nz,
+                                           double complex* vals, int* irow, int* jcol) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
 
@@ -150,7 +150,7 @@ void mumps_factorize_double(void* jmumps) {
     return;
 }
 
-void mumps_factorize_complex(void* jmumps) {
+void mumps_factorize_double_complex(void* jmumps) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
 
@@ -179,7 +179,7 @@ void mumps_associate_rhs_double(void* jmumps, int nrhs, double* rhs) {
   pmumps->rhs  = rhs;  // Will be overwritten with the solution.
 }
 
-void mumps_associate_rhs_complex(void* jmumps, int nrhs, double complex* rhs) {
+void mumps_associate_rhs_double_complex(void* jmumps, int nrhs, double complex* rhs) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
 
@@ -225,7 +225,7 @@ void mumps_solve_double(void* jmumps, int* transposed) {
   return;
 }
 
-void mumps_solve_complex(void* jmumps, int* transposed) {
+void mumps_solve_double_complex(void* jmumps, int* transposed) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -276,7 +276,7 @@ void mumps_get_solution_double(void* jmumps, double* x) {
   return;
 }
 
-void mumps_get_solution_complex(void* jmumps, double complex* x) {
+void mumps_get_solution_double_complex(void* jmumps, double complex* x) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
   ZMUMPS_COMPLEX  val;
@@ -299,7 +299,7 @@ int mumps_get_nrhs_double(void* jmumps) {
   return pmumps->nrhs;
 }
 
-int mumps_get_nrhs_complex(void* jmumps) {
+int mumps_get_nrhs_double_complex(void* jmumps) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
   return pmumps->nrhs;
@@ -324,7 +324,7 @@ void mumps_get_info_double(void* jmumps, int* infog, double* rinfog) {
   return;
 }
 
-void mumps_get_info_complex(void* jmumps, int* infog, double* rinfog) {
+void mumps_get_info_double_complex(void* jmumps, int* infog, double* rinfog) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
   int taskid, ierr;
@@ -372,7 +372,7 @@ void mumps_finalize_double(void* jmumps) {
   return;
 }
 
-void mumps_finalize_complex(void* jmumps) {
+void mumps_finalize_double_complex(void* jmumps) {
 
   ZMUMPS_STRUC_C* pmumps = (ZMUMPS_STRUC_C*)jmumps;
 
@@ -391,7 +391,7 @@ void mumps_finalize_complex(void* jmumps) {
 
   pmumps->job = JOB_END;
   zmumps_c(pmumps);
-  mumps_free_complex(&pmumps);
+  mumps_free_double_complex(&pmumps);
 
 #ifdef JMUMPS_DEBUG
   if (taskid == 0)
@@ -433,7 +433,7 @@ void mumps_alloc_double(DMUMPS_STRUC_C** mumps){
   (*mumps)->uns_perm      = NULL;
 }
 
-void mumps_alloc_complex(ZMUMPS_STRUC_C** mumps){
+void mumps_alloc_double_complex(ZMUMPS_STRUC_C** mumps){
 
   (*mumps) = malloc(sizeof(ZMUMPS_STRUC_C));
   if (*mumps == NULL) return;
@@ -488,7 +488,7 @@ void mumps_free_double(DMUMPS_STRUC_C** mumps){
   }
 }
 
-void mumps_free_complex(ZMUMPS_STRUC_C** mumps){
+void mumps_free_double_complex(ZMUMPS_STRUC_C** mumps){
   if (*mumps != NULL){
     Free( (*mumps)->irn_loc );
     Free( (*mumps)->jcn_loc );

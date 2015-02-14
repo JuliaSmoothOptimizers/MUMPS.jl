@@ -128,7 +128,7 @@ type Mumps{Tv <: MUMPSValueDataType}
       id = @mumps_call(:mumps_initialize_double, Ptr{Void},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
     else
-      id = @mumps_call(:mumps_initialize_complex, Ptr{Void},
+      id = @mumps_call(:mumps_initialize_double_complex, Ptr{Void},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
     end
 
@@ -167,7 +167,7 @@ function finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   if Tv == Float64
     @mumps_call(:mumps_finalize_double, Void, (Ptr{Void},), mumps.__id);
   else
-    @mumps_call(:mumps_finalize_complex, Void, (Ptr{Void},), mumps.__id);
+    @mumps_call(:mumps_finalize_double_complex, Void, (Ptr{Void},), mumps.__id);
   end
   mumps.__id = C_NULL;
 end
@@ -201,7 +201,7 @@ function associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mump
                 (Ptr{Void}, Int32, Int32, Ptr{Float64}, Ptr{Int32}, Ptr{Int32}),
                 mumps.__id,     n,    nz,         vals,       irow,       jcol);
   else
-    @mumps_call(:mumps_associate_matrix_complex, Void,
+    @mumps_call(:mumps_associate_matrix_double_complex, Void,
                 (Ptr{Void}, Int32, Int32, Ptr{Complex128}, Ptr{Int32}, Ptr{Int32}),
                 mumps.__id,     n,    nz,            vals,       irow,       jcol);
   end
@@ -234,9 +234,9 @@ function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   else
-    @mumps_call(:mumps_factorize_complex, Void, (Ptr{Void},), mumps.__id);
+    @mumps_call(:mumps_factorize_double_complex, Void, (Ptr{Void},), mumps.__id);
 
-    @mumps_call(:mumps_get_info_complex, Void,
+    @mumps_call(:mumps_get_info_double_complex, Void,
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   end
@@ -266,7 +266,7 @@ function associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Arra
                 (Ptr{Void}, Int32, Ptr{Float64}),
                 mumps.__id,  nrhs,            x);
   else
-    @mumps_call(:mumps_associate_rhs_complex, Void,
+    @mumps_call(:mumps_associate_rhs_double_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex128}),
                 mumps.__id,  nrhs,               x);
   end
@@ -295,11 +295,11 @@ function solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   else
-    @mumps_call(:mumps_solve_complex, Void,
+    @mumps_call(:mumps_solve_double_complex, Void,
                 (Ptr{Void}, Int32),
                 mumps.__id, transposed ? 1 : 0);
 
-    @mumps_call(:mumps_get_info_complex, Void,
+    @mumps_call(:mumps_get_info_double_complex, Void,
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   end
@@ -322,10 +322,10 @@ function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
                 (Ptr{Void}, Ptr{Float64}),
                 mumps.__id,            x);
   else
-    nrhs = int(@mumps_call(:mumps_get_nrhs_complex, Int32, (Ptr{Void},), mumps.__id));
+    nrhs = int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Complex128, mumps.n * nrhs);
-    @mumps_call(:mumps_get_solution_complex, Void,
+    @mumps_call(:mumps_get_solution_double_complex, Void,
                 (Ptr{Void}, Ptr{Complex128}),
                 mumps.__id,               x);
   end
