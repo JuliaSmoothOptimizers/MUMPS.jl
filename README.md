@@ -1,8 +1,7 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
-OSX: [![Build
+OSX and Linux: [![Build
 Status](https://travis-ci.org/dpo/MUMPS.jl.svg?branch=master)](https://travis-ci.org/dpo/MUMPS.jl)
-Linux: Coming up...
 
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
@@ -61,9 +60,9 @@ MUMPS after the factorization and solve phases, and to modify this information
 (e.g., to perform iterative refinement).
 
 When creating an instance of a `Mumps` object explicitly, it is important to
-specify in advance what arithmetic should be used. Currently, only double
-precision real (`Float64`) and complex (`Complex128`) arithmetics are
-supported.
+specify in advance what arithmetic should be used. Single and double precision
+real (`Float32` and `Float64`) and complex (`Complex64` and `Complex128`)
+arithmetics are supported.
 
 For instance,
 
@@ -110,8 +109,8 @@ Constant            | Meaning
 `mumps_definite`    | matrix is symmetric and (positive or negative) definite
 `mumps_symmetric`   | matrix is symmetric but indefinite (or definiteness is unknown)
 `default_icntl`     | array of default integer parameters
-`default_cntl`      | array of default real parameters
-
+`default_cntl32`    | array of default real parameters in single precision
+`default_cntl64`    | array of default real parameters in double precision
 
 See Sections 5.1 and 5.2 of the [MUMPS User's Manual](http://mumps.enseeiht.fr/doc/userguide_4.10.0.pdf) for a description of the integer and real control arrays.
 
@@ -163,8 +162,8 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 
 ## To Do (Pull Requests Welcome!)
 
-* [ ] Support double precision complex arithmetic
-* [ ] Support single precision real and complex arithmetic
+* [X] Support double precision complex arithmetic (in [99c23fe](https://github.com/dpo/MUMPS.jl/commit/99c23fe87e7c985fe3062d78ab7664b82a6b8dba))
+* [X] Support single precision real and complex arithmetic (in [654814a](https://github.com/dpo/MUMPS.jl/commit/654814a5e5800260011d2f26f7fb6de179609cfa))
 * [ ] Support distributed matrices / vectors
 * [ ] User-selected permutation
 * [X] Out-of-core option (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
