@@ -63,11 +63,3 @@ for i = 1 : nrhs
   relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]);
   @test(relres[i] <= 1.0e-12);
 end
-
-# Test a mixed-type example
-A = rand(Float32, 4, 4);
-rhs = rand(Int16, 4);
-x = solve(A, rhs, sym=mumps_unsymmetric);
-MPI.Barrier(comm);
-relres = norm(A * x - rhs) / norm(rhs);
-@test(relres <= 1.0e-12);
