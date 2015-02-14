@@ -6,7 +6,7 @@ CC = mpicc
 mumps_prefix = $(shell brew --prefix mumps)
 mumps_incdir = $(mumps_prefix)/include # parallel MUMPS
 mumps_libdir = $(mumps_prefix)/lib
-mumps_libs   = -L$(mumps_libdir) -ldmumps -lzmumps -lmumps_common -lpord
+mumps_libs   = -L$(mumps_libdir) -lsmumps -ldmumps -lcmumps -lzmumps -lmumps_common -lpord
 
 scalapack_libdir = $(shell brew --prefix scalapack)/lib
 scalapack_libs   = -L$(scalapack_libdir) -lscalapack
