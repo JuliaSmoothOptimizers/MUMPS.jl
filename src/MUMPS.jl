@@ -284,7 +284,7 @@ function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   end
 
   if mumps.icntl[33] == 1
-    mumps.det = mumps.rinfog[12] * 2^(mumps.infog[34]);
+    mumps.det = mumps.rinfog[12] * 2.0^(mumps.infog[34]);
   end
   mumps.err = mumps.infog[1];
   return;
