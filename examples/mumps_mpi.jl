@@ -6,7 +6,7 @@ root = 0;
 comm = MPI.COMM_WORLD;
 
 # Solve a real problem.
-mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl);
+mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl64);
 
 # Define problem on the host.
 if MPI.Comm_rank(comm) == root
@@ -33,7 +33,7 @@ end
 finalize(mumps);
 
 # 2. Solve a complex problem.
-mumps = Mumps{Complex128}(mumps_unsymmetric, default_icntl, default_cntl);
+mumps = Mumps{Complex128}(mumps_unsymmetric, default_icntl, default_cntl64);
 
 # Define problem on the host.
 if MPI.Comm_rank(comm) == root
