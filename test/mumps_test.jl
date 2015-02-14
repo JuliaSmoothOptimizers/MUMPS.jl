@@ -11,7 +11,7 @@ rhs = [1., 4., 9., 16.];
 x = solve(mumps1, rhs);
 finalize(mumps1);
 MPI.Barrier(comm)
-@test(norm(x - [1, 2, 3, 4]) <= 1.0e-14);
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
 
 mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64);
 A = rand(4,4); A = sparse(A + A');
@@ -20,7 +20,7 @@ rhs = rand(4);
 x = solve(mumps2, rhs);
 finalize(mumps2);
 MPI.Barrier(comm)
-@test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
 
 mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64);
 A = sparse(rand(4,4));
@@ -29,7 +29,7 @@ rhs = rand(4);
 x = solve(mumps3, rhs);
 finalize(mumps3);
 MPI.Barrier(comm)
-@test(norm(x - A\rhs)/norm(x) <= 1.0e-12);
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
 
 # Test for solving real div-grad system with single and multiple rhs.
 # Based on Lars Ruthotto's initial implementation.
