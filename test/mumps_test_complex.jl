@@ -40,7 +40,7 @@ A = sprand(100, 100, .2) + im * sprand(100, 100, .2);
 if MPI.Comm_rank(comm) == root
   println("Test single rhs on div_grad matrix");
 end
-rhs = randn(n);
+rhs = randn(n) + im * randn(n);
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 MPI.Barrier(comm)
@@ -52,12 +52,12 @@ if MPI.Comm_rank(comm) == root
   println("Test multiple rhs on div_grad matrix");
 end
 nrhs = 10;
-rhs = randn(n, nrhs);
+rhs = randn(n, nrhs) + im * randn(n, nrhs);
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 
 MPI.Barrier(comm)
-relres = zeros(nrhs)
+relres = zeros(Float64, nrhs)
 for i = 1 : nrhs
   relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]);
   @test(relres[i] <= 1.0e-8);
