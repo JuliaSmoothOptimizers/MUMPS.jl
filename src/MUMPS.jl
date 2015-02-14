@@ -1,6 +1,6 @@
 module MUMPS
 
-export default_icntl, default_cntl, Mumps, get_icntl,
+export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
        finalize, factorize, solve,
        associate_matrix, associate_rhs, get_solution,
        mumps_unsymmetric, mumps_definite, mumps_symmetric,
@@ -24,7 +24,7 @@ type MUMPSException <: Exception
   msg :: ASCIIString
 end
 
-typealias MUMPSValueDataType Union(Float64, Complex128);
+typealias MUMPSValueDataType Union(Float32, Float64, Complex64, Complex128);
 typealias MUMPSIntDataType   Union(Int64);
 
 
@@ -74,14 +74,23 @@ default_icntl[40] =  0;  # (not used)
 
 # See MUMPS User's Manual Section 5.2.
 # icntl[1] will be set to its default value if left at -1.
-@doc "Default real parameters" ->
-default_cntl = zeros(Float64, 15);
-default_cntl[1] = -1;    # relative threshold for numerical pivoting
-default_cntl[2] = sqrt(eps(Float64));  # tolerance for iterative refinement
-default_cntl[3] =  0.0;  # threshold to detect null pivots
-default_cntl[4] = -1.0;  # threshold for static pivoting (<0: disable)
-default_cntl[5] =  0.0;  # what null pivots are reset to
-# default_cntl[6-15] are not used.
+@doc "Default single precision real parameters" ->
+default_cntl32 = zeros(Float32, 15);
+default_cntl32[1] = -1;    # relative threshold for numerical pivoting
+default_cntl32[2] = sqrt(eps(Float32));  # tolerance for iterative refinement
+default_cntl32[3] =  0.0;  # threshold to detect null pivots
+default_cntl32[4] = -1.0;  # threshold for static pivoting (<0: disable)
+default_cntl32[5] =  0.0;  # what null pivots are reset to
+# default_cntl32[6-15] are not used.
+
+@doc "Default double precision real parameters" ->
+default_cntl64 = zeros(Float64, 15);
+default_cntl64[1] = -1;    # relative threshold for numerical pivoting
+default_cntl64[2] = sqrt(eps(Float64));  # tolerance for iterative refinement
+default_cntl64[3] =  0.0;  # threshold to detect null pivots
+default_cntl64[4] = -1.0;  # threshold for static pivoting (<0: disable)
+default_cntl64[5] =  0.0;  # what null pivots are reset to
+# default_cntl64[6-15] are not used.
 
 # Symbols for symmetry
 @doc """Constant indicating that a general unsymmetric matrix will be
@@ -105,17 +114,17 @@ type Mumps{Tv <: MUMPSValueDataType}
   __id    :: Ptr{Void}         # Pointer to MUMPS struct. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
   icntl   :: Array{Int32,1}    # Integer control parameters.
-  cntl    :: Array{Float64,1}  # Real control parameters.
+  cntl    :: Union(Array{Float32,1}, Array{Float64,1})    # Real control parameters.
   n       :: Int32             # Order of the matrix factorized.
   infog   :: Array{Int32,1}
-  rinfog  :: Array{Float64,1}
+  rinfog  :: Union(Array{Float32,1}, Array{Float64,1})
   nnz     :: Int               # Number of nonzeros in factors.
-  det     :: Int
+  det     :: FloatingPoint
   err     :: Int
 
-  function Mumps(sym   :: Int=mumps_unsymmetric,
-                 icntl :: Array{Int32,1}=default_icntl,
-                 cntl  :: Array{Float64,1}=default_cntl)
+  function Mumps(sym :: Int,
+                 icntl :: Array{Int32,1},
+                 cntl  :: Union(Array{Float32,1}, Array{Float64,1}))
 
     MPI.Initialized() || throw(MUMPSException("Initialize MPI first"));
 
@@ -124,18 +133,27 @@ type Mumps{Tv <: MUMPSValueDataType}
       cntl[1] = (sym == mumps_definite) ? 0.0 : 0.01
     end
 
-    if Tv == Float64
+    if Tv == Float32
+      id = @mumps_call(:mumps_initialize_float, Ptr{Void},
+                       (Int32, Ptr{Int32}, Ptr{Float32}), sym, icntl, cntl);
+      rinfog = zeros(Float32, 20);
+    elseif Tv == Float64
       id = @mumps_call(:mumps_initialize_double, Ptr{Void},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
+      rinfog = zeros(Float64, 20);
+    elseif Tv == Complex64
+      id = @mumps_call(:mumps_initialize_float_complex, Ptr{Void},
+                       (Int32, Ptr{Int32}, Ptr{Float32}), sym, icntl, cntl);
+      rinfog = zeros(Float32, 20);
     else
       id = @mumps_call(:mumps_initialize_double_complex, Ptr{Void},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
+      rinfog = zeros(Float64, 20);
     end
 
     id == C_NULL && throw(MUMPSException("Error allocating MUMPS structure"));
 
     infog = zeros(Int32, 40);
-    rinfog = zeros(Float64, 20);
 
     self = new(id, int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
     finalizer(self, finalize);  # Destructor.
@@ -164,8 +182,12 @@ end
 
 @doc "Terminate a Mumps instance." ->
 function finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
-  if Tv == Float64
+  if Tv == Float32
+    @mumps_call(:mumps_finalize_float, Void, (Ptr{Void},), mumps.__id);
+  elseif Tv == Float64
     @mumps_call(:mumps_finalize_double, Void, (Ptr{Void},), mumps.__id);
+  elseif Tv == Complex64
+    @mumps_call(:mumps_finalize_float_complex, Void, (Ptr{Void},), mumps.__id);
   else
     @mumps_call(:mumps_finalize_double_complex, Void, (Ptr{Void},), mumps.__id);
   end
@@ -196,10 +218,18 @@ function associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mump
     jcol[B.colptr[i] : B.colptr[i+1]-1] = i;
   end
 
-  if Tv == Float64
+  if Tv == Float32
+    @mumps_call(:mumps_associate_matrix_float, Void,
+                (Ptr{Void}, Int32, Int32, Ptr{Float32}, Ptr{Int32}, Ptr{Int32}),
+                mumps.__id,     n,    nz,         vals,       irow,       jcol);
+  elseif Tv == Float64
     @mumps_call(:mumps_associate_matrix_double, Void,
                 (Ptr{Void}, Int32, Int32, Ptr{Float64}, Ptr{Int32}, Ptr{Int32}),
                 mumps.__id,     n,    nz,         vals,       irow,       jcol);
+  elseif Tv == Complex64
+    @mumps_call(:mumps_associate_matrix_float_complex, Void,
+                (Ptr{Void}, Int32, Int32, Ptr{Complex64}, Ptr{Int32}, Ptr{Int32}),
+                mumps.__id,     n,    nz,           vals,       irow,       jcol);
   else
     @mumps_call(:mumps_associate_matrix_double_complex, Void,
                 (Ptr{Void}, Int32, Int32, Ptr{Complex128}, Ptr{Int32}, Ptr{Int32}),
@@ -227,11 +257,23 @@ After the factorization, the determinant, if requested, is stored in
 `mumps.det`. The MUMPS error code is stored in `mumps.err`. """ ->
 function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
-  if Tv == Float64
+  if Tv == Float32
+    @mumps_call(:mumps_factorize_float, Void, (Ptr{Void},), mumps.__id);
+
+    @mumps_call(:mumps_get_info_float, Void,
+                (Ptr{Void}, Ptr{Int32},  Ptr{Float32}),
+                mumps.__id, mumps.infog, mumps.rinfog)
+  elseif Tv == Float64
     @mumps_call(:mumps_factorize_double, Void, (Ptr{Void},), mumps.__id);
 
     @mumps_call(:mumps_get_info_double, Void,
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
+                mumps.__id, mumps.infog, mumps.rinfog)
+  elseif Tv == Complex64
+    @mumps_call(:mumps_factorize_float_complex, Void, (Ptr{Void},), mumps.__id);
+
+    @mumps_call(:mumps_get_info_float_complex, Void,
+                (Ptr{Void}, Ptr{Int32},  Ptr{Float32}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   else
     @mumps_call(:mumps_factorize_double_complex, Void, (Ptr{Void},), mumps.__id);
@@ -261,10 +303,18 @@ function associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Arra
   nrhs = size(rhs, 2);
   x = rhs[:];  # Make a copy; will be overwritten with solution.
 
-  if Tv == Float64
+  if Tv == Float32
+    @mumps_call(:mumps_associate_rhs_float, Void,
+                (Ptr{Void}, Int32, Ptr{Float32}),
+                mumps.__id,  nrhs,            x);
+  elseif Tv == Float64
     @mumps_call(:mumps_associate_rhs_double, Void,
                 (Ptr{Void}, Int32, Ptr{Float64}),
                 mumps.__id,  nrhs,            x);
+  elseif Tv == Complex64
+    @mumps_call(:mumps_associate_rhs_float_complex, Void,
+                (Ptr{Void}, Int32, Ptr{Complex64}),
+                mumps.__id,  nrhs,              x);
   else
     @mumps_call(:mumps_associate_rhs_double_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex128}),
@@ -286,13 +336,29 @@ forward or transposed system. The solution is stored internally and must
 be retrieved with `get_solution()`.""" ->
 function solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=false)
 
-  if Tv == Float64
+  if Tv == Float32
+    @mumps_call(:mumps_solve_float, Void,
+                (Ptr{Void}, Int32),
+                mumps.__id, transposed ? 1 : 0);
+
+    @mumps_call(:mumps_get_info_float, Void,
+                (Ptr{Void}, Ptr{Int32},  Ptr{Float32}),
+                mumps.__id, mumps.infog, mumps.rinfog)
+  elseif Tv == Float64
     @mumps_call(:mumps_solve_double, Void,
                 (Ptr{Void}, Int32),
                 mumps.__id, transposed ? 1 : 0);
 
     @mumps_call(:mumps_get_info_double, Void,
                 (Ptr{Void}, Ptr{Int32},  Ptr{Float64}),
+                mumps.__id, mumps.infog, mumps.rinfog)
+  elseif Tv == Complex64
+    @mumps_call(:mumps_solve_float_complex, Void,
+                (Ptr{Void}, Int32),
+                mumps.__id, transposed ? 1 : 0);
+
+    @mumps_call(:mumps_get_info_float_complex, Void,
+                (Ptr{Void}, Ptr{Int32},  Ptr{Float32}),
                 mumps.__id, mumps.infog, mumps.rinfog)
   else
     @mumps_call(:mumps_solve_double_complex, Void,
@@ -314,13 +380,27 @@ function makes it possible to ask MUMPS to assemble the final solution
 on the host only, and to retrieve it there.""" ->
 function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
-  if Tv == Float64
+  if Tv == Float32
+    nrhs = int(@mumps_call(:mumps_get_nrhs_float, Int32, (Ptr{Void},), mumps.__id));
+
+    x = zeros(Float32, mumps.n * nrhs);
+    @mumps_call(:mumps_get_solution_float, Void,
+                (Ptr{Void}, Ptr{Float32}),
+                mumps.__id,            x);
+  elseif Tv == Float64
     nrhs = int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Float64, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_double, Void,
                 (Ptr{Void}, Ptr{Float64}),
                 mumps.__id,            x);
+  elseif Tv == Complex64
+    nrhs = int(@mumps_call(:mumps_get_nrhs_float_complex, Int32, (Ptr{Void},), mumps.__id));
+
+    x = zeros(Complex64, mumps.n * nrhs);
+    @mumps_call(:mumps_get_solution_float_complex, Void,
+                (Ptr{Void}, Ptr{Complex64}),
+                mumps.__id,              x);
   else
     nrhs = int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), mumps.__id));
 
@@ -381,8 +461,8 @@ The optional keyword argument `sym` indicates the symmetry of `A`.
 The solution is retrieved and returned.""", returns=(Array{MUMPSValueDataType},)) ->
 function solve{Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}(A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric)
 
-  Tm = (Tv <: Complex || Tr <: Complex) ? Complex128 : Float64
-  mumps = Mumps{Tm}(sym, default_icntl, default_cntl);
+  Tm = (Tv <: Complex || Tr <: Complex) ? Complex128 : Float64;  # Could be smarter.
+  mumps = Mumps{Tm}(sym, default_icntl, default_cntl64);
   x = solve(mumps, A, rhs);
   finalize(mumps);
   return x;
