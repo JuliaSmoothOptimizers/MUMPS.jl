@@ -13,7 +13,7 @@ finalize(mumps1);
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= 1.0e-5 * norm(rhs));
 
-mumps2 = Mumps{Complex64}(mumps_symmetric, icntl, default_cntl32);
+mumps2 = Mumps{Complex64}(mumps_unsymmetric, icntl, default_cntl32);
 A = rand(4,4); A = sparse(A + A');
 factorize(mumps2, A);
 rhs = rand(4);
