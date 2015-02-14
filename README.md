@@ -13,9 +13,8 @@ See http://dpo.github.io/MUMPS.jl/MUMPS.html for preliminary documentation.
 
 ## How to Install
 
-We recommend using [Homebrew](https://brew.sh). Currently, only OSX is
-supported. The procedure below may work if you use
-[Linuxbrew](https://github.com/Homebrew/linuxbrew).
+On OSX we recommend using [Homebrew](https://brew.sh). The procedure below
+should also work on Linux if you use [Linuxbrew](https://github.com/Homebrew/linuxbrew).
 
 ````
 brew tap homebrew/science  # if not already done
