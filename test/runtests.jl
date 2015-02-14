@@ -17,4 +17,3 @@ include("mumps_test_mixed.jl")
 
 MPI.Barrier(comm)
 MPI.Finalize()
-
