@@ -33,5 +33,8 @@ install:
   - julia -E 'Pkg.build("MUMPS");'
 
 script:
-  - julia --check-bounds=yes -E 'Pkg.test("MUMPS")'
+  - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
   - mpirun -np 2 julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
+
+after_success:
+  - julia -e 'cd(Pkg.dir("MUMPS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
