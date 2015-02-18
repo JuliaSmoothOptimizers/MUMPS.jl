@@ -1,4 +1,6 @@
 julia 0.3
+BinDeps
+@osx Homebrew
 MPI
 AnsiColor
 Docile

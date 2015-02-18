@@ -10,8 +10,11 @@ using MPI
 using Docile
 @docstrings(manual = ["../doc/manual.md"])
 
+using BinDeps
+@BinDeps.load_dependencies [:libmumps_simple]
+
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
-mumps_lib = "libjmumps";
+mumps_lib = "libmumps_simple";
 macro mumps_call(func, args...)
   quote
     ccall(($func, $mumps_lib), $(args...))
