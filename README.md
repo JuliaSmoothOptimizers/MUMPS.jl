@@ -89,8 +89,8 @@ For intance,
 ```JULIA
 julia> mumps = Mumps{Complex128}(mumps_unsymmetric);
 julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4);
-julia> associate_matrix(mumps, A);  # A is converted to a sparse Float64 matrix
-julia> associate_rhs(mumps, rhs);   # rhs is converted to a Float64 array
+julia> associate_matrix(mumps, A);  # A is converted to a sparse Complex128 matrix
+julia> associate_rhs(mumps, rhs);   # rhs is converted to a Complex128 array
 ```
 
 See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
