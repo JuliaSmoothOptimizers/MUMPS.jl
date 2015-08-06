@@ -2,7 +2,7 @@ icntl = get_icntl(det=true, ooc=true, itref=1);
 
 mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
 A = spdiagm(Array{Float32}([1., 2., 3., 4.]));
-factorize(mumps1, A);  # Analyze and factorize.
+factorize!(mumps1, A);  # Analyze and factorize.
 rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps1, rhs);
 finalize(mumps1);
@@ -11,7 +11,7 @@ MPI.Barrier(comm)
 
 mumps2 = Mumps{Float32}(mumps_symmetric, icntl, default_cntl32);
 A = random_matrix(Float32, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
-factorize(mumps2, A);
+factorize!(mumps2, A);
 rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps2, rhs);
 finalize(mumps2);
@@ -20,7 +20,7 @@ MPI.Barrier(comm)
 
 mumps3 = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4));
-factorize(mumps3, A);
+factorize!(mumps3, A);
 rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps3, rhs);
 finalize(mumps3);
