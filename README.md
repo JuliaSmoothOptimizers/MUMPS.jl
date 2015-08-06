@@ -57,10 +57,10 @@ For instance,
 julia> MPI.Init();
 julia> mumps = Mumps{Float64}(mumps_unsymmetric);  # Real, general unsymmetric
 julia> A = sparse(rand(4,4)); rhs = rand(4);       # Happens on all cores
-julia> associate_matrix(mumps, A);
-julia> factorize(mumps);
-julia> associate_rhs(mumps, rhs);
-julia> solve(mumps);
+julia> associate_matrix!(mumps, A);
+julia> factorize!(mumps);
+julia> associate_rhs!(mumps, rhs);
+julia> solve!(mumps);
 julia> x = get_solution(mumps);
 julia> finalize(mumps);
 julia> MPI.Finalize();
@@ -77,8 +77,8 @@ For intance,
 ```JULIA
 julia> mumps = Mumps{Complex128}(mumps_unsymmetric);
 julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4);
-julia> associate_matrix(mumps, A);  # A is converted to a sparse Complex128 matrix
-julia> associate_rhs(mumps, rhs);   # rhs is converted to a Complex128 array
+julia> associate_matrix!(mumps, A);  # A is converted to a sparse Complex128 matrix
+julia> associate_rhs!(mumps, rhs);   # rhs is converted to a Complex128 array
 ```
 
 See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/master/test) for more examples.
@@ -132,10 +132,10 @@ before calling `MPI.Finalize()`.
 Method             | Description
 -------------------|------------
 `finalize`         | Finalize a `Mumps` object. Must be done before calling `MPI.Finalize()`
-`associate_matrix` | Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
-`factorize`        | Factorize the matrix registered with the `Mumps` object.
-`associate_rhs`    | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
-`solve`            | Solve the linear system for the given right-hand side.
+`associate_matrix!`| Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
+`factorize!`       | Factorize the matrix registered with the `Mumps` object.
+`associate_rhs!`   | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
+`solve!`           | Solve the linear system for the given right-hand side.
 `get_solution`     | Retrieve the solution from the `Mumps` object. This function makes it possible for the solution to be assembled on the host only.
 
 ## Parallel Execution
