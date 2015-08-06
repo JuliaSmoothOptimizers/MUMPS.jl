@@ -14,7 +14,7 @@ else
   error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
 end
 
-# libjmumps.dylib should be on your LD_LIBRARY_PATH.
+
 mumps_lib = "libmumps_simple";
 macro mumps_call(func, args...)
   quote
