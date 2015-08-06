@@ -159,6 +159,7 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 * [X] Control iterative refinement (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Obtain a Schur complement
 * [ ] Solve with sparse right-hand sides
+* [ ] Sequential, version with no MPI requirement
 
 This content is released under the [MIT](http://opensource.org/licenses/MIT) License.
 <a rel="license" href="http://opensource.org/licenses/MIT">
