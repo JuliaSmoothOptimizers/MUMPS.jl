@@ -24,14 +24,6 @@ julia> Pkg.clone("https://github.com/JuliaOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
 ````
 
-In order for Julia to find the MUMPS interface library, its location must
-appear on your `LD_LIBRARY_PATH`:
-````
-export LD_LIBRARY_PATH=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')/MUMPS/src:$LD_LIBRARY_PATH
-````
-
-Place the above in your `~/.bashrc` to make it permanent.
-
 ## How to Use
 
 The main data type holding information on a factorization is `Mumps`. Remember
