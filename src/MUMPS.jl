@@ -184,6 +184,9 @@ function get_icntl(;
   return icntl;
 end
 
+if VERSION >= v"0.4-"
+  import Base.finalize
+end
 
 import Base.finalize
 
