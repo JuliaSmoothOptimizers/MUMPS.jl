@@ -21,7 +21,7 @@ install:
   - if [ `uname` == "Linux" ]; then rm ~/julia/lib/julia/libgfortran.so.3; fi
   - if [ `uname` == "Darwin" ]; then export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH; fi
   - julia -e 'versioninfo()'
-  - julia -E 'Pkg.clone("https://github.com/JuliaParallel/MPI.jl.git"); Pkg.build("MPI"); Pkg.test("MPI")'
+  # - julia -E 'Pkg.clone("https://github.com/JuliaParallel/MPI.jl.git"); Pkg.build("MPI"); Pkg.test("MPI")'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
   - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
