@@ -52,6 +52,16 @@ associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :
 # associate_matrix for dense matrices.
 associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int64}, sparse(A)));
 
+# for multi-processing.
+function associate_matrix!{Tv <: Number, Ti <: Integer}(remote_mumps :: RemoteRef, A :: SparseMatrixCSC{Tv,Ti})
+  remote_mumps.where == myid() || throw(MUMPSException, "MUMPS instance does not reside on this worker")
+  mumps = take!(remote_mumps)
+  mumps = associate_matrix!(mumps, A)
+  put!(remote_mumps, mumps)
+  return mumps
+end
+
+associate_matrix!{Tv <: Number}(remote_mumps :: RemoteRef, A :: Array{Tv,2}) = associate_matrix!(remote_mumps, sparse(A));
 
 # import Base.LinAlg.factorize
 
@@ -93,6 +103,15 @@ function factorize!{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   end
   mumps.err = mumps.infog[1];
   return mumps;
+end
+
+# for multi-processing.
+function factorize!(remote_mumps :: RemoteRef)
+  remote_mumps.where == myid() || throw(MUMPSException, "MUMPS instance does not reside on this worker")
+  mumps = take!(remote_mumps)
+  mumps = factorize!(mumps)
+  put!(remote_mumps, mumps)
+  return mumps
 end
 
 
@@ -144,6 +163,15 @@ end
 # An InexactError should be raised if, e.g., mumps is Float64 and rhs is Complex128.
 associate_rhs!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :: Array{Tv}) = associate_rhs!(mumps, convert(Array{Tm}, rhs));
 
+# for multi-processing.
+function associate_rhs!{Tv <: Number}(remote_mumps :: RemoteRef, rhs :: Array{Tv})
+  remote_mumps.where == myid() || throw(MUMPSException, "MUMPS instance does not reside on this worker")
+  mumps = take!(remote_mumps)
+  mumps = associate_rhs!(mumps, rhs)
+  put!(remote_mumps, mumps)
+  return mumps
+end
+
 
 """Solve the system registered with the `Mumps` object `mumps`.
 The matrix and right-hand side(s) must have been previously registered
@@ -192,6 +220,15 @@ function solve!{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool
   return mumps;
 end
 
+# for multi-processing.
+function solve!(remote_mumps :: RemoteRef; transposed :: Bool=false)
+  remote_mumps.where == myid() || throw(MUMPSException, "MUMPS instance does not reside on this worker")
+  mumps = take!(remote_mumps)
+  mumps = solve!(mumps, transposed=transposed)
+  put!(remote_mumps, mumps)
+  return mumps
+end
+
 
 """Retrieve the solution of the system solved by `solve()`. This
 function makes it possible to ask MUMPS to assemble the final solution
@@ -230,6 +267,15 @@ function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   end
 
   return reshape(x, int(mumps.n), nrhs);
+end
+
+# for multi-processing.
+function get_solution(remote_mumps :: RemoteRef)
+  remote_mumps.where == myid() || throw(MUMPSException, "MUMPS instance does not reside on this worker")
+  mumps = take!(remote_mumps)
+  x = get_solution(mumps)
+  put!(remote_mumps, mumps)
+  return x
 end
 
 
