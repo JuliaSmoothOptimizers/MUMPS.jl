@@ -24,8 +24,8 @@ type MUMPSException <: Exception
   msg :: ASCIIString
 end
 
-typealias MUMPSValueDataType Union(Float32, Float64, Complex64, Complex128);
-typealias MUMPSIntDataType   Union(Int64);
+typealias MUMPSValueDataType Union{Float32, Float64, Complex64, Complex128};
+typealias MUMPSIntDataType   Union{Int64};
 
 
 # See MUMPS User's Manual Section 5.1.
@@ -114,17 +114,17 @@ type Mumps{Tv <: MUMPSValueDataType}
   __id    :: Ptr{Void}         # Pointer to MUMPS struct. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
   icntl   :: Array{Int32,1}    # Integer control parameters.
-  cntl    :: Union(Array{Float32,1}, Array{Float64,1})    # Real control parameters.
+  cntl    :: Union{Array{Float32,1}, Array{Float64,1}}    # Real control parameters.
   n       :: Int32             # Order of the matrix factorized.
   infog   :: Array{Int32,1}
-  rinfog  :: Union(Array{Float32,1}, Array{Float64,1})
+  rinfog  :: Union{Array{Float32,1}, Array{Float64,1}}
   nnz     :: Int               # Number of nonzeros in factors.
-  det     :: FloatingPoint
+  det     :: AbstractFloat
   err     :: Int
 
   function Mumps(sym :: Int,
                  icntl :: Array{Int32,1},
-                 cntl  :: Union(Array{Float32,1}, Array{Float64,1}))
+                 cntl  :: Union{Array{Float32,1}, Array{Float64,1}})
 
     MPI.Initialized() || throw(MUMPSException("Initialize MPI first"));
 
@@ -155,7 +155,7 @@ type Mumps{Tv <: MUMPSValueDataType}
 
     infog = zeros(Int32, 40);
 
-    self = new(id, int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
+    self = new(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
