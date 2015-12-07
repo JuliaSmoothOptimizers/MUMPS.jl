@@ -8,6 +8,7 @@ export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
 
 using MPI
 using Docile
+using Compat
 @docstrings(manual = ["../doc/manual.md"])
 
 using BinDeps
@@ -27,8 +28,8 @@ type MUMPSException <: Exception
   msg :: ASCIIString
 end
 
-typealias MUMPSValueDataType Union(Float32, Float64, Complex64, Complex128);
-typealias MUMPSIntDataType   Union(Int64);
+typealias MUMPSValueDataType @compat Union{Float32, Float64, Complex64, Complex128};
+typealias MUMPSIntDataType   @compat Union{Int64};
 
 
 # See MUMPS User's Manual Section 5.1.
@@ -117,17 +118,17 @@ type Mumps{Tv <: MUMPSValueDataType}
   __id    :: Ptr{Void}         # Pointer to MUMPS struct. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
   icntl   :: Array{Int32,1}    # Integer control parameters.
-  cntl    :: Union(Array{Float32,1}, Array{Float64,1})    # Real control parameters.
+  cntl    :: @compat Union{Array{Float32,1}, Array{Float64,1}}    # Real control parameters.
   n       :: Int32             # Order of the matrix factorized.
   infog   :: Array{Int32,1}
-  rinfog  :: Union(Array{Float32,1}, Array{Float64,1})
+  rinfog  :: @compat Union{Array{Float32,1}, Array{Float64,1}}
   nnz     :: Int               # Number of nonzeros in factors.
-  det     :: FloatingPoint
+  det     :: @compat AbstractFloat
   err     :: Int
 
   function Mumps(sym :: Int,
                  icntl :: Array{Int32,1},
-                 cntl  :: Union(Array{Float32,1}, Array{Float64,1}))
+                 cntl  :: @compat Union{Array{Float32,1}, Array{Float64,1}})
 
     MPI.Initialized() || throw(MUMPSException("Initialize MPI first"));
 
@@ -158,7 +159,7 @@ type Mumps{Tv <: MUMPSValueDataType}
 
     infog = zeros(Int32, 40);
 
-    self = new(id, int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
+    @compat self = new(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
@@ -384,28 +385,28 @@ on the host only, and to retrieve it there.""" ->
 function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
   if Tv == Float32
-    nrhs = int(@mumps_call(:mumps_get_nrhs_float, Int32, (Ptr{Void},), mumps.__id));
+    @compat nrhs = Int(@mumps_call(:mumps_get_nrhs_float, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Float32, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_float, Void,
                 (Ptr{Void}, Ptr{Float32}),
                 mumps.__id,            x);
   elseif Tv == Float64
-    nrhs = int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), mumps.__id));
+    @compat nrhs = Int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Float64, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_double, Void,
                 (Ptr{Void}, Ptr{Float64}),
                 mumps.__id,            x);
   elseif Tv == Complex64
-    nrhs = int(@mumps_call(:mumps_get_nrhs_float_complex, Int32, (Ptr{Void},), mumps.__id));
+    @compat nrhs = Int(@mumps_call(:mumps_get_nrhs_float_complex, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Complex64, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_float_complex, Void,
                 (Ptr{Void}, Ptr{Complex64}),
                 mumps.__id,              x);
   else
-    nrhs = int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), mumps.__id));
+    @compat nrhs = Int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), mumps.__id));
 
     x = zeros(Complex128, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_double_complex, Void,
@@ -413,7 +414,7 @@ function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
                 mumps.__id,               x);
   end
 
-  return reshape(x, int(mumps.n), nrhs);
+  return @compat reshape(x, Int(mumps.n), nrhs);
 end
 
 
