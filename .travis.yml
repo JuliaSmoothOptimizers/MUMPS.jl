@@ -5,8 +5,9 @@ os:
   - linux
 
 julia:
-  - release
-  #- nightly
+  - 0.3
+  - 0.4
+  - nightly
 
 before_install:
   - unset DYLD_LIBRARY_PATH
