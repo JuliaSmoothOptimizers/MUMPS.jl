@@ -1,7 +1,7 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
-OSX and Linux: [![Build Status](https://travis-ci.org/dpo/MUMPS.jl.svg?branch=master)](https://travis-ci.org/dpo/MUMPS.jl)
-[![Coverage Status](https://coveralls.io/repos/dpo/MUMPS.jl/badge.svg)](https://coveralls.io/r/dpo/MUMPS.jl)
+OSX and Linux: [![Build Status](https://travis-ci.org/JuliaOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaOptimizers/MUMPS.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaOptimizers/MUMPS.jl?branch=master)
 
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
