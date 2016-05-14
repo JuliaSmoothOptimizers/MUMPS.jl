@@ -11,54 +11,55 @@ rhs = [1., 4., 9., 16.];
 x = solve(mumps1, rhs);
 finalize(mumps1);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-5 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
 
 mumps2 = Mumps{Complex64}(mumps_unsymmetric, icntl, default_cntl32);
-A = rand(4,4); A = sparse(A + A');
+A = random_matrix(Float64, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
 factorize(mumps2, A);
-rhs = rand(4);
+rhs = [1., 4., 9., 16.];
 x = solve(mumps2, rhs);
 finalize(mumps2);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-5 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
 
 mumps3 = Mumps{Complex64}(mumps_unsymmetric, icntl, default_cntl32);
-A = map(Complex{Float32}, sparse(rand(4,4)) + im * sparse(rand(4,4)));
+A = sparse(random_matrix(Complex64, [1, 2, 3, 4], 4, 4));
 factorize(mumps3, A);
-rhs = map(Complex{Float32}, rand(4) + im * rand(4));
+rhs = map(Complex64, [1., 4., 9., 16.] + im * [1., 4., 9., 16.]);
 x = solve(mumps3, rhs);
 finalize(mumps3);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-5 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
 
 # Test convenience interface.
 
-n = 100;
-A = map(Complex{Float32}, sprand(100, 100, .2) + im * sprand(100, 100, .2));
+n = 10;
+n3 = n * n * n
+A = map(Complex64, get_div_grad(n, n, n))
 
 # Test with single rhs
 if MPI.Comm_rank(comm) == root
   println("Test single rhs on div_grad matrix");
 end
-rhs = map(Complex{Float32}, randn(n) + im * randn(n));
+rhs = map(Complex64, ones(n3) + im * ones(n3));
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 MPI.Barrier(comm)
-relres = norm(A * x - rhs) / norm(rhs);
-@test(relres <= 1.0e-4);
+relres = norm(A * x - rhs) / norm(rhs) / norm(A, 1);
+@test(relres <= 1.0e-6);
 
 # Test with multiple rhs
 if MPI.Comm_rank(comm) == root
   println("Test multiple rhs on div_grad matrix");
 end
-nrhs = 10;
-rhs = map(Complex{Float32}, randn(n, nrhs) + im * randn(n, nrhs));
+nrhs = 5;
+rhs = map(Complex64, ones(n3, nrhs) + im * ones(n3, nrhs)) * diagm(Array{Float32}(collect(1:nrhs)));
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 
 MPI.Barrier(comm)
 relres = zeros(Float32, nrhs)
 for i = 1 : nrhs
-  relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]);
-  @test(relres[i] <= 1.0e-4);
+  relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]) / norm(A, 1);
+  @test(relres[i] <= 1.0e-6);
 end

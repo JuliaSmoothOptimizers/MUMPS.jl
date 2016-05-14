@@ -11,37 +11,38 @@ rhs = [1., 4., 9., 16.];
 x = solve(mumps1, rhs);
 finalize(mumps1);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs) * norm(A, 1));
 
 mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64);
-A = rand(4,4); A = sparse(A + A');
+A = random_matrix(Float64, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
 factorize(mumps2, A);
-rhs = rand(4);
+rhs = [1., 4., 9., 16.];
 x = solve(mumps2, rhs);
 finalize(mumps2);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs) * norm(A, 1));
 
 mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64);
-A = sparse(rand(4,4));
+A = sparse(random_matrix(Float64, [1, 2, 3, 4], 4, 4));
 factorize(mumps3, A);
-rhs = rand(4);
+rhs = [1., 4., 9., 16.];
 x = solve(mumps3, rhs);
 finalize(mumps3);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs));
+@test(norm(A * x - rhs) <= 1.0e-12 * norm(rhs) * norm(A, 1));
 
 # Test for solving real div-grad system with single and multiple rhs.
 # Based on Lars Ruthotto's initial implementation.
 
-A = get_div_grad(32, 32, 32);
-n = size(A, 1);
+n = 10
+n3 = 10 * 10 * 10
+A = get_div_grad(n, n, n);
 
 # Test with single rhs
 if MPI.Comm_rank(comm) == root
   println("Test single rhs on div_grad matrix");
 end
-rhs = randn(n);
+rhs = ones(n3);
 
 x = solve(A, rhs, sym=mumps_definite);
 MPI.Barrier(comm)
@@ -52,14 +53,14 @@ relres = norm(A * x - rhs) / norm(rhs);
 if MPI.Comm_rank(comm) == root
   println("Test multiple rhs on div_grad matrix");
 end
-nrhs = 10;
-rhs = randn(n, nrhs);
+nrhs = 5;
+rhs = ones(n3, nrhs) * diagm(collect(1:nrhs))
 
 x = solve(A, rhs, sym=mumps_definite);
 
 MPI.Barrier(comm)
 relres = zeros(nrhs)
 for i = 1 : nrhs
-  relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]);
+  relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]) / norm(A, 1);
   @test(relres[i] <= 1.0e-12);
 end
