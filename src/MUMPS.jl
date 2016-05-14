@@ -24,7 +24,7 @@ end
 
 @doc "Exception type raised in case of error." ->
 type MUMPSException <: Exception
-  msg :: ASCIIString
+  msg :: AbstractString
 end
 
 typealias MUMPSValueDataType Union{Float32, Float64, Complex64, Complex128};
