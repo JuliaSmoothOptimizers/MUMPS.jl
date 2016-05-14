@@ -10,8 +10,11 @@ using MPI
 using Docile
 @docstrings(manual = ["../doc/manual.md"])
 
-using BinDeps
-@BinDeps.load_dependencies [:libmumps_simple]
+if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
+  include("../deps/deps.jl")
+else
+  error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
+end
 
 # libjmumps.dylib should be on your LD_LIBRARY_PATH.
 mumps_lib = "libmumps_simple";
