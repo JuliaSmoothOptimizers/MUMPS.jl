@@ -50,4 +50,4 @@ provides(SimpleBuild,
              end)
           end), [libmumps_simple], os = :Unix)
 
-@BinDeps.install [:libmumps_simple => :libmumps_simple]
+@BinDeps.install Dict(:libmumps_simple => :libmumps_simple)
