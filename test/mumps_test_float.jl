@@ -1,9 +1,9 @@
 icntl = get_icntl(det=true, ooc=true, itref=1);
 
 mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
-A = spdiagm(float32([1., 2., 3., 4.]));
+A = spdiagm(Array{Float32}([1., 2., 3., 4.]));
 factorize(mumps1, A);  # Analyze and factorize.
-rhs = float32([1., 4., 9., 16.]);
+rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps1, rhs);
 finalize(mumps1);
 MPI.Barrier(comm)
