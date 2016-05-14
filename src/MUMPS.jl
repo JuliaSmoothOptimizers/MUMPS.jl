@@ -7,8 +7,6 @@ export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
        MUMPSException
 
 using MPI
-using Docile
-@docstrings(manual = ["../doc/manual.md"])
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
@@ -25,7 +23,7 @@ macro mumps_call(func, args...)
 end
 
 
-@doc "Exception type raised in case of error." ->
+"Exception type raised in case of error."
 type MUMPSException <: Exception
   msg :: AbstractString
 end
@@ -35,7 +33,7 @@ typealias MUMPSIntDataType   Union{Int64};
 
 
 # See MUMPS User's Manual Section 5.1.
-@doc "Default integer parameters." ->
+"Default integer parameters."
 default_icntl = zeros(Int32, 40);
 default_icntl[1]  =  6;  # Output stream for error messages
 default_icntl[2]  =  0;  # Output stream for diagonstics/stats/warnings
@@ -80,7 +78,7 @@ default_icntl[40] =  0;  # (not used)
 
 # See MUMPS User's Manual Section 5.2.
 # icntl[1] will be set to its default value if left at -1.
-@doc "Default single precision real parameters" ->
+"Default single precision real parameters"
 default_cntl32 = zeros(Float32, 15);
 default_cntl32[1] = -1;    # relative threshold for numerical pivoting
 default_cntl32[2] = sqrt(eps(Float32));  # tolerance for iterative refinement
@@ -89,7 +87,7 @@ default_cntl32[4] = -1.0;  # threshold for static pivoting (<0: disable)
 default_cntl32[5] =  0.0;  # what null pivots are reset to
 # default_cntl32[6-15] are not used.
 
-@doc "Default double precision real parameters" ->
+"Default double precision real parameters"
 default_cntl64 = zeros(Float64, 15);
 default_cntl64[1] = -1;    # relative threshold for numerical pivoting
 default_cntl64[2] = sqrt(eps(Float64));  # tolerance for iterative refinement
@@ -99,23 +97,23 @@ default_cntl64[5] =  0.0;  # what null pivots are reset to
 # default_cntl64[6-15] are not used.
 
 # Symbols for symmetry
-@doc """Constant indicating that a general unsymmetric matrix will be
-analyzed and factorized""" ->
+"""Constant indicating that a general unsymmetric matrix will be
+analyzed and factorized"""
 mumps_unsymmetric = 0;
 
-@doc """Constant indicating that a symmetric definite matrix will be
-analyzed and factorized""" ->
+"""Constant indicating that a symmetric definite matrix will be
+analyzed and factorized"""
 mumps_definite    = 1;
 
-@doc """Constant indicating that a general symmetric matrix will be
-analyzed and factorized""" ->
+"""Constant indicating that a general symmetric matrix will be
+analyzed and factorized"""
 mumps_symmetric   = 2;
 
 
-@doc """Abstract type representing a factorization with MUMPS.
+"""Abstract type representing a factorization with MUMPS.
 All constructor arguments are optional. By default a general
 unsymmetric matrix will be analyzed/factorized with default
-integer and real parameters""" ->
+integer and real parameters"""
 type Mumps{Tv <: MUMPSValueDataType}
   __id    :: Ptr{Void}         # Pointer to MUMPS struct. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
@@ -168,7 +166,7 @@ type Mumps{Tv <: MUMPSValueDataType}
 end
 
 
-@doc "Obtain an array of integer control parameters." ->
+"Obtain an array of integer control parameters."
 function get_icntl(;
                    det :: Bool=false,       # Compute determinant.
                    verbose :: Bool=false,   # Output intermediate info.
@@ -186,8 +184,10 @@ function get_icntl(;
 end
 
 
-@doc "Terminate a Mumps instance." ->
-function Base.finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
+import Base.finalize
+
+"Terminate a Mumps instance."
+function finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   if Tv == Float32
     @mumps_call(:mumps_finalize_float, Void, (Ptr{Void},), mumps.__id);
   elseif Tv == Float64
@@ -201,10 +201,10 @@ function Base.finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 end
 
 
-@doc """Register the matrix `A` with the `Mumps` object `mumps`.
+"""Register the matrix `A` with the `Mumps` object `mumps`.
 This function makes it possible to define the matrix on the host
 only. If the matrix is defined on all nodes, there is no need to
-use this function.""" ->
+use this function."""
 function associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mumps :: Mumps{Tv}, A :: SparseMatrixCSC{Tv,Ti})
 
   n = size(A, 1);
@@ -257,10 +257,10 @@ associate_matrix{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :
 
 import Base.LinAlg.factorize
 
-@doc """Factorize the matrix registered with the `Mumps` instance.
+"""Factorize the matrix registered with the `Mumps` instance.
 The matrix must have been previously registered with `associate_matrix()`.
 After the factorization, the determinant, if requested, is stored in
-`mumps.det`. The MUMPS error code is stored in `mumps.err`. """ ->
+`mumps.det`. The MUMPS error code is stored in `mumps.err`. """
 function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
   if Tv == Float32
@@ -297,10 +297,10 @@ function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 end
 
 
-@doc """Register the right-hand side(s) `rhs` with the `Mumps`
+"""Register the right-hand side(s) `rhs` with the `Mumps`
 object `mumps`. This function makes it possible to define the right-
 -hand side(s) on the host only. If the right-hand side(s) are defined
-on all nodes, there is no need to use this function.""" ->
+on all nodes, there is no need to use this function."""
 function associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Array{Tv})
 
   n = size(rhs, 1);
@@ -334,12 +334,12 @@ end
 associate_rhs{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :: Array{Tv}) = associate_rhs(mumps, convert(Array{Tm}, rhs));
 
 
-@doc """Solve the system registered with the `Mumps` object `mumps`.
+"""Solve the system registered with the `Mumps` object `mumps`.
 The matrix and right-hand side(s) must have been previously registered
 with `associate_matrix()` and `associate_rhs()`. The optional keyword
 argument `transposed` indicates whether the user wants to solve the
 forward or transposed system. The solution is stored internally and must
-be retrieved with `get_solution()`.""" ->
+be retrieved with `get_solution()`."""
 function solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=false)
 
   if Tv == Float32
@@ -381,9 +381,9 @@ function solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=
 end
 
 
-@doc """Retrieve the solution of the system solved by `solve()`. This
+"""Retrieve the solution of the system solved by `solve()`. This
 function makes it possible to ask MUMPS to assemble the final solution
-on the host only, and to retrieve it there.""" ->
+on the host only, and to retrieve it there."""
 function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
   if Tv == Float32
@@ -422,24 +422,24 @@ end
 
 # Convenience functions.
 
-@doc """Combined associate_matrix / factorize.
-Presume that `A` is available on all nodes.""" ->
+"""Combined associate_matrix / factorize.
+Presume that `A` is available on all nodes."""
 function factorize{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti})
   associate_matrix(mumps, A);  # A will be converted by associate_matrix.
   factorize(mumps);
   return;
 end
 
-@doc """Combined associate_matrix / factorize.
-Presume that `A` is available on all nodes.""" ->
+"""Combined associate_matrix / factorize.
+Presume that `A` is available on all nodes."""
 factorize{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) = factorize(mumps, convert(SparseMatrixCSC{Tm,Int64}, sparse(A)));
 
 
-@doc meta("""Combined associate_rhs / solve.
+"""Combined associate_rhs / solve.
 Presume that `rhs` is available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
-The solution is retrieved and returned.""", returns=(Array{MUMPSValueDataType},)) ->
+The solution is retrieved and returned."""
 function solve{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :: Array{Tv}; transposed :: Bool=false)
   associate_rhs(mumps, rhs);  # rhs will be converted by associate_rhs.
   solve(mumps, transposed=transposed);
@@ -447,11 +447,11 @@ function solve{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :
 end
 
 
-@doc meta("""Combined analyze / factorize / solve.
+"""Combined analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
-The solution is retrieved and returned.""", returns=(Array{MUMPSValueDataType},)) ->
+The solution is retrieved and returned."""
 function solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; transposed :: Bool=false)
 
   factorize(mumps, A);
@@ -461,10 +461,10 @@ end
 solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}, rhs :: Array{Tr}) = solve(mumps, sparse(A), rhs);
 
 
-@doc meta("""Combined initialize / analyze / factorize / solve.
+"""Combined initialize / analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `sym` indicates the symmetry of `A`.
-The solution is retrieved and returned.""", returns=(Array{MUMPSValueDataType},)) ->
+The solution is retrieved and returned."""
 function solve{Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}(A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric)
 
   Tm = (Tv <: Complex || Tr <: Complex) ? Complex128 : Float64;  # Could be smarter.
