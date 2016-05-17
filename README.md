@@ -20,7 +20,7 @@ brew install mumps [--with-scotch5] [--with-openblas]  # use scotch/openblas at 
 At the Julia prompt, type
 
 ````JULIA
-julia> Pkg.clone("https://github.com/dpo/MUMPS.jl.git")
+julia> Pkg.clone("https://github.com/JuliaOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
 ````
 
@@ -67,7 +67,7 @@ julia> mumps = Mumps{Float64}(mumps_unsymmetric);  # Real, general unsymmetric
 julia> A = sparse(rand(4,4)); rhs = rand(4);       # Happens on all cores
 julia> associate_matrix(mumps, A);
 julia> factorize(mumps);
-julia> associate_matrix(mumps, rhs);
+julia> associate_rhs(mumps, rhs);
 julia> solve(mumps);
 julia> x = get_solution(mumps);
 julia> finalize(mumps);
