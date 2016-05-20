@@ -99,15 +99,15 @@ default_cntl64[5] =  0.0;  # what null pivots are reset to
 # Symbols for symmetry
 """Constant indicating that a general unsymmetric matrix will be
 analyzed and factorized"""
-mumps_unsymmetric = 0;
+const mumps_unsymmetric = 0;
 
 """Constant indicating that a symmetric definite matrix will be
 analyzed and factorized"""
-mumps_definite    = 1;
+const mumps_definite    = 1;
 
 """Constant indicating that a general symmetric matrix will be
 analyzed and factorized"""
-mumps_symmetric   = 2;
+const mumps_symmetric   = 2;
 
 
 """Abstract type representing a factorization with MUMPS.
