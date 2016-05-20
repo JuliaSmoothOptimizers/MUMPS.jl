@@ -2,7 +2,7 @@ module MUMPS
 
 export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
        finalize, factorize, solve,
-       associate_matrix, associate_rhs, get_solution,
+       associate_matrix, associate_rhs, associate_rhs!, get_solution,
        mumps_unsymmetric, mumps_definite, mumps_symmetric,
        MUMPSException
 
@@ -296,37 +296,46 @@ function factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
   return;
 end
 
-
 """Register the right-hand side(s) `rhs` with the `Mumps`
 object `mumps`. This function makes it possible to define the right-
 -hand side(s) on the host only. If the right-hand side(s) are defined
 on all nodes, there is no need to use this function."""
 function associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Array{Tv})
+  associate_rhs!(mumps, copy(rhs))
+end
 
-  n = size(rhs, 1);
+
+"""Register the right-hand side(s) `rhs` with the `Mumps`
+object `mumps`. This function makes it possible to define the right-
+-hand side(s) on the host only. If the right-hand side(s) are defined
+on all nodes, there is no need to use this function.
+
+Note that `rhs` will be overwritten with the solution after a call to `solve()`."""
+function associate_rhs!{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Array{Tv})
+
+  n = size(rhs, 1)
   n == mumps.n || throw(MUMPSException("rhs has incompatible dimension"))
 
-  nrhs = size(rhs, 2);
-  x = rhs[:];  # Make a copy; will be overwritten with solution.
+  nrhs = size(rhs, 2)
 
   if Tv == Float32
     @mumps_call(:mumps_associate_rhs_float, Void,
                 (Ptr{Void}, Int32, Ptr{Float32}),
-                mumps.__id,  nrhs,            x);
+                mumps.__id,  nrhs,          rhs)
   elseif Tv == Float64
     @mumps_call(:mumps_associate_rhs_double, Void,
                 (Ptr{Void}, Int32, Ptr{Float64}),
-                mumps.__id,  nrhs,            x);
+                mumps.__id,  nrhs,          rhs)
   elseif Tv == Complex64
     @mumps_call(:mumps_associate_rhs_float_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex64}),
-                mumps.__id,  nrhs,              x);
+                mumps.__id,  nrhs,            rhs)
   else
     @mumps_call(:mumps_associate_rhs_double_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex128}),
-                mumps.__id,  nrhs,               x);
+                mumps.__id,  nrhs,             rhs)
   end
-  return;
+  return
 end
 
 # Associate a generally-typed rhs with a Mumps type. Attempt conversion.
