@@ -10,7 +10,8 @@ b = rand(n)
 xtrue = A \ b;
 
 # Initialize.
-remote_mumps = remotecall(2, Mumps{Float64}, mumps_unsymmetric, default_icntl, default_cntl64)
+@everywhere mumps64(args...) = Mumps{Float64}(args...)
+remote_mumps = remotecall(2, mumps64, mumps_unsymmetric, default_icntl, default_cntl64)
 
 # Associate with matrix A.
 MPI.Barrier(MPI.COMM_WORLD)
@@ -22,7 +23,7 @@ remotecall(2, factorize!, remote_mumps)
 
 # Associate with rhs b.
 MPI.Barrier(MPI.COMM_WORLD)
-remotecall(2, associate_rhs!, remote_mumps, b)
+remotecall(2, associate_rhs, remote_mumps, b)
 
 # Solve.
 MPI.Barrier(MPI.COMM_WORLD)
