@@ -24,14 +24,6 @@ julia> Pkg.clone("https://github.com/JuliaOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
 ````
 
-In order for Julia to find the MUMPS interface library, its location must
-appear on your `LD_LIBRARY_PATH`:
-````
-export LD_LIBRARY_PATH=$(julia -E 'Pkg.dir()' | sed -e 's/"//g')/MUMPS/src:$LD_LIBRARY_PATH
-````
-
-Place the above in your `~/.bashrc` to make it permanent.
-
 ## How to Use
 
 The main data type holding information on a factorization is `Mumps`. Remember
@@ -65,10 +57,10 @@ For instance,
 julia> MPI.Init();
 julia> mumps = Mumps{Float64}(mumps_unsymmetric);  # Real, general unsymmetric
 julia> A = sparse(rand(4,4)); rhs = rand(4);       # Happens on all cores
-julia> associate_matrix(mumps, A);
-julia> factorize(mumps);
-julia> associate_rhs(mumps, rhs);
-julia> solve(mumps);
+julia> associate_matrix!(mumps, A);
+julia> factorize!(mumps);
+julia> associate_rhs!(mumps, rhs);
+julia> solve!(mumps);
 julia> x = get_solution(mumps);
 julia> finalize(mumps);
 julia> MPI.Finalize();
@@ -85,8 +77,8 @@ For intance,
 ```JULIA
 julia> mumps = Mumps{Complex128}(mumps_unsymmetric);
 julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4);
-julia> associate_matrix(mumps, A);  # A is converted to a sparse Complex128 matrix
-julia> associate_rhs(mumps, rhs);   # rhs is converted to a Complex128 array
+julia> associate_matrix!(mumps, A);  # A is converted to a sparse Complex128 matrix
+julia> associate_rhs!(mumps, rhs);   # rhs is converted to a Complex128 array
 ```
 
 See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
@@ -140,10 +132,10 @@ before calling `MPI.Finalize()`.
 Method             | Description
 -------------------|------------
 `finalize`         | Finalize a `Mumps` object. Must be done before calling `MPI.Finalize()`
-`associate_matrix` | Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
-`factorize`        | Factorize the matrix registered with the `Mumps` object.
-`associate_rhs`    | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
-`solve`            | Solve the linear system for the given right-hand side.
+`associate_matrix!`| Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
+`factorize!`       | Factorize the matrix registered with the `Mumps` object.
+`associate_rhs!`   | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
+`solve!`           | Solve the linear system for the given right-hand side.
 `get_solution`     | Retrieve the solution from the `Mumps` object. This function makes it possible for the solution to be assembled on the host only.
 
 ## Parallel Execution
@@ -167,6 +159,7 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 * [X] Control iterative refinement (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Obtain a Schur complement
 * [ ] Solve with sparse right-hand sides
+* [ ] Sequential, version with no MPI requirement
 
 This content is released under the [MIT](http://opensource.org/licenses/MIT) License.
 <a rel="license" href="http://opensource.org/licenses/MIT">

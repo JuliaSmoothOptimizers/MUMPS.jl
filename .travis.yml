@@ -5,19 +5,19 @@ os:
   - linux
 
 julia:
-  - 0.4
+  - release
   - nightly
 
 before_install:
   - unset DYLD_LIBRARY_PATH
-    # Install stuff necessary to MPI.jl
-  - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
+  # Install stuff necessary to MPI.jl
+  - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libmpich-dev mpich-bin; fi
   - if [ `uname` == "Darwin" ]; then brew --config; brew update; fi
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
 install:
   # Install MUMPS on OSX.
-  - if [ `uname` == "Darwin" ]; then brew tap homebrew/science; brew install scalapack mumps; fi
+  - if [ `uname` == "Darwin" ]; then brew tap homebrew/science; brew install mpich2 scalapack mumps; fi
   - if [ `uname` == "Linux" ]; then rm ~/julia/lib/julia/libgfortran.so.3; fi
   - if [ `uname` == "Darwin" ]; then export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH; fi
   - julia -e 'versioninfo()'
@@ -29,6 +29,7 @@ install:
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
   - mpirun -np 2 julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
+  - julia -p 2 $TRAVIS_BUILD_DIR/examples/mumps_remote.jl
 
 after_success:
   - julia -e 'cd(Pkg.dir("MUMPS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
