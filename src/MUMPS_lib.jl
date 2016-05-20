@@ -63,7 +63,6 @@ end
 
 associate_matrix!{Tv <: Number}(remote_mumps :: RemoteRef, A :: Array{Tv,2}) = associate_matrix!(remote_mumps, sparse(A));
 
-# import Base.LinAlg.factorize
 
 """Factorize the matrix registered with the `Mumps` instance.
 The matrix must have been previously registered with `associate_matrix()`.
@@ -237,28 +236,28 @@ function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
 
   id = reinterpret(Ptr{Void}, mumps.__id)
   if Tv == Float32
-    nrhs = int(@mumps_call(:mumps_get_nrhs_float, Int32, (Ptr{Void},), id));
+    nrhs = Int(@mumps_call(:mumps_get_nrhs_float, Int32, (Ptr{Void},), id));
 
     x = zeros(Float32, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_float, Void,
                 (Ptr{Void}, Ptr{Float32}),
                         id,            x);
   elseif Tv == Float64
-    nrhs = int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), id));
+    nrhs = Int(@mumps_call(:mumps_get_nrhs_double, Int32, (Ptr{Void},), id));
 
     x = zeros(Float64, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_double, Void,
                 (Ptr{Void}, Ptr{Float64}),
                         id,            x);
   elseif Tv == Complex64
-    nrhs = int(@mumps_call(:mumps_get_nrhs_float_complex, Int32, (Ptr{Void},), id));
+    nrhs = Int(@mumps_call(:mumps_get_nrhs_float_complex, Int32, (Ptr{Void},), id));
 
     x = zeros(Complex64, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_float_complex, Void,
                 (Ptr{Void}, Ptr{Complex64}),
                         id,              x);
   else
-    nrhs = int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), id));
+    nrhs = Int(@mumps_call(:mumps_get_nrhs_double_complex, Int32, (Ptr{Void},), id));
 
     x = zeros(Complex128, mumps.n * nrhs);
     @mumps_call(:mumps_get_solution_double_complex, Void,
@@ -266,7 +265,7 @@ function get_solution{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
                         id,               x);
   end
 
-  return reshape(x, int(mumps.n), nrhs);
+  return reshape(x, Int(mumps.n), nrhs);
 end
 
 # for multi-processing.
