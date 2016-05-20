@@ -135,25 +135,24 @@ function associate_rhs!{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Arr
   n == mumps.n || throw(MUMPSException("rhs has incompatible dimension"))
 
   nrhs = size(rhs, 2);
-  x = rhs[:];  # Make a copy; will be overwritten with solution.
 
   id = reinterpret(Ptr{Void}, mumps.__id)
   if Tv == Float32
     @mumps_call(:mumps_associate_rhs_float, Void,
                 (Ptr{Void}, Int32, Ptr{Float32}),
-                        id,  nrhs,            x);
+                        id,  nrhs,          rhs);
   elseif Tv == Float64
     @mumps_call(:mumps_associate_rhs_double, Void,
                 (Ptr{Void}, Int32, Ptr{Float64}),
-                        id,  nrhs,            x);
+                        id,  nrhs,          rhs);
   elseif Tv == Complex64
     @mumps_call(:mumps_associate_rhs_float_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex64}),
-                        id,  nrhs,              x);
+                        id,  nrhs,            rhs);
   else
     @mumps_call(:mumps_associate_rhs_double_complex, Void,
                 (Ptr{Void}, Int32, Ptr{Complex128}),
-                        id,  nrhs,               x);
+                        id,  nrhs,             rhs);
   end
   return mumps;
 end
