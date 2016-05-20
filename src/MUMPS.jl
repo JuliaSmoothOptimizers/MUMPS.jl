@@ -160,7 +160,7 @@ type Mumps{Tv <: MUMPSValueDataType}
     infog = zeros(Int32, 40);
 
     id = reinterpret(Int, id)
-    self = new(id, int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
+    self = new(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
@@ -208,6 +208,7 @@ include("MUMPS_lib.jl")
 
 
 # Deprecated syntax.
+import Base.factorize
 
 @Base.deprecate associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mumps :: Mumps{Tv}, A :: SparseMatrixCSC{Tv,Ti}) associate_matrix!(mumps, A)
 
