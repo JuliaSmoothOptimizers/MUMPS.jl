@@ -1,7 +1,7 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
-OSX and Linux: [![Build Status](https://travis-ci.org/JuliaOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaOptimizers/MUMPS.jl)
-[![Coverage Status](https://coveralls.io/repos/JuliaOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaOptimizers/MUMPS.jl?branch=master)
+OSX and Linux: [![Build Status](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=master)
 
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
@@ -20,7 +20,7 @@ brew install mumps [--with-scotch5] [--with-openblas]  # use scotch/openblas at 
 At the Julia prompt, type
 
 ````JULIA
-julia> Pkg.clone("https://github.com/JuliaOptimizers/MUMPS.jl.git")
+julia> Pkg.clone("https://github.com/JuliaSmoothOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
 ````
 
@@ -89,7 +89,7 @@ julia> associate_matrix(mumps, A);  # A is converted to a sparse Complex128 matr
 julia> associate_rhs(mumps, rhs);   # rhs is converted to a Complex128 array
 ```
 
-See [test](https://github.com/dpo/MUMPS.jl/tree/master/test) for more examples.
+See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/master/test) for more examples.
 
 ## Constants and Methods Exposed
 
@@ -157,14 +157,14 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 
 ## To Do (Pull Requests Welcome!)
 
-* [X] Support double precision complex arithmetic (in [99c23fe](https://github.com/dpo/MUMPS.jl/commit/99c23fe87e7c985fe3062d78ab7664b82a6b8dba))
-* [X] Support single precision real and complex arithmetic (in [654814a](https://github.com/dpo/MUMPS.jl/commit/654814a5e5800260011d2f26f7fb6de179609cfa))
+* [X] Support double precision complex arithmetic (in [99c23fe](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/99c23fe87e7c985fe3062d78ab7664b82a6b8dba))
+* [X] Support single precision real and complex arithmetic (in [654814a](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/654814a5e5800260011d2f26f7fb6de179609cfa))
 * [ ] Support distributed matrices / vectors
 * [ ] User-selected permutation
-* [X] Out-of-core option (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [X] Determinant (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
+* [X] Out-of-core option (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
+* [X] Determinant (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Compute entries of the inverse
-* [X] Control iterative refinement (in [73e829b](https://github.com/dpo/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
+* [X] Control iterative refinement (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [ ] Obtain a Schur complement
 * [ ] Solve with sparse right-hand sides
 
