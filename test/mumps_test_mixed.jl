@@ -24,12 +24,12 @@ finalize(mumps);
 relres = norm(A * x - rhs) / norm(rhs);
 @test(relres <= 1.0e-6);
 
-# Same as above but call associate_matrix and associate_rhs directly.
+# Same as above but call associate_matrix! and associate_rhs! directly.
 mumps = Mumps{Complex64}(mumps_unsymmetric, default_icntl, default_cntl32);
-associate_matrix(mumps, A);
-factorize(mumps);
-associate_rhs(mumps, rhs);
-solve(mumps);
+associate_matrix!(mumps, A);
+factorize!(mumps);
+associate_rhs!(mumps, rhs);
+solve!(mumps);
 x = get_solution(mumps);
 MPI.Barrier(comm);
 finalize(mumps);
@@ -38,10 +38,10 @@ relres = norm(A * x - rhs) / norm(rhs);
 
 # And the same with sparse A.
 mumps = Mumps{Complex64}(mumps_unsymmetric, default_icntl, default_cntl32);
-associate_matrix(mumps, sparse(A));
-factorize(mumps);
-associate_rhs(mumps, rhs);
-solve(mumps);
+associate_matrix!(mumps, sparse(A));
+factorize!(mumps);
+associate_rhs!(mumps, rhs);
+solve!(mumps);
 x = get_solution(mumps);
 MPI.Barrier(comm);
 finalize(mumps);

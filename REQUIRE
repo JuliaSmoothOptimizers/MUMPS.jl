@@ -2,6 +2,3 @@ julia 0.4
 BinDeps
 @osx Homebrew
 MPI
-AnsiColor
-Docile
-Markdown
