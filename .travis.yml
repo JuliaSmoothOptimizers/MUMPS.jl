@@ -6,6 +6,7 @@ os:
 
 julia:
   - 0.4
+  - 0.5
   - nightly
 
 before_install:
@@ -24,7 +25,6 @@ install:
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
   - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
-  - if [ `uname` == "Linux" ]; then export LD_LIBRARY_PATH=/home/travis/.julia/v0.3/MUMPS/deps/usr/lib:$LD_LIBRARY_PATH; fi
 
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
