@@ -1,26 +1,31 @@
 language: julia
 
-os:
-  - osx
-  - linux
-
-julia:
-  - 0.4
-  - 0.5
-  - nightly
+# Homebrew no longer bottles for OSX 10.9; request 10.11
+matrix:
+  include:
+    - os: linux
+      julia: 0.4
+    - os: linux
+      julia: 0.5
+    - os: linux
+      julia: nightly
+    - os: osx
+      julia: 0.4
+      osx_image: xcode7.3
+    - os: osx
+      julia: 0.5
+      osx_image: xcode7.3
+    - os: osx
+      julia: nightly
+      osx_image: xcode7.3
 
 before_install:
   - unset DYLD_LIBRARY_PATH
-    # Install stuff necessary to MPI.jl
   - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
-  - if [ `uname` == "Darwin" ]; then brew --config; brew update; fi
+  - if [ `uname` == "Darwin" ]; then brew --config; brew update; brew tap homebrew/science; brew install mumps; fi
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
 install:
-  # Install MUMPS on OSX.
-  - if [ `uname` == "Darwin" ]; then brew tap homebrew/science; brew install scalapack mumps; fi
-  - if [ `uname` == "Linux" ]; then rm ~/julia/lib/julia/libgfortran.so.3; fi
-  - if [ `uname` == "Darwin" ]; then export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH; fi
   - julia -e 'versioninfo()'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'

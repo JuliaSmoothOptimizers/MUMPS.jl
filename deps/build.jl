@@ -1,32 +1,18 @@
 using BinDeps
+using Compat
 
 @BinDeps.setup
 
-libblas = library_dependency("libblas", aliases=["libvecLibFort"])
-liblapack = library_dependency("liblapack", aliases=["libvecLibFort"])
-libscalapack = library_dependency("libscalapack", aliases=["libscalapack-openmpi"])
-libmumps = library_dependency("libmumps_common", depends=[libblas, liblapack, libscalapack])
+libmumps = library_dependency("libmumps_common")
 libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
 
 # Uncomment when MUMPS makes it into Homebrew.jl.
-# @osx_only begin
-#   using Homebrew
-#   provides(Homebrew.HB, "scalapack", libscalapack, os = :Darwin)
-#   provides(Homebrew.HB, "mumps", [libmumps, libmumps_simple], os = :Darwin)
-# end
+@static if is_apple()
+  using Homebrew
+  provides(Homebrew.HB, "homebrew/science/mumps", [libmumps, libmumps_simple], os = :Darwin)
+end
 
-provides(AptGet, "libblas-dev", libblas, os = :Linux)
-provides(AptGet, "liblapack-dev", liblapack, os = :Linux)
-provides(AptGet, "libmumps-dev", [libscalapack, libmumps], os = :Linux)
-# provides(AptGet, "libmumps_simple", libmumps_simple, os = :Linux)
-
-# Uncomment when RPM for Windows is ready.
-# MPI would have to be available on Windows first.
-# @windows_only begin
-#   using WinRPM
-#   provides(WinRPM.RPM, "mumps",        libmumps,        os = :Windows)
-#   provides(WinRPM.RPM, "mumps_simple", libmumps_simple, os = :Windows)
-# end
+provides(AptGet, "libmumps-dev", libmumps, os = :Linux)
 
 provides(Sources,
          URI("https://github.com/dpo/mumps_simple/archive/v0.4.tar.gz"),
