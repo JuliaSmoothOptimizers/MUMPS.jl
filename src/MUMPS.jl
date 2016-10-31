@@ -187,20 +187,22 @@ end
 
 import Base.finalize
 
-"Terminate a Mumps instance."
-function finalize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv})
-  id = reinterpret(Ptr{Void}, mumps.__id)
-  if Tv == Float32
-    @mumps_call(:mumps_finalize_float, Void, (Ptr{Void},), id);
-  elseif Tv == Float64
-    @mumps_call(:mumps_finalize_double, Void, (Ptr{Void},), id);
-  elseif Tv == Complex64
-    @mumps_call(:mumps_finalize_float_complex, Void, (Ptr{Void},), id);
-  else
-    @mumps_call(:mumps_finalize_double_complex, Void, (Ptr{Void},), id);
+for (fname, elty) in ((:mumps_finalize_float, Float32),
+                      (:mumps_finalize_double, Float64),
+                      (:mumps_finalize_float_complex, Complex64),
+                      (:mumps_finalize_double_complex, Complex128))
+
+  @eval begin
+
+    "Terminate a Mumps instance."
+    function finalize(mumps :: Mumps{$elty})
+      id = reinterpret(Ptr{Void}, mumps.__id)
+      @mumps_call($(string(fname)), Void, (Ptr{Void},), id)
+      mumps.__id = C_NULL;
+      return mumps
+    end
+
   end
-  mumps.__id = C_NULL;
-  return mumps
 end
 
 
