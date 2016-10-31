@@ -213,19 +213,11 @@ include("MUMPS_lib.jl")
 import Base.factorize
 
 @Base.deprecate associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mumps :: Mumps{Tv}, A :: SparseMatrixCSC{Tv,Ti}) associate_matrix!(mumps, A)
-
 @Base.deprecate associate_matrix{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) associate_matrix!(mumps, A)
-
 @Base.deprecate associate_matrix{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) associate_matrix!(mumps, A)
-
-
 @Base.deprecate factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}) factorize!(mumps)
-
 @Base.deprecate factorize{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) factorize!(mumps, A)
-
-
 @Base.deprecate solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=false) solve!(mumps, transposed=transposed)
-
 @Base.deprecate factorize{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) factorize!(mumps, A)
 
 end  # Module MUMPS
