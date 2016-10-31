@@ -123,7 +123,7 @@ type Mumps{Tv <: MUMPSValueDataType}
   infog   :: Array{Int32,1}
   rinfog  :: Union{Array{Float32,1}, Array{Float64,1}}
   nnz     :: Int               # Number of nonzeros in factors.
-  det     :: AbstractFloat
+  det     :: Tv
   err     :: Int
 
   function Mumps(sym :: Int,
