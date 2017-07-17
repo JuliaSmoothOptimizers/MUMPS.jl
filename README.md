@@ -22,7 +22,26 @@ At the Julia prompt, type
 ````JULIA
 julia> Pkg.clone("https://github.com/JuliaSmoothOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
+julia> Pkg.test("MUMPS")
 ````
+
+## Troubleshooting
+
+If you are running OSX and see error messages of the form
+```
+PMIx has detected a temporary directory name that results in a path that is too long for the Unix domain socket:
+
+  Temp dir:
+  /var/folders/rq/p5nq9tv17p5drlk49755jjz80000gn/T/openmpi-sessions-501@your_computer_name_0/44473
+
+Try setting your TMPDIR environmental variable to point to something shorter in length
+```
+simply exit Julia and set the environment variable `TMPDIR` to, e.g., `\tmp`:
+```bash
+$ export TMPDIR=/tmp
+```
+The issue has to do with OpenMPI and is [documented on their
+faq](https://www.open-mpi.org/faq/?category=osx#startup-errors-with-open-mpi-2.0.x).
 
 ## How to Use
 
