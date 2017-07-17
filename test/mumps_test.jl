@@ -15,7 +15,7 @@ MPI.Barrier(comm)
 
 mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64);
 A = random_matrix(Float64, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
-factorize(mumps2, A);
+factorize!(mumps2, A);
 rhs = [1., 4., 9., 16.];
 x = solve(mumps2, rhs);
 finalize(mumps2);
