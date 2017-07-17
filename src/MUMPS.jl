@@ -19,7 +19,7 @@ mumps_lib = "libmumps_simple";
 macro mumps_call(func, args...)
   quote
     ccall(($func, $mumps_lib), $(args...))
-  end
+  end |> esc
 end
 
 
