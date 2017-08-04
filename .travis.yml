@@ -26,15 +26,18 @@ matrix:
       julia: nightly
       osx_image: xcode7.3
 
+addons:
+  apt_packages:
+    - gfortran
+
 branches:
   only:
     - master
 
 before_install:
   - unset DYLD_LIBRARY_PATH
-  - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
-  - if [ `uname` == "Darwin" ]; then
-      brew --config; brew update; brew tap homebrew/science; brew install mumps; fi
+  - if [ `uname` == "Linux" ]; then
+    julia -E 'Pkg.clone("https://github.com/dpo/Linuxbrew.jl.git"); Pkg.build("Linuxbrew"); using Linuxbrew; Linuxbrew.add("patchelf")'; fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
