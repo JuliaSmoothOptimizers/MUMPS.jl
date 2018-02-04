@@ -9,7 +9,7 @@ libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
 # Uncomment when MUMPS makes it into Homebrew.jl.
 @static if is_apple()
   using Homebrew
-  provides(Homebrew.HB, "homebrew/science/mumps", [libmumps, libmumps_simple], os = :Darwin)
+  provides(Homebrew.HB, "dpo/openblas/mumps", [libmumps, libmumps_simple], os = :Darwin)
 end
 
 provides(AptGet, "libmumps-dev", libmumps, os = :Linux)
