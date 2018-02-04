@@ -1,4 +1,5 @@
 icntl = get_icntl(det=true, ooc=true, itref=1);
+tol = sqrt(eps(Float32))
 
 mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
 A = spdiagm(Array{Float32}([1., 2., 3., 4.]));
@@ -7,7 +8,7 @@ rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps1, rhs);
 finalize(mumps1);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
 mumps2 = Mumps{Float32}(mumps_symmetric, icntl, default_cntl32);
 A = random_matrix(Float32, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
@@ -16,7 +17,7 @@ rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps2, rhs);
 finalize(mumps2);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
 mumps3 = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4));
@@ -25,7 +26,7 @@ rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps3, rhs);
 finalize(mumps3);
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= 1.0e-6 * norm(rhs) * norm(A, 1));
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
 # Test convenience interface.
 
@@ -58,5 +59,5 @@ MPI.Barrier(comm)
 relres = zeros(Float32, nrhs)
 for i = 1 : nrhs
   relres[i] =  norm(A * x[:,i] - rhs[:,i]) / norm(rhs[:,i]) / norm(A, 1);
-  @test(relres[i] <= 1.0e-6);
+  @test(relres[i] <= tol);
 end
