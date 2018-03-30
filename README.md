@@ -9,14 +9,6 @@ definiteness. The factorization and solve phases can be performed in parallel.
 
 ## How to Install
 
-On OSX we recommend using [Homebrew](https://brew.sh). The procedure below
-should also work on Linux if you use [Linuxbrew](https://github.com/Homebrew/linuxbrew).
-
-````
-brew tap homebrew/science  # if not already done
-brew install mumps [--with-scotch5] [--with-openblas]  # use scotch/openblas at your option
-````
-
 At the Julia prompt, type
 
 ````JULIA
@@ -25,7 +17,23 @@ julia> Pkg.build("MUMPS")
 julia> Pkg.test("MUMPS")
 ````
 
+On OSX, you can also install MUMPS outside of Julia using [Homebrew](https://brew.sh). The procedure below should also work on Linux if you use [Linuxbrew](https://github.com/Homebrew/linuxbrew).
+
+````
+brew tap dpo/openblas
+brew install mumps [--with-scotch5]  # use scotch at your option
+````
+
+
 ## Troubleshooting
+
+On OSX, if you observe an error during the compilation of scalapack mentioning `MPI_BASE_DIR`, try
+```JULIA
+julia> ENV["MPI_BASE_DIR"] = joinpath(Pkg.dir("Homebrew"), "deps", "usr", "opt", "open-mpi")
+julia> using Homebrew
+julia> Homebrew.brew(`install dpo/openblas/mumps`)
+```
+and build again.
 
 If you are running OSX and see error messages of the form
 ```
@@ -40,8 +48,7 @@ simply exit Julia and set the environment variable `TMPDIR` to, e.g., `\tmp`:
 ```bash
 $ export TMPDIR=/tmp
 ```
-The issue has to do with OpenMPI and is [documented on their
-faq](https://www.open-mpi.org/faq/?category=osx#startup-errors-with-open-mpi-2.0.x).
+The issue has to do with OpenMPI and is [documented in their faq](https://www.open-mpi.org/faq/?category=osx#startup-errors-with-open-mpi-2.0.x).
 
 ## How to Use
 
@@ -53,11 +60,11 @@ session is as follows:
 julia> using MUMPS
 julia> using MPI
 julia> MPI.Init()
-julia> A = sprand(10, 10, .2) + speye(10); rhs = rand(10);
-julia> x = solve(A, rhs);  # Mumps object is created and destroyed
+julia> A = sprand(10, 10, .2) + speye(10); rhs = rand(10)
+julia> x = solve(A, rhs)  # Mumps object is created and destroyed
 julia> norm(x - A \ rhs) / norm(x)
 2.640677159735313e-16
-julia> MPI.Finalize();     # if you're finished
+julia> MPI.Finalize()     # if you're finished
 ````
 
 It is possible to separate the initialization, the analysis/factorization,
@@ -73,16 +80,16 @@ arithmetics are supported.
 For instance,
 
 ````JULIA
-julia> MPI.Init();
-julia> mumps = Mumps{Float64}(mumps_unsymmetric);  # Real, general unsymmetric
-julia> A = sparse(rand(4,4)); rhs = rand(4);       # Happens on all cores
-julia> associate_matrix!(mumps, A);
-julia> factorize!(mumps);
-julia> associate_rhs!(mumps, rhs);
-julia> solve!(mumps);
-julia> x = get_solution(mumps);
-julia> finalize(mumps);
-julia> MPI.Finalize();
+julia> MPI.Init()
+julia> mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64)  # Real, general unsymmetric
+julia> A = sparse(rand(4,4)); rhs = rand(4)       # Happens on all cores
+julia> associate_matrix!(mumps, A)
+julia> factorize!(mumps)
+julia> associate_rhs!(mumps, rhs)
+julia> solve!(mumps)
+julia> x = get_solution(mumps)
+julia> finalize(mumps)
+julia> MPI.Finalize()
 ````
 
 Once the arithmetic of the `Mumps` instance has been specified, it cannot be
@@ -94,10 +101,10 @@ converted to sparse format.
 For intance,
 
 ```JULIA
-julia> mumps = Mumps{Complex128}(mumps_unsymmetric);
-julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4);
-julia> associate_matrix!(mumps, A);  # A is converted to a sparse Complex128 matrix
-julia> associate_rhs!(mumps, rhs);   # rhs is converted to a Complex128 array
+julia> mumps = Mumps{Complex128}(mumps_unsymmetric, default_icntl, default_cntl64)
+julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4)
+julia> associate_matrix!(mumps, A)  # A is converted to a sparse Complex128 matrix
+julia> associate_rhs!(mumps, rhs)   # rhs is converted to a Complex128 array
 ```
 
 See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/master/test) for more examples.
