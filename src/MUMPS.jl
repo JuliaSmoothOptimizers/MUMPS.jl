@@ -29,7 +29,7 @@ type MUMPSException <: Exception
 end
 
 typealias MUMPSValueDataType Union{Float32, Float64, Complex64, Complex128};
-typealias MUMPSIntDataType   Union{Int64};
+typealias MUMPSIntDataType   Int32;
 
 
 # See MUMPS User's Manual Section 5.1.

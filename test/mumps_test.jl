@@ -37,7 +37,7 @@ MPI.Barrier(comm)
 
 n = 10
 n3 = 10 * 10 * 10
-A = get_div_grad(n, n, n);
+A = convert(SparseMatrixCSC{Float64,Int32}, get_div_grad(n, n, n))
 
 # Test with single rhs
 if MPI.Comm_rank(comm) == root

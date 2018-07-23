@@ -40,10 +40,10 @@ end
 
 # Associate a generally-typed matrix with a Mumps type. Attempt conversion.
 # An InexactError should be raised if, e.g., mumps is Float64 and A is Complex128.
-associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int64}, A));
+associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, A));
 
 # associate_matrix for dense matrices.
-associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int64}, sparse(A)));
+associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)));
 
 
 for (fname, infoname, elty, infoty) in ((:mumps_factorize_float, :mumps_get_info_float, Float32, Float32),
@@ -177,7 +177,7 @@ end
 
 """Combined associate_matrix / factorize.
 Presume that `A` is available on all nodes."""
-factorize!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) = factorize!(mumps, convert(SparseMatrixCSC{Tm,Int64}, sparse(A)));
+factorize!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) = factorize!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)));
 
 
 """Combined associate_rhs / solve.
@@ -203,7 +203,7 @@ function solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number, Ti <: Integ
   return solve(mumps, rhs, transposed=transposed);
 end
 
-solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}, rhs :: Array{Tr}) = solve(mumps, sparse(A), rhs);
+solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}, rhs :: Array{Tr}) = solve(mumps, convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs);
 
 
 """Combined initialize / analyze / factorize / solve.
@@ -219,4 +219,4 @@ function solve{Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}(A :: SparseMa
   return x;
 end
 
-solve{Tv <: Number, Tr <: Number}(A :: Array{Tv,2}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) = solve(sparse(A), rhs, sym=sym);
+solve{Tv <: Number, Tr <: Number}(A :: Array{Tv,2}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) = solve(convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs, sym=sym);
