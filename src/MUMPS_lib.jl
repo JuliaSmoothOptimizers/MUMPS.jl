@@ -35,6 +35,18 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
       return mumps;
     end
 
+    function associate_matrix!{Ti <: MUMPSIntDataType}(mumps :: Mumps{$elty}, n :: Ti, irow :: Vector{Ti}, jcol :: Vector{Ti}, vals :: Vector{$elty})
+
+      nz = length(vals)
+      id = reinterpret(Ptr{Void}, mumps.__id)
+      @mumps_call($(string(fname)), Void,
+                  (Ptr{Void}, Int32, Int32, Ptr{$elty}, Ptr{Int32}, Ptr{Int32}),
+                          id,     n,    nz,       vals,       irow,       jcol)
+      mumps.n = n
+      mumps.nnz = mumps.infog[29]
+      return mumps
+    end
+
   end
 end
 
