@@ -75,16 +75,6 @@ for (fname, infoname, elty, infoty) in ((:mumps_factorize_float, :mumps_get_info
   end
 end
 
-"""Register the right-hand side(s) `rhs` with the `Mumps`
-object `mumps`. This function makes it possible to define the right-
--hand side(s) on the host only. If the right-hand side(s) are defined
-on all nodes, there is no need to use this function.
-
-This variant makes a copy of the right-hand side to avoid overwriting it."""
-function associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Array{Tv})
-  associate_rhs!(mumps, copy(rhs))
-end
-
 
 for (fname, elty) in ((:mumps_associate_rhs_float, Float32),
                       (:mumps_associate_rhs_double, Float64),
