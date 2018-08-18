@@ -9,7 +9,7 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
     This function makes it possible to define the matrix on the host
     only. If the matrix is defined on all nodes, there is no need to
     use this function."""
-    function associate_matrix!{Ti <: MUMPSIntDataType}(mumps :: Mumps{$elty}, A :: SparseMatrixCSC{$elty,Ti})
+    function associate_matrix!(mumps :: Mumps{$elty}, A :: SparseMatrixCSC{$elty,Ti}) where {Ti <: MUMPSIntDataType}
 
       n = size(A, 1);
       size(A, 2) == n || throw(MUMPSException("Input matrix must be square"))
@@ -23,7 +23,7 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
       irow = convert(Array{Int32,1}, B.rowval);   # Necessary?
       jcol = zeros(Int32, nz, 1);
       for i = 1 : n
-        jcol[B.colptr[i] : B.colptr[i+1]-1] = i;
+        jcol[B.colptr[i] : B.colptr[i+1]-1] .= i;
       end
 
       id = reinterpret(Ptr{Void}, mumps.__id)
@@ -35,7 +35,7 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
       return mumps;
     end
 
-    function associate_matrix!{Ti <: MUMPSIntDataType}(mumps :: Mumps{$elty}, n :: Ti, irow :: Vector{Ti}, jcol :: Vector{Ti}, vals :: Vector{$elty})
+    function associate_matrix!(mumps :: Mumps{$elty}, n :: Ti, irow :: Vector{Ti}, jcol :: Vector{Ti}, vals :: Vector{$elty}) where {Ti <: MUMPSIntDataType}
 
       nz = length(vals)
       id = reinterpret(Ptr{Void}, mumps.__id)
@@ -52,10 +52,10 @@ end
 
 # Associate a generally-typed matrix with a Mumps type. Attempt conversion.
 # An InexactError should be raised if, e.g., mumps is Float64 and A is Complex128.
-associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, A));
+associate_matrix!(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) where {Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer} = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, A))
 
 # associate_matrix for dense matrices.
-associate_matrix!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)));
+associate_matrix!(mumps :: Mumps{Tm}, A :: Array{Tv,2}) where {Tm <: MUMPSValueDataType, Tv <: Number} = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)))
 
 
 for (fname, infoname, elty, infoty) in ((:mumps_factorize_float, :mumps_get_info_float, Float32, Float32),
@@ -119,7 +119,7 @@ end
 
 # Associate a generally-typed rhs with a Mumps type. Attempt conversion.
 # An InexactError should be raised if, e.g., mumps is Float64 and rhs is Complex128.
-associate_rhs!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :: Array{Tv}) = associate_rhs!(mumps, convert(Array{Tm}, rhs));
+associate_rhs!(mumps :: Mumps{Tm}, rhs :: Array{Tv}) where {Tm <: MUMPSValueDataType, Tv <: Number} = associate_rhs!(mumps, convert(Array{Tm}, rhs))
 
 
 for (fname, infoname, elty, infoty) in ((:mumps_solve_float, :mumps_get_info_float, Float32, Float32),
@@ -182,14 +182,14 @@ end
 
 """Combined associate_matrix / factorize.
 Presume that `A` is available on all nodes."""
-function factorize!{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti})
+function factorize!(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) where {Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}
   mumps = associate_matrix!(mumps, A);  # A will be converted by associate_matrix.
   return factorize!(mumps);
 end
 
 """Combined associate_matrix / factorize.
 Presume that `A` is available on all nodes."""
-factorize!{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) = factorize!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)));
+factorize!(mumps :: Mumps{Tm}, A :: Array{Tv}) where {Tm <: MUMPSValueDataType, Tv <: Number} = factorize!(mumps, convert(SparseMatrixCSC{Tm,Int32}, sparse(A)))
 
 
 """Combined associate_rhs / solve.
@@ -197,7 +197,7 @@ Presume that `rhs` is available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
 The solution is retrieved and returned."""
-function solve{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, rhs :: Array{Tv}; transposed :: Bool=false)
+function solve(mumps :: Mumps{Tm}, rhs :: Array{Tv}; transposed :: Bool=false) where {Tm <: MUMPSValueDataType, Tv <: Number}
   mumps = associate_rhs!(mumps, rhs);  # rhs will be converted by associate_rhs.
   mumps = solve!(mumps, transposed=transposed);
   return get_solution(mumps);
@@ -209,20 +209,20 @@ Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
 The solution is retrieved and returned."""
-function solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; transposed :: Bool=false)
+function solve(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; transposed :: Bool=false) where {Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number, Ti <: Integer}
 
   mumps = factorize!(mumps, A);
   return solve(mumps, rhs, transposed=transposed);
 end
 
-solve{Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}, rhs :: Array{Tr}) = solve(mumps, convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs);
+solve(mumps :: Mumps{Tm}, A :: Array{Tv,2}, rhs :: Array{Tr}) where {Tm <: MUMPSValueDataType, Tv <: Number, Tr <: Number} = solve(mumps, convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs)
 
 
 """Combined initialize / analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `sym` indicates the symmetry of `A`.
 The solution is retrieved and returned."""
-function solve{Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}(A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric)
+function solve(A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) where {Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}
 
   Tm = (Tv <: Complex || Tr <: Complex) ? Complex128 : Float64;  # Could be smarter.
   mumps = Mumps{Tm}(sym, default_icntl, default_cntl64);
@@ -231,4 +231,4 @@ function solve{Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}(A :: SparseMa
   return x;
 end
 
-solve{Tv <: Number, Tr <: Number}(A :: Array{Tv,2}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) = solve(convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs, sym=sym);
+solve(A :: Array{Tv,2}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) where {Tv <: Number, Tr <: Number} = solve(convert(SparseMatrixCSC{Tv,Int32}, sparse(A)), rhs, sym=sym)
