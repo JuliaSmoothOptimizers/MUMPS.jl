@@ -1,20 +1,11 @@
 language: julia
 
-# Homebrew no longer bottles for OSX 10.9; request 10.11
-env:  # to allow failures below
-matrix:
-  include:
-    - os: linux
-      julia: 0.6
-    - os: osx
-      julia: 0.6
-      osx_image: xcode7.3
-  allow_failures:
-    - os: linux
-      julia: nightly
-    - os: osx
-      julia: nightly
-      osx_image: xcode7.3
+os:
+  - linux
+  - osx
+
+julia:
+  - 0.6
 
 branches:
   only:
@@ -24,7 +15,13 @@ before_install:
   - unset DYLD_LIBRARY_PATH
   - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
   - if [ `uname` == "Darwin" ]; then
-      brew --config; brew update; brew tap dpo/openblas; brew install mumps; fi
+      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
+      brew --config;
+      brew update;
+      brew cask uninstall oclint;
+      brew tap dpo/openblas;
+      brew install mumps;
+    fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
@@ -36,7 +33,7 @@ install:
 
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
-  - mpirun -np 2 julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
+  - mpirun julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
 
 after_success:
   - julia -e 'cd(Pkg.dir("MUMPS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
