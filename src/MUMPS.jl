@@ -24,12 +24,12 @@ end
 
 
 "Exception type raised in case of error."
-type MUMPSException <: Exception
+mutable struct MUMPSException <: Exception
   msg :: AbstractString
 end
 
-typealias MUMPSValueDataType Union{Float32, Float64, Complex64, Complex128};
-typealias MUMPSIntDataType   Int32;
+const MUMPSValueDataType = Union{Float32, Float64, Complex64, Complex128}
+const MUMPSIntDataType   = Int32
 
 
 # See MUMPS User's Manual Section 5.1.
@@ -114,7 +114,7 @@ const mumps_symmetric   = 2;
 All constructor arguments are optional. By default a general
 unsymmetric matrix will be analyzed/factorized with default
 integer and real parameters"""
-type Mumps{Tv <: MUMPSValueDataType}
+mutable struct Mumps{Tv <: MUMPSValueDataType}
   __id    :: Int               # Pointer to MUMPS struct as an Int. Do not touch.
   __sym   :: Int32             # Value of sym used by Mumps.
   icntl   :: Array{Int32,1}    # Integer control parameters.
@@ -126,9 +126,9 @@ type Mumps{Tv <: MUMPSValueDataType}
   det     :: Tv
   err     :: Int
 
-  function Mumps(sym :: Int,
-                 icntl :: Array{Int32,1},
-                 cntl  :: Union{Array{Float32,1}, Array{Float64,1}})
+  function Mumps{Tv}(sym :: Int,
+                     icntl :: Array{Int32,1},
+                     cntl  :: Union{Array{Float32,1}, Array{Float64,1}}) where {Tv <: MUMPSValueDataType}
 
     MPI.Initialized() || throw(MUMPSException("Initialize MPI first"));
 
@@ -160,7 +160,7 @@ type Mumps{Tv <: MUMPSValueDataType}
     infog = zeros(Int32, 40);
 
     id = reinterpret(Int, id)
-    self = new(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, 0, 0);
+    self = new{Tv}(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, Tv(0), 0);
     finalizer(self, finalize);  # Destructor.
     return self;
   end
@@ -177,7 +177,7 @@ function get_icntl(;
   icntl = default_icntl[:];
   icntl[33] = det ? 1 : 0;
   if !verbose
-    icntl[1:4] = 0;
+    icntl[1:4] .= 0;
   end
   icntl[22] = ooc ? 1 : 0;
   icntl[10] = itref;
@@ -207,18 +207,5 @@ end
 
 
 include("MUMPS_lib.jl")
-
-
-# Deprecated syntax.
-import Base.factorize
-
-@Base.deprecate associate_matrix{Tv <: MUMPSValueDataType, Ti <: MUMPSIntDataType}(mumps :: Mumps{Tv}, A :: SparseMatrixCSC{Tv,Ti}) associate_matrix!(mumps, A)
-@Base.deprecate associate_matrix{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) associate_matrix!(mumps, A)
-@Base.deprecate associate_matrix{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv,2}) associate_matrix!(mumps, A)
-@Base.deprecate factorize{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}) factorize!(mumps)
-@Base.deprecate factorize{Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer}(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) factorize!(mumps, A)
-@Base.deprecate associate_rhs{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}, rhs :: Array{Tv}) associate_rhs!(mumps, rhs)
-@Base.deprecate solve{Tv <: MUMPSValueDataType}(mumps :: Mumps{Tv}; transposed :: Bool=false) solve!(mumps, transposed=transposed)
-@Base.deprecate factorize{Tm <: MUMPSValueDataType, Tv <: Number}(mumps :: Mumps{Tm}, A :: Array{Tv}) factorize!(mumps, A)
 
 end  # Module MUMPS
