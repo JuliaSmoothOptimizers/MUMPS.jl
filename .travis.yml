@@ -33,7 +33,13 @@ before_install:
       cd $TRAVIS_BUILD_DIR;
     fi
   - if [ `uname` == "Darwin" ]; then
-      brew --config; brew update; brew cask uninstall oclint; brew tap dpo/openblas; brew install mumps; fi
+      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
+      brew --config;
+      brew update;
+      brew cask uninstall oclint;
+      brew tap dpo/openblas;
+      brew install mumps;
+    fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
