@@ -23,7 +23,7 @@ before_install:
   - unset DYLD_LIBRARY_PATH
   - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran mpich2 libmpich2 libmpich2-dev; fi
   - if [ `uname` == "Darwin" ]; then
-      brew --config; brew update; brew tap dpo/openblas; brew install mumps; fi
+      brew --config; brew update; brew cask uninstall oclint; brew tap dpo/openblas; brew install mumps; fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
