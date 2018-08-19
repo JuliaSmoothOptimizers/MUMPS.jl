@@ -47,7 +47,9 @@ install:
   - julia -e 'versioninfo()'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
-  - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
+  - cat ~/.julia/packages/MPI/eK1iR/deps/build.log || true;
+  - cat ~/build/JuliaSmoothOptimizers/MUMPS.jl/deps/build.log || true;
+  # - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
 
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
