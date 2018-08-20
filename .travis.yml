@@ -1,20 +1,19 @@
 language: julia
 
-# Homebrew no longer bottles for OSX 10.9; request 10.11
-env:  # to allow failures below
+os:
+  - linux
+  - osx
+
+julia:
+  - 0.6
+  - 0.7
+  - 1.0
+  - nightly
+
 matrix:
-  include:
-    - os: linux
-      julia: 0.6
-    - os: osx
-      julia: 0.6
-      osx_image: xcode7.3
   allow_failures:
-    - os: linux
+      julia: 1.0
       julia: nightly
-    - os: osx
-      julia: nightly
-      osx_image: xcode7.3
 
 branches:
   only:
@@ -22,9 +21,28 @@ branches:
 
 before_install:
   - unset DYLD_LIBRARY_PATH
-  - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
+  - if [ `uname` == "Linux" ]; then
+      sudo apt-get install -y cmake git gfortran;
+      cd $HOME;
+      wget --no-check-certificate https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz;
+      tar -zxf openmpi-3.0.0.tar.gz;
+      cd openmpi-3.0.0;
+      sh ./configure --prefix=$HOME/OpenMPI > /dev/null;
+      make -j > /dev/null;
+      sudo make install > /dev/null;
+      export PATH=$HOME/OpenMPI/bin:$PATH;
+      export CC=mpicc;
+      export FC=mpif90;
+      cd $TRAVIS_BUILD_DIR;
+    fi
   - if [ `uname` == "Darwin" ]; then
-      brew --config; brew update; brew tap dpo/openblas; brew install mumps; fi
+      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
+      brew --config;
+      brew update;
+      brew cask uninstall oclint;
+      brew tap dpo/openblas;
+      brew install mumps;
+    fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
@@ -32,7 +50,9 @@ install:
   - julia -e 'versioninfo()'
   - julia -E 'Pkg.clone(pwd());'
   - julia -E 'Pkg.build("MUMPS");'
-  - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
+  - cat ~/.julia/packages/MPI/eK1iR/deps/build.log || true;
+  - cat ~/build/JuliaSmoothOptimizers/MUMPS.jl/deps/build.log || true;
+  # - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
 
 script:
   - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
