@@ -30,6 +30,9 @@ before_install:
       sh ./configure --prefix=$HOME/OpenMPI > /dev/null;
       make -j > /dev/null;
       sudo make install > /dev/null;
+      export PATH=$HOME/OpenMPI/bin:$PATH;
+      export CC=mpicc;
+      export FC=mpif90;
       cd $TRAVIS_BUILD_DIR;
     fi
   - if [ `uname` == "Darwin" ]; then
