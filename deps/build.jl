@@ -30,6 +30,7 @@ provides(SimpleBuild,
             (@build_steps begin
                ChangeDirectory(srcdir)
                (@build_steps begin
+                  @info "building libmumps_simple"
                   `make mumps_prefix=/usr scalapack_libdir=/usr/lib scalapack_libs= blas_libs=`
                   `make install prefix=$prefix`
                 end)

@@ -5,7 +5,13 @@ os:
   - osx
 
 julia:
-  - 0.6
+  - 0.7
+  - 1.0
+  - nightly
+
+matrix:
+  allow_failures:
+    - julia: nightly
 
 branches:
   only:
@@ -13,7 +19,18 @@ branches:
 
 before_install:
   - unset DYLD_LIBRARY_PATH
-  - if [ `uname` == "Linux" ]; then sudo apt-get install -y cmake git gfortran libopenmpi-dev openmpi-bin; fi
+  - if [ `uname` == "Linux" ]; then
+      sudo apt-get install -y cmake git gfortran;
+      cd $HOME;
+      wget --no-check-certificate https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.2.tar.gz;
+      tar -zxf openmpi-3.1.2.tar.gz;
+      cd openmpi-3.1.2;
+      sh ./configure --prefix=$HOME/OpenMPI > /dev/null;
+      make -j > /dev/null;
+      sudo make install > /dev/null;
+      export PATH=$HOME/OpenMPI/bin:$PATH;
+      cd $TRAVIS_BUILD_DIR;
+    fi
   - if [ `uname` == "Darwin" ]; then
       sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
       brew --config;
@@ -23,17 +40,17 @@ before_install:
       brew install mumps;
     fi
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
+  - export CC=mpicc;
+  - export FC=mpif90;
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - rm -rf $HOME/.julia/registries
 
 install:
-  - julia -e 'versioninfo()'
-  - julia -E 'Pkg.clone(pwd());'
-  - julia -E 'Pkg.build("MUMPS");'
-  - julia -E 'using BinDeps; BinDeps.debug("MUMPS")'
+  - julia -e 'using InteractiveUtils; versioninfo()'
+  - julia -E 'using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")'
 
 script:
-  - julia --check-bounds=yes -E 'Pkg.test("MUMPS"; coverage=true)'
-  - mpirun julia $TRAVIS_BUILD_DIR/examples/mumps_mpi.jl
+  - julia --check-bounds=yes -E 'using Pkg; Pkg.test("MUMPS"; coverage=true)'
 
 after_success:
-  - julia -e 'cd(Pkg.dir("MUMPS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("MUMPS")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
