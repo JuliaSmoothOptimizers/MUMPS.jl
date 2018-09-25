@@ -6,7 +6,7 @@ icntl[4] = 0;
 tol = sqrt(eps(Float64))
 
 mumps1 = Mumps{Float64}(mumps_definite, icntl, default_cntl64);
-A = spdiagm([1., 2., 3., 4.]);
+A = sparse(Diagonal([1., 2., 3., 4.]))
 factorize!(mumps1, A);  # Analyze and factorize.
 rhs = [1., 4., 9., 16.];
 x = solve(mumps1, rhs);
@@ -55,7 +55,7 @@ if MPI.Comm_rank(comm) == root
   println("Test multiple rhs on div_grad matrix");
 end
 nrhs = 5;
-rhs = ones(n3, nrhs) * diagm(collect(1:nrhs))
+rhs = ones(n3, nrhs) * diagm(0 => collect(1:nrhs))
 
 x = solve(A, rhs, sym=mumps_definite);
 
