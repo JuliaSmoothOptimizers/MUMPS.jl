@@ -6,7 +6,9 @@ export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
        mumps_unsymmetric, mumps_definite, mumps_symmetric,
        MUMPSException
 
+using LinearAlgebra
 using MPI
+using SparseArrays
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
@@ -28,7 +30,7 @@ mutable struct MUMPSException <: Exception
   msg :: AbstractString
 end
 
-const MUMPSValueDataType = Union{Float32, Float64, Complex64, Complex128}
+const MUMPSValueDataType = Union{Float32, Float64, ComplexF32, ComplexF64}
 const MUMPSIntDataType   = Int32
 
 
@@ -138,19 +140,19 @@ mutable struct Mumps{Tv <: MUMPSValueDataType}
     end
 
     if Tv == Float32
-      id = @mumps_call(:mumps_initialize_float, Ptr{Void},
+      id = @mumps_call(:mumps_initialize_float, Ptr{Nothing},
                        (Int32, Ptr{Int32}, Ptr{Float32}), sym, icntl, cntl);
       rinfog = zeros(Float32, 20);
     elseif Tv == Float64
-      id = @mumps_call(:mumps_initialize_double, Ptr{Void},
+      id = @mumps_call(:mumps_initialize_double, Ptr{Nothing},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
       rinfog = zeros(Float64, 20);
-    elseif Tv == Complex64
-      id = @mumps_call(:mumps_initialize_float_complex, Ptr{Void},
+    elseif Tv == ComplexF32
+      id = @mumps_call(:mumps_initialize_float_complex, Ptr{Nothing},
                        (Int32, Ptr{Int32}, Ptr{Float32}), sym, icntl, cntl);
       rinfog = zeros(Float32, 20);
     else
-      id = @mumps_call(:mumps_initialize_double_complex, Ptr{Void},
+      id = @mumps_call(:mumps_initialize_double_complex, Ptr{Nothing},
                        (Int32, Ptr{Int32}, Ptr{Float64}), sym, icntl, cntl);
       rinfog = zeros(Float64, 20);
     end
@@ -161,7 +163,7 @@ mutable struct Mumps{Tv <: MUMPSValueDataType}
 
     id = reinterpret(Int, id)
     self = new{Tv}(id, Int32(sym), icntl, cntl, 0, infog, rinfog, 0, Tv(0), 0);
-    finalizer(self, finalize);  # Destructor.
+    finalizer(finalize, self)  # Destructor.
     return self;
   end
 end
@@ -189,15 +191,15 @@ import Base.finalize
 
 for (fname, elty) in ((:mumps_finalize_float, Float32),
                       (:mumps_finalize_double, Float64),
-                      (:mumps_finalize_float_complex, Complex64),
-                      (:mumps_finalize_double_complex, Complex128))
+                      (:mumps_finalize_float_complex, ComplexF32),
+                      (:mumps_finalize_double_complex, ComplexF64))
 
   @eval begin
 
     "Terminate a Mumps instance."
     function finalize(mumps :: Mumps{$elty})
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void, (Ptr{Void},), id)
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing, (Ptr{Nothing},), id)
       mumps.__id = C_NULL;
       return mumps
     end

@@ -1,7 +1,7 @@
 for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
                       (:mumps_associate_matrix_double, Float64),
-                      (:mumps_associate_matrix_float_complex, Complex64),
-                      (:mumps_associate_matrix_double_complex, Complex128))
+                      (:mumps_associate_matrix_float_complex, ComplexF32),
+                      (:mumps_associate_matrix_double_complex, ComplexF64))
 
   @eval begin
 
@@ -26,9 +26,9 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
         jcol[B.colptr[i] : B.colptr[i+1]-1] .= i;
       end
 
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void,
-                  (Ptr{Void}, Int32, Int32, Ptr{$elty}, Ptr{Int32}, Ptr{Int32}),
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing,
+                  (Ptr{Nothing}, Int32, Int32, Ptr{$elty}, Ptr{Int32}, Ptr{Int32}),
                           id,     n,    nz,       vals,       irow,       jcol);
       mumps.n = n;
       mumps.nnz = mumps.infog[29];
@@ -38,9 +38,9 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
     function associate_matrix!(mumps :: Mumps{$elty}, n :: Ti, irow :: Vector{Ti}, jcol :: Vector{Ti}, vals :: Vector{$elty}) where {Ti <: MUMPSIntDataType}
 
       nz = length(vals)
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void,
-                  (Ptr{Void}, Int32, Int32, Ptr{$elty}, Ptr{Int32}, Ptr{Int32}),
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing,
+                  (Ptr{Nothing}, Int32, Int32, Ptr{$elty}, Ptr{Int32}, Ptr{Int32}),
                           id,     n,    nz,       vals,       irow,       jcol)
       mumps.n = n
       mumps.nnz = mumps.infog[29]
@@ -51,7 +51,7 @@ for (fname, elty) in ((:mumps_associate_matrix_float, Float32),
 end
 
 # Associate a generally-typed matrix with a Mumps type. Attempt conversion.
-# An InexactError should be raised if, e.g., mumps is Float64 and A is Complex128.
+# An InexactError should be raised if, e.g., mumps is Float64 and A is ComplexF64.
 associate_matrix!(mumps :: Mumps{Tm}, A :: SparseMatrixCSC{Tv,Ti}) where {Tm <: MUMPSValueDataType, Tv <: Number, Ti <: Integer} = associate_matrix!(mumps, convert(SparseMatrixCSC{Tm,Int32}, A))
 
 # associate_matrix for dense matrices.
@@ -60,8 +60,8 @@ associate_matrix!(mumps :: Mumps{Tm}, A :: Array{Tv,2}) where {Tm <: MUMPSValueD
 
 for (fname, infoname, elty, infoty) in ((:mumps_factorize_float, :mumps_get_info_float, Float32, Float32),
                                         (:mumps_factorize_double, :mumps_get_info_double, Float64, Float64),
-                                        (:mumps_factorize_float_complex, :mumps_get_info_float_complex, Complex64, Float32),
-                                        (:mumps_factorize_double_complex, :mumps_get_info_double_complex, Complex128, Float64))
+                                        (:mumps_factorize_float_complex, :mumps_get_info_float_complex, ComplexF32, Float32),
+                                        (:mumps_factorize_double_complex, :mumps_get_info_double_complex, ComplexF64, Float64))
 
   @eval begin
 
@@ -71,10 +71,10 @@ for (fname, infoname, elty, infoty) in ((:mumps_factorize_float, :mumps_get_info
     `mumps.det`. The MUMPS error code is stored in `mumps.err`. """
     function factorize!(mumps :: Mumps{$elty})
 
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void, (Ptr{Void},), id)
-      @mumps_call($(string(infoname)), Void,
-                  (Ptr{Void}, Ptr{Int32},  Ptr{$infoty}),
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing, (Ptr{Nothing},), id)
+      @mumps_call($(string(infoname)), Nothing,
+                  (Ptr{Nothing}, Ptr{Int32},  Ptr{$infoty}),
                           id, mumps.infog, mumps.rinfog)
 
       if mumps.icntl[33] == 1
@@ -90,8 +90,8 @@ end
 
 for (fname, elty) in ((:mumps_associate_rhs_float, Float32),
                       (:mumps_associate_rhs_double, Float64),
-                      (:mumps_associate_rhs_float_complex, Complex64),
-                      (:mumps_associate_rhs_double_complex, Complex128))
+                      (:mumps_associate_rhs_float_complex, ComplexF32),
+                      (:mumps_associate_rhs_double_complex, ComplexF64))
 
   @eval begin
 
@@ -107,9 +107,9 @@ for (fname, elty) in ((:mumps_associate_rhs_float, Float32),
       nrhs = size(rhs, 2);
       x = rhs[:];  # Make a copy; will be overwritten with solution.
 
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void,
-                  (Ptr{Void}, Int32, Ptr{$elty}),
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing,
+                  (Ptr{Nothing}, Int32, Ptr{$elty}),
                           id,  nrhs,          x)
       return mumps
     end
@@ -118,14 +118,14 @@ for (fname, elty) in ((:mumps_associate_rhs_float, Float32),
 end
 
 # Associate a generally-typed rhs with a Mumps type. Attempt conversion.
-# An InexactError should be raised if, e.g., mumps is Float64 and rhs is Complex128.
+# An InexactError should be raised if, e.g., mumps is Float64 and rhs is ComplexF64.
 associate_rhs!(mumps :: Mumps{Tm}, rhs :: Array{Tv}) where {Tm <: MUMPSValueDataType, Tv <: Number} = associate_rhs!(mumps, convert(Array{Tm}, rhs))
 
 
 for (fname, infoname, elty, infoty) in ((:mumps_solve_float, :mumps_get_info_float, Float32, Float32),
                                         (:mumps_solve_double, :mumps_get_info_double, Float64, Float64),
-                                        (:mumps_solve_float_complex, :mumps_get_info_float_complex, Complex64, Float32),
-                                        (:mumps_solve_double_complex, :mumps_get_info_double_complex, Complex128, Float64))
+                                        (:mumps_solve_float_complex, :mumps_get_info_float_complex, ComplexF32, Float32),
+                                        (:mumps_solve_double_complex, :mumps_get_info_double_complex, ComplexF64, Float64))
 
   @eval begin
 
@@ -137,12 +137,12 @@ for (fname, infoname, elty, infoty) in ((:mumps_solve_float, :mumps_get_info_flo
     be retrieved with `get_solution()`."""
     function solve!(mumps :: Mumps{$elty}; transposed :: Bool=false)
 
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      @mumps_call($(string(fname)), Void,
-                  (Ptr{Void}, Int32),
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      @mumps_call($(string(fname)), Nothing,
+                  (Ptr{Nothing}, Int32),
                           id, transposed ? 1 : 0)
-      @mumps_call($(string(infoname)), Void,
-                  (Ptr{Void}, Ptr{Int32},  Ptr{$infoty}),
+      @mumps_call($(string(infoname)), Nothing,
+                  (Ptr{Nothing}, Ptr{Int32},  Ptr{$infoty}),
                           id, mumps.infog, mumps.rinfog)
 
       mumps.err = mumps.infog[1]
@@ -155,8 +155,8 @@ end
 
 for (fname, solname, elty) in ((:mumps_get_nrhs_float, :mumps_get_solution_float, Float32),
                                (:mumps_get_nrhs_double, :mumps_get_solution_double, Float64),
-                               (:mumps_get_nrhs_float_complex, :mumps_get_solution_float_complex, Complex64),
-                               (:mumps_get_nrhs_double_complex, :mumps_get_solution_double_complex, Complex128))
+                               (:mumps_get_nrhs_float_complex, :mumps_get_solution_float_complex, ComplexF32),
+                               (:mumps_get_nrhs_double_complex, :mumps_get_solution_double_complex, ComplexF64))
 
   @eval begin
 
@@ -165,11 +165,11 @@ for (fname, solname, elty) in ((:mumps_get_nrhs_float, :mumps_get_solution_float
     on the host only, and to retrieve it there."""
     function get_solution(mumps :: Mumps{$elty})
 
-      id = reinterpret(Ptr{Void}, mumps.__id)
-      nrhs = Int(@mumps_call($(string(fname)), Int32, (Ptr{Void},), id))
+      id = reinterpret(Ptr{Nothing}, mumps.__id)
+      nrhs = Int(@mumps_call($(string(fname)), Int32, (Ptr{Nothing},), id))
       x = zeros($elty, mumps.n * nrhs)
-      @mumps_call($(string(solname)), Void,
-                  (Ptr{Void}, Ptr{$elty}),
+      @mumps_call($(string(solname)), Nothing,
+                  (Ptr{Nothing}, Ptr{$elty}),
                           id,          x)
 
       return reshape(x, Int(mumps.n), nrhs)
@@ -224,7 +224,7 @@ The optional keyword argument `sym` indicates the symmetry of `A`.
 The solution is retrieved and returned."""
 function solve(A :: SparseMatrixCSC{Tv,Ti}, rhs :: Array{Tr}; sym :: Int=mumps_unsymmetric) where {Tv <: Number, Tr <: Number, Ti <: MUMPSIntDataType}
 
-  Tm = (Tv <: Complex || Tr <: Complex) ? Complex128 : Float64;  # Could be smarter.
+  Tm = (Tv <: Complex || Tr <: Complex) ? ComplexF64 : Float64;  # Could be smarter.
   mumps = Mumps{Tm}(sym, default_icntl, default_cntl64);
   x = solve(mumps, A, rhs);
   finalize(mumps);

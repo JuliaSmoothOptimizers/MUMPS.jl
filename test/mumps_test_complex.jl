@@ -5,8 +5,8 @@ icntl[3] = 0;
 icntl[4] = 0;
 tol = sqrt(eps(Float64))
 
-mumps1 = Mumps{Complex128}(mumps_definite, icntl, default_cntl64);
-A = spdiagm([1., 2., 3., 4.]);
+mumps1 = Mumps{ComplexF64}(mumps_definite, icntl, default_cntl64);
+A = sparse(Diagonal(([1., 2., 3., 4.])))
 factorize!(mumps1, A);  # Analyze and factorize.
 rhs = [1., 4., 9., 16.];
 x = solve(mumps1, rhs);
@@ -14,7 +14,7 @@ finalize(mumps1);
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
-mumps2 = Mumps{Complex128}(mumps_symmetric, icntl, default_cntl64);
+mumps2 = Mumps{ComplexF64}(mumps_symmetric, icntl, default_cntl64);
 A = random_matrix(Float64, [1, 2, 3, 4], 4, 4); A = sparse(A + A');
 factorize!(mumps2, A);
 rhs = [1., 4., 9., 16.];
@@ -23,8 +23,8 @@ finalize(mumps2);
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
-mumps3 = Mumps{Complex128}(mumps_unsymmetric, icntl, default_cntl64);
-A = sparse(random_matrix(Complex128, [1, 2, 3, 4], 4, 4))
+mumps3 = Mumps{ComplexF64}(mumps_unsymmetric, icntl, default_cntl64);
+A = sparse(random_matrix(ComplexF64, [1, 2, 3, 4], 4, 4))
 factorize!(mumps3, A);
 rhs = [1., 4., 9., 16.] + im * [1., 4., 9., 16.];
 x = solve(mumps3, rhs);
@@ -36,7 +36,7 @@ MPI.Barrier(comm)
 
 n = 10;
 n3 = n * n * n
-A = convert(SparseMatrixCSC{Complex128,Int32}, map(Complex128, get_div_grad(n, n, n)))
+A = convert(SparseMatrixCSC{ComplexF64,Int32}, map(ComplexF64, get_div_grad(n, n, n)))
 
 # Test with single rhs
 if MPI.Comm_rank(comm) == root
@@ -54,7 +54,7 @@ if MPI.Comm_rank(comm) == root
   println("Test multiple rhs on div_grad matrix");
 end
 nrhs = 5;
-rhs = map(Complex128, ones(n3, nrhs) + im * ones(n3, nrhs)) * diagm(Array{Float64}(collect(1:nrhs)));
+rhs = map(ComplexF64, ones(n3, nrhs) + im * ones(n3, nrhs)) * diagm(0 => Array{Float64}(collect(1:nrhs)))
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 

@@ -2,7 +2,7 @@ icntl = get_icntl(det=true, ooc=true, itref=1);
 tol = sqrt(eps(Float32))
 
 mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
-A = spdiagm(Array{Float32}([1., 2., 3., 4.]));
+A = sparse(Diagonal(Array{Float32}([1., 2., 3., 4.])))
 factorize!(mumps1, A);  # Analyze and factorize.
 rhs = Array{Float32}([1., 4., 9., 16.]);
 x = solve(mumps1, rhs);
@@ -51,7 +51,7 @@ if MPI.Comm_rank(comm) == root
   println("Test multiple rhs");
 end
 nrhs = 5;
-rhs = ones(n3, nrhs) * diagm(collect(1:nrhs));
+rhs = ones(n3, nrhs) * diagm(0 => collect(1:nrhs))
 
 x = solve(A, rhs, sym=mumps_unsymmetric);
 

@@ -1,13 +1,11 @@
 using BinDeps
-using Compat
 
 @BinDeps.setup
 
 libmumps = library_dependency("libmumps_common")
 libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
 
-# Uncomment when MUMPS makes it into Homebrew.jl.
-@static if is_apple()
+@static if Sys.isapple()
   using Homebrew
   provides(Homebrew.HB, "dpo/openblas/mumps", [libmumps, libmumps_simple], os = :Darwin)
 end

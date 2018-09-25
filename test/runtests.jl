@@ -1,11 +1,14 @@
-using Base.Test
-using MUMPS
+using Test
+
+using LinearAlgebra
 using MPI
+using MUMPS
+using SparseArrays
 
 function random_matrix(t, σ, nrow, ncol)
   # t = data type
   # σ = vector of desired singular values
-  Σ = diagm(Array{t}(σ))
+  Σ = diagm(0 => Array{t}(σ))
   A = rand(t, nrow, ncol)
   (U, _) = qr(A)
   A = rand(t, nrow, ncol)
