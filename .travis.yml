@@ -20,36 +20,33 @@ branches:
 before_install:
   - unset DYLD_LIBRARY_PATH
   - if [ `uname` == "Linux" ]; then
-      sudo apt-get install -y cmake git gfortran;
-      cd $HOME;
-      wget --no-check-certificate https://www.open-mpi.org/software/ompi/v3.1/downloads/openmpi-3.1.2.tar.gz;
-      tar -zxf openmpi-3.1.2.tar.gz;
-      cd openmpi-3.1.2;
-      sh ./configure --prefix=$HOME/OpenMPI > /dev/null;
-      make -j > /dev/null;
-      sudo make install > /dev/null;
-      export PATH=$HOME/OpenMPI/bin:$PATH;
-      cd $TRAVIS_BUILD_DIR;
+      unset DY_LIBRARY_PATH;
+      bash ci/setup_travis_linux.sh;
+      export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH";
     fi
   - if [ `uname` == "Darwin" ]; then
       sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
-      brew --config;
-      brew update;
-      brew cask uninstall oclint;
-      brew tap dpo/openblas;
-      brew install mumps;
     fi
+  - brew --config;
+  - brew update;
+  - if [ `uname` = "Linux" ]; then brew tap linuxbrew/xorg; fi
+  - if [ `uname` == "Darwin" ]; then brew cask uninstall oclint; fi
+  - brew tap dpo/openblas;
+  - brew install mumps;
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
-  - export CC=mpicc;
-  - export FC=mpif90;
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - rm -rf $HOME/.julia/registries
+  - if [ `uname` == "Linux" ]; then
+      ldd $(brew --prefix mumps)/lib/*.so;
+      ldd $(brew --prefix scalapack)/lib/*.so;
+    fi
 
 install:
-  - julia -e 'using InteractiveUtils; versioninfo()'
   - julia -E 'using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")'
 
 script:
+  - if [ `uname` = "Linux" ]; then
+      julia -E 'using Pkg; Pkg.add("MPI"); Pkg.test("MPI"); using MPI; run(`ldd $(MPI.libmpi).so`)';
+    fi
   - julia --check-bounds=yes -E 'using Pkg; Pkg.test("MUMPS"; coverage=true)'
 
 after_success:
