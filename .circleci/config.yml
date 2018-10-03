@@ -1,0 +1,73 @@
+# .circleci/config.yml
+version: 2
+jobs:
+  build-linux-julia-0.7:
+    working_directory: ~/MUMPS.jl
+    machine: true
+    environment:
+      HOMEBREW_VERBOSE: 1
+      HOMEBREW_VERBOSE_USING_DOTS: 1
+    steps:
+      - checkout
+      # Install Linuxbrew (Note: Adding linuxbrew to the PATH here won't work since each run command runs in its
+      # own shell. The parent shell (the one that calls each run command) is not affected. We add `yes |` to
+      # tell linuxbrew to continue installing. We add `|| true` to override the linuxbrew install returning exit
+      # code 141. There may be a bug in the install of linuxbrew via a password where it returns 141 on a warning
+      # rather than on an error.)
+      - run:
+          name: Install Linuxbrew
+          command: |
+            yes | ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)" || true
+      - run: |
+          export LINUXBREW=/home/linuxbrew/.linuxbrew
+          export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
+          brew --env
+          brew config
+          brew update
+          brew tap linuxbrew/xorg
+          brew tap dpo/openblas
+          brew install mumps
+      - run: |
+          wget https://julialang-s3.julialang.org/bin/linux/x64/0.7/julia-0.7.0-linux-x86_64.tar.gz
+          tar zxf julia-0.7.0-linux-x86_64.tar.gz
+      - run: |
+          export LINUXBREW=/home/linuxbrew/.linuxbrew
+          export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
+          ./julia-0.7.0/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("MUMPS"); Pkg.test("MUMPS");'
+
+  build-linux-julia-1.0:
+    working_directory: ~/MUMPS.jl
+    machine: true
+    environment:
+      HOMEBREW_VERBOSE: 1
+      HOMEBREW_VERBOSE_USING_DOTS: 1
+    steps:
+      - checkout
+      - run:
+          name: Install Linuxbrew
+          command: |
+            yes | ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)" || true
+      - run: |
+          export LINUXBREW=/home/linuxbrew/.linuxbrew
+          export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
+          brew --env
+          brew config
+          brew update
+          brew tap linuxbrew/xorg
+          brew tap dpo/openblas
+          brew install mumps
+      - run: |
+          wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz
+          tar zxf julia-1.0.1-linux-x86_64.tar.gz
+      - run: |
+          export LINUXBREW=/home/linuxbrew/.linuxbrew
+          export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
+          ./julia-1.0.1/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("MUMPS"); Pkg.test("MUMPS");'
+
+
+workflows:
+  version: 2
+  test-bot:
+    jobs:
+      - build-linux-julia-0.7
+      - build-linux-julia-1.0
