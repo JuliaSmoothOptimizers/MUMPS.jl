@@ -35,18 +35,15 @@ before_install:
   - brew install mumps;
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - if [ `uname` == "Linux" ]; then
-      ldd $(brew --prefix mumps)/lib/*.so;
-      ldd $(brew --prefix scalapack)/lib/*.so;
-    fi
 
 install:
-  - julia -E 'using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")'
+  - if [ `uname` == "Linux" ]; then
+      julia -E 'using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")';
+    else
+      julia -E 'using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")';
+    fi
 
 script:
-  - if [ `uname` = "Linux" ]; then
-      julia -E 'using Pkg; Pkg.add("MPI"); Pkg.test("MPI"); using MPI; run(`ldd $(MPI.libmpi).so`)';
-    fi
   - julia --check-bounds=yes -E 'using Pkg; Pkg.test("MUMPS"; coverage=true)'
 
 after_success:
