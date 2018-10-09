@@ -1,6 +1,7 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
 OSX and Linux: [![Build Status](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl)
+[![CircleCI](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl.svg?style=svg)](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl)
 [![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=master)
 
 MUMPS is a library for the solution of large linear systems using a
