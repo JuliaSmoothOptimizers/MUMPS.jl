@@ -5,11 +5,6 @@ using BinDeps
 libmumps = library_dependency("libmumps_common")
 libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
 
-@static if Sys.isapple()
-  using Homebrew
-  provides(Homebrew.HB, "brewsci/num/brewsci-mumps", [libmumps, libmumps_simple], os = :Darwin)
-end
-
 provides(AptGet, "libmumps-dev", libmumps, os = :Linux)
 
 provides(Sources,

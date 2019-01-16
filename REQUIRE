@@ -1,4 +1,3 @@
 julia 0.7
 BinDeps
-@osx Homebrew
 MPI 0.7.1
