@@ -4,6 +4,8 @@ os:
   - linux
   - osx
 
+osx_image: xcode10.1
+
 julia:
   - 0.7
   - 1.0
@@ -24,15 +26,18 @@ before_install:
       bash ci/setup_travis_linux.sh;
       export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH";
     fi
-  - if [ `uname` == "Darwin" ]; then
-      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
-    fi
   - brew --config;
   - brew update;
   - if [ `uname` = "Linux" ]; then brew tap linuxbrew/xorg; fi
-  - if [ `uname` == "Darwin" ]; then brew cask uninstall oclint; fi
-  - brew tap dpo/openblas;
-  - brew install mumps;
+  - if [ `uname` == "Darwin" ]; then
+      brew cask uninstall oclint || true;
+      brew install gcc || true;
+      brew link gcc || true;
+    fi
+  - brew tap brewsci/num;
+  - brew install brewsci-mumps;
+  - export CC=mpicc;
+  - export FC=mpif90;
   - if [ `uname` == "Darwin" ]; then export TMPDIR=/tmp; fi  # for OpenMPI
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
