@@ -1,6 +1,22 @@
+using Libdl
 using BinDeps
 
 @BinDeps.setup
+
+mumps_prefix = "/usr"
+scalapack_prefix = "/usr"
+for (jvar, evar) in ((:mumps_prefix, "MUMPS_PREFIX"),
+                     (:scalapack_prefix, "SCALAPACK_PREFIX"))
+  @eval begin
+    try
+      $jvar = ENV[$evar]
+      push!(DL_LOAD_PATH, joinpath($jvar, "lib"))
+    catch
+      nothing
+    end
+  end
+end
+scalapack_libdir = joinpath(scalapack_prefix, "lib")
 
 libmumps = library_dependency("libmumps_common")
 libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
@@ -24,7 +40,7 @@ provides(SimpleBuild,
                ChangeDirectory(srcdir)
                (@build_steps begin
                   @info "building libmumps_simple"
-                  `make mumps_prefix=/usr scalapack_libdir=/usr/lib scalapack_libs= blas_libs=`
+                  `make mumps_prefix=$mumps_prefix scalapack_libdir=$scalapack_libdir scalapack_libs= blas_libs=`
                   `make install prefix=$prefix`
                 end)
              end)
