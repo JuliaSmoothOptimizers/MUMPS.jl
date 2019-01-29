@@ -10,33 +10,63 @@ definiteness. The factorization and solve phases can be performed in parallel.
 
 ## How to Install
 
+### Prerequisites
+
+Because BinDeps is essentially broken, you must install MUMPS outside of Julia.
+On macOS, we recommend using [Homebrew](https://brew.sh).
+On Linux, we recommend using [Linuxbrew](http://linuxbrew.sh).
+In both cases, the commands are the same:
+```bash
+$ brew tap brewsci/num
+$ brew install brewsci-mumps  # use brew options brewsci-mumps for build options
+```
+
+Note: `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl.
+See the Troubleshooting section below.
+
+All examples above install OpenMPI.
+If you wish to use MPICH, you will have to build MUMPS by hand.
+
+### Building MUMPS.jl
+
+If MUMPS and SCALAPACK are not in standard locations where BinDeps will find them, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
+
+The Homebrew and Linuxbrew methods above install MUMPS and SCALAPACK in nonstandard locations.
+You can define
+```JULIA
+julia> ENV["MUMPS_PREFIX"] = "/usr/local/opt/brewsci-mumps"
+julia> ENV["SCALAPACK_PREFIX"] = "/usr/local/opt/brewsci-scalapack"
+```
+on macOS, and something of the form
+```JULIA
+julia> ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"
+julia> ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"
+```
+on Linux.
+
 At the Julia prompt, type
 
-````JULIA
+```JULIA
+julia> using Pkg
 julia> Pkg.clone("https://github.com/JuliaSmoothOptimizers/MUMPS.jl.git")
 julia> Pkg.build("MUMPS")
 julia> Pkg.test("MUMPS")
-````
-
-On OSX, you can also install MUMPS outside of Julia using [Homebrew](https://brew.sh). The procedure below should also work on Linux if you use [Linuxbrew](https://github.com/Homebrew/linuxbrew).
-
-````
-brew tap dpo/openblas
-brew install mumps [--with-scotch5]  # use scotch at your option
-````
-
+```
 
 ## Troubleshooting
 
-On OSX, if you observe an error during the compilation of scalapack mentioning `MPI_BASE_DIR`, try
-```JULIA
-julia> ENV["MPI_BASE_DIR"] = joinpath(Pkg.dir("Homebrew"), "deps", "usr", "opt", "open-mpi")
-julia> using Homebrew
-julia> Homebrew.brew(`install dpo/openblas/mumps`)
+On macOS or Linux, if you see the error message
 ```
-and build again.
+[ 11%] Building Fortran object CMakeFiles/gen_constants.dir/gen_constants.f90.o
+│ /home/ubuntu/.julia/packages/MPI/U5ujD/deps/gen_constants.f90:43:43:
+│
+│    call output("MPI_NO_OP       ", MPI_NO_OP)
+│                                            1
+│ Error: Symbol ‘mpi_no_op’ at (1) has no IMPLICIT type
+```
+your OpenMPI library is [too old](https://github.com/JuliaParallel/MPI.jl/issues/39#issuecomment-441093933).
 
-If you are running OSX and see error messages of the form
+If you are running macOS and see error messages of the form
 ```
 PMIx has detected a temporary directory name that results in a path that is too long for the Unix domain socket:
 
