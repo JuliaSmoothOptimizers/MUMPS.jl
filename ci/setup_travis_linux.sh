@@ -4,6 +4,7 @@ set -ev
 # Install LinuxBrew.
 sudo apt-get update
 sudo apt-get install build-essential curl git file python-setuptools m4 texinfo libbz2-dev libcurl4-openssl-dev libexpat-dev libncurses-dev zlib1g-dev
+sudo apt remove openmpi-bin libopenmpi-dev mpich libmpich-dev || true
 
 HOME=/home/linuxbrew  # install linuxbrew here so we can install the glibc bottle
 sudo mkdir $HOME
