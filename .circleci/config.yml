@@ -19,21 +19,22 @@ jobs:
           command: |
             yes | ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)" || true
       - run: |
+          sudo apt remove openmpi-bin libopenmpi-dev mpich libmpich-dev || true
           export LINUXBREW=/home/linuxbrew/.linuxbrew
           export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
           brew --env
           brew config
           brew update
           brew tap linuxbrew/xorg
-          brew tap dpo/openblas
-          brew install mumps
+          brew tap brewsci/num
+          brew install brewsci-mumps
       - run: |
           wget https://julialang-s3.julialang.org/bin/linux/x64/0.7/julia-0.7.0-linux-x86_64.tar.gz
           tar zxf julia-0.7.0-linux-x86_64.tar.gz
       - run: |
           export LINUXBREW=/home/linuxbrew/.linuxbrew
           export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
-          ./julia-0.7.0/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("MUMPS"); Pkg.test("MUMPS");'
+          ./julia-0.7.0/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"; Pkg.build("MUMPS"); Pkg.test("MUMPS");'
 
   build-linux-julia-1.0:
     working_directory: ~/MUMPS.jl
@@ -48,21 +49,22 @@ jobs:
           command: |
             yes | ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)" || true
       - run: |
+          sudo apt remove openmpi-bin libopenmpi-dev mpich libmpich-dev || true
           export LINUXBREW=/home/linuxbrew/.linuxbrew
           export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
           brew --env
           brew config
           brew update
           brew tap linuxbrew/xorg
-          brew tap dpo/openblas
-          brew install mumps
+          brew tap brewsci/num
+          brew install brewsci-mumps
       - run: |
-          wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.1-linux-x86_64.tar.gz
-          tar zxf julia-1.0.1-linux-x86_64.tar.gz
+          wget https://julialang-s3.julialang.org/bin/linux/x64/1.0/julia-1.0.3-linux-x86_64.tar.gz
+          tar zxf julia-1.0.3-linux-x86_64.tar.gz
       - run: |
           export LINUXBREW=/home/linuxbrew/.linuxbrew
           export PATH=$LINUXBREW/bin:$LINUXBREW/sbin:$PATH
-          ./julia-1.0.1/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("MUMPS"); Pkg.test("MUMPS");'
+          ./julia-1.0.3/bin/julia -e 'ENV["FC"] = "/home/linuxbrew/.linuxbrew/bin/gfortran"; using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.update(); Pkg.clone(pwd()); ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"; Pkg.build("MUMPS"); Pkg.test("MUMPS");'
 
 
 workflows:
