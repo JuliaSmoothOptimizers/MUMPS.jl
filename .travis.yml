@@ -43,9 +43,9 @@ before_install:
 
 install:
   - if [ `uname` == "Linux" ]; then
-      julia -E 'using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")';
+      julia -E 'using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); using Pkg; Pkg.clone(pwd()); ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"; Pkg.build("MUMPS")';
     else
-      julia -E 'using Pkg; Pkg.clone(pwd()); Pkg.build("MUMPS")';
+      julia -E 'using Pkg; Pkg.clone(pwd()); ENV["MUMPS_PREFIX"] = "/usr/local/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/usr/local/opt/brewsci-scalapack"; Pkg.build("MUMPS")';
     fi
 
 script:
