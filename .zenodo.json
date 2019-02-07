@@ -5,7 +5,7 @@
   "publication_date": "2019-02-07",
   "creators": [
     {
-      "affiliation": "\u00c9cole Polytechnique/GERAD - Montr\u00e9al",
+      "affiliation": "École Polytechnique/GERAD - Montréal",
       "name": "Dominique Orban"
     }
   ],
@@ -16,5 +16,16 @@
       "identifier": "https://github.com/JuliaSmoothOptimizers/MUMPS.jl/releases/latest",
       "relation": "isSupplementTo"
     }
-  ]
+  ],
+  "contributors": [
+    {
+      "name": "Abel Soares Siqueira",
+      "type": "Researcher"
+    },
+    {
+      "name": "Lars Ruthotto",
+      "type": "Other"
+    }
+  ],
+  "license": "MPL-2.0"
 }
