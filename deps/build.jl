@@ -21,8 +21,6 @@ scalapack_libdir = joinpath(scalapack_prefix, "lib")
 libmumps = library_dependency("libmumps_common")
 libmumps_simple = library_dependency("libmumps_simple", depends=[libmumps])
 
-provides(AptGet, "libmumps-dev", libmumps, os = :Linux)
-
 provides(Sources,
          URI("https://github.com/dpo/mumps_simple/archive/v0.4.tar.gz"),
          libmumps_simple,
