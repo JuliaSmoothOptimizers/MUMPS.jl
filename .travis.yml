@@ -48,6 +48,16 @@ install:
       julia -E 'using Pkg; Pkg.clone(pwd()); ENV["MUMPS_PREFIX"] = "/usr/local/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/usr/local/opt/brewsci-scalapack"; Pkg.build("MUMPS")';
     fi
 
+jobs:
+  include:
+    - stage: Documentation
+      julia: 1.1
+      os: linux
+      script:
+        - julia --project=docs -e 'using Libdl; push!(DL_LOAD_PATH, "/home/linuxbrew/.linuxbrew/lib"); ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"; ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"; using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(path=pwd()))'
+        - julia --project=docs docs/make.jl
+      after_success: skip
+
 script:
   - julia --check-bounds=yes -E 'using Pkg; Pkg.test("MUMPS"; coverage=true)'
 
