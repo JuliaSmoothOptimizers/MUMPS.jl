@@ -7,8 +7,8 @@ os:
 osx_image: xcode10.1
 
 julia:
-  - 0.7
   - 1.0
+  - 1.1
   - nightly
 
 matrix:
