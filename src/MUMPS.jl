@@ -2,7 +2,7 @@ module MUMPS
 
 export default_icntl, default_cntl32, default_cntl64, Mumps, get_icntl,
        finalize, factorize!, solve!, solve,
-       associate_matrix!, associate_rhs, associate_rhs!, get_solution,
+       associate_matrix!, associate_rhs!, get_solution,
        mumps_unsymmetric, mumps_definite, mumps_symmetric,
        MUMPSException
 
