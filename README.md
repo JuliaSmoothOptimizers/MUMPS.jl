@@ -2,6 +2,7 @@
 
 OSX and Linux: [![Build Status](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl)
 [![CircleCI](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl.svg?style=svg)](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl)
+[![](https://img.shields.io/badge/docs-latest-3f51b5.svg)](https://JuliaSmoothOptimizers.github.io/MUMPS.jl/latest)
 [![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=master)
 
 MUMPS is a library for the solution of large linear systems using a
@@ -217,4 +218,3 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 * [ ] Obtain a Schur complement
 * [ ] Solve with sparse right-hand sides
 * [ ] Sequential, version with no MPI requirement
-
