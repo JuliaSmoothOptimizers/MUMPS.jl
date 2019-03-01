@@ -13,24 +13,26 @@ definiteness. The factorization and solve phases can be performed in parallel.
 
 ### Prerequisites
 
-Because BinDeps is essentially broken, you must install MUMPS outside of Julia.
+Currently, MUMPS must be installed outside of Julia.
 On macOS, we recommend using [Homebrew](https://brew.sh).
 On Linux, we recommend using [Linuxbrew](http://linuxbrew.sh).
-In both cases, the commands are the same:
+Please follow the installation instructions of each package manager.
+
+In both cases, the commands to install MUMPS are the same:
 ```bash
 $ brew tap brewsci/num
 $ brew install brewsci-mumps  # use brew options brewsci-mumps for build options
 ```
 
-Note: `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl.
+Note: on Linux, `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl, and installation will fail.
 See the Troubleshooting section below.
 
 All examples above install OpenMPI.
-If you wish to use MPICH, you will have to build MUMPS by hand.
+If you wish to use MPICH, you will have to build MPICH, SCALAPACK and MUMPS by hand.
 
 ### Building MUMPS.jl
 
-If MUMPS and SCALAPACK are not in standard locations where BinDeps will find them, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
+If MUMPS and SCALAPACK are not in standard locations, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
 
 The Homebrew and Linuxbrew methods above install MUMPS and SCALAPACK in nonstandard locations.
 You can define
