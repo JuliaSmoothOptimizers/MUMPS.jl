@@ -18,6 +18,7 @@ matrix:
 branches:
   only:
     - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/ # tags
 
 before_install:
   - unset DYLD_LIBRARY_PATH
