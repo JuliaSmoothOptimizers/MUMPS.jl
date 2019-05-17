@@ -1,0 +1,21 @@
+name = "MUMPS"
+uuid = "bf6389e2-cca1-5e17-ac22-36425c4ccbb4"
+authors = ["Dominique Orban <dominique.orban@gmail.com>"]
+version = "0.2.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[compat]
+MPI = "≥ 0.7.2"
+julia = "≥ 0.7.0"
+
+[extras]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["LinearAlgebra", "SparseArrays", "Test"]
