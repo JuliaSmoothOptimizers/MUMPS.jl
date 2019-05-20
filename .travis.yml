@@ -31,8 +31,6 @@ before_install:
   - brew update;
   - if [ `uname` = "Linux" ]; then
       brew tap linuxbrew/xorg;
-      brew unlink patchelf || true;
-      brew install https://raw.githubusercontent.com/Homebrew/linuxbrew-core/1d5b681f01440527bc47b3937f25bee3e82b9169/Formula/patchelf.rb;
      fi
   - if [ `uname` == "Darwin" ]; then
       brew cask uninstall oclint || true;
