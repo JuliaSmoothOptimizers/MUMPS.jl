@@ -62,9 +62,7 @@ initialized.
 
 See also: [`invoke_mumps_unsafe!`](@ref)
 """
-function invoke_mumps!(mumps::Mumps)
-    return is_finalized(mumps) ? nothing : invoke_mumps_unsafe!(mumps)
-end
+invoke_mumps!(mumps::Mumps) = is_finalized(mumps) ? nothing : invoke_mumps_unsafe!(mumps)
 # function check_finalized(mumps::Mumps)
     # if mumps._finalized
         # throw(MUMPSException("Mumps object already finalized"))
@@ -290,7 +288,7 @@ end
 function get_rhs_unsafe!(x::Union{SubArray,Array},mumps::Mumps)
     is_rhs_dense(mumps) ? nothing : throw(MUMPSException("rhs is sparse, target is dense. try with sparse target"))
     for i ∈ LinearIndices(x)
-        x[i] = unsafe_load(mumps.s,i)
+        x[i] = unsafe_load(mumps.rhs,i)
     end
     return nothing
 end
