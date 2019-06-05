@@ -1,18 +1,18 @@
-icntl = default_icntl[:];
-icntl[1] = 0;
-icntl[2] = 0;
-icntl[3] = 0;
-icntl[4] = 0;
+icntl = default_icntl[:]
+icntl[1] = 0
+icntl[2] = 0
+icntl[3] = 0
+icntl[4] = 0
 tol = sqrt(eps(Float64))
 
-mumps1 = Mumps{Float64}(mumps_definite, icntl, default_cntl64);
+mumps1 = Mumps{Float64}(mumps_definite, icntl, default_cntl64)
 A = sparse(Diagonal([1., 2., 3., 4.]))
 factorize!(mumps1, A);  # Analyze and factorize.
-rhs = [1., 4., 9., 16.];
-x = solve(mumps1, rhs);
-finalize(mumps1);
+rhs = [1., 4., 9., 16.]
+x = solve(mumps1, rhs)
+finalize(mumps1)
 MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
 mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64);
 A = random_matrix(Float64, [1, 2, 3, 4], 4, 4); A = sparse(A + A');

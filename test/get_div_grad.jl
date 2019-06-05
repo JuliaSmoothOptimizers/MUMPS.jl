@@ -12,7 +12,7 @@ function get_div_grad(n1 :: Int, n2 :: Int, n3 :: Int)
   # DIV from faces to cell-centers
   Div = [D1 D2 D3]
 
-  return Div * Div';
+  return Div * Div'
 end
 
 # 1D finite difference on staggered grid
