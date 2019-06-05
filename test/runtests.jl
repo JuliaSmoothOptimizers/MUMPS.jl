@@ -30,3 +30,4 @@ comm = MPI.COMM_WORLD
 @testset "mixed: " begin include("mumps_test_mixed.jl") end
 
 MPI.Barrier(comm)
+MPI.Finalize()
