@@ -94,12 +94,14 @@ Show the complete ICNTL integer array of `mumps`, with descriptions
 
 See also: [`set_icntl!`](@ref)
 """
-display_icntl(io::IO,mumps::Mumps) = display_icntl(io,mumps.mumps.icntl)
+display_icntl(mumps::Mumps) = display_icntl(stdout,mumps)
+display_icntl(io::IO,mumps::Mumps) = display_icntl(io,mumps.icntl)
 function display_icntl(io::IO,icntl)
     for i ∈ eachindex(icntl)
         display_icntl(io,icntl,i,icntl[i])
     end
 end
+
 function display_icntl(io::IO,icntl,i,val)
     automatic = "decided by software"
     print(io,"$i,\t$val\t")
