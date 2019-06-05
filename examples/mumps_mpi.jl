@@ -61,3 +61,4 @@ if MPI.Comm_rank(comm) == root
 end
 
 finalize(mumps)
+MPI.Finalize()
