@@ -1,7 +1,7 @@
 name = "MUMPS"
 uuid = "bf6389e2-cca1-5e17-ac22-36425c4ccbb4"
 authors = ["Dominique Orban <dominique.orban@gmail.com>"]
-version = "0.2.0"
+version = "1.0.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
