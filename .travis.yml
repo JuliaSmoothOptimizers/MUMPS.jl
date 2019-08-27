@@ -17,7 +17,7 @@ matrix:
 
 branches:
   only:
-    - *debug*
+    - sha-debug
     - master
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/ # tags
 
