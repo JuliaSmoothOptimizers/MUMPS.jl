@@ -1,9 +1,9 @@
 # A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
 
-OSX and Linux: [![Build Status](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl.svg?branch=master)](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl)
+OSX and Linux: [![Build Status](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl.svg?branch=main)](https://travis-ci.org/JuliaSmoothOptimizers/MUMPS.jl)
 [![CircleCI](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl.svg?style=svg)](https://circleci.com/gh/JuliaSmoothOptimizers/MUMPS.jl)
 [![](https://img.shields.io/badge/docs-latest-3f51b5.svg)](https://JuliaSmoothOptimizers.github.io/MUMPS.jl/latest)
-[![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=main&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=main)
 
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
@@ -141,7 +141,7 @@ julia> associate_matrix!(mumps, A)  # A is converted to a sparse Complex128 matr
 julia> associate_rhs!(mumps, rhs)   # rhs is converted to a Complex128 array
 ```
 
-See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/master/test) for more examples.
+See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/main/test) for more examples.
 
 ## Constants and Methods Exposed
 
