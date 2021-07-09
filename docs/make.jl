@@ -17,5 +17,5 @@ makedocs(
 deploydocs(deps = nothing, make = nothing,
   repo = "github.com/JuliaSmoothOptimizers/MUMPS.jl.git",
   target = "build",
-  devbranch = "master"
+  devbranch = "main"
 )

@@ -134,7 +134,7 @@ julia> associate_matrix!(mumps, A)  # A is converted to a sparse Complex128 matr
 julia> associate_rhs!(mumps, rhs)   # rhs is converted to a Complex128 array
 ```
 
-See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/master/test) for more examples.
+See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/main/test) for more examples.
 
 ## Constants and Methods Exposed
 
