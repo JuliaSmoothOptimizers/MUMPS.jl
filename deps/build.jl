@@ -3,8 +3,8 @@ using SHA
 
 mumps_prefix = "/usr"
 scalapack_prefix = "/usr"
-for (jvar, evar) in ((:mumps_prefix, "MUMPS_PREFIX"),
-                     (:scalapack_prefix, "SCALAPACK_PREFIX"))
+for (jvar, evar) in ((:var_mumps_prefix, "MUMPS_PREFIX"),
+                     (:var_scalapack_prefix, "SCALAPACK_PREFIX"))
   @eval begin
     try
       $jvar = ENV[$evar]
