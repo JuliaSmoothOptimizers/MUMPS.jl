@@ -4,13 +4,15 @@ authors = ["Dominique Orban <dominique.orban@gmail.com>"]
 version = "1.0.0"
 
 [deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-MPI = "≥ 0.7.2"
-julia = "≥ 0.7.0"
+MPI = "≥ 0.14.0"
+julia = "≥ 1.3.0"
 
 [extras]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
