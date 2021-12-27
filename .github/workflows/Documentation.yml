@@ -10,14 +10,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install MUMPS from Homebrew
+        id: set-up-mumps
+        run: |
+          brew tap brewsci/num
+          brew tap dpo/mumps-jl
+          brew install gcc openblas cmake
+          brew install -s mpich-mumps
+          echo "$(brew --prefix)/bin" >> $GITHUB_PATH
+          echo "::set-output name=prefix::$(brew --prefix)"
+          echo "::set-output name=gfortran::$(which gfortran)"
+          echo "::set-output name=mpif90::$(which mpif90)"
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@latest
         with:
           version: '1'
+          arch: x64
       - name: Install dependencies
-        run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate(); Pkg.build("MUMPS")'
+        env:
+          MUMPS_PREFIX: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich-mumps"
+          SCALAPACK_PREFIX: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich-scalapack"
+          JULIA_MPI_PATH: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich"
+          JULIA_MPI_Fortran_COMPILER: "${{steps.set-up-mumps.outputs.mpif90}}"
+          FC: "${{steps.set-up-mumps.outputs.prefix}}/opt/gcc/bin/gfortran"
       - name: Build and deploy
+        run: julia --project=docs --color=yes docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-        run: julia --project=docs --color=yes docs/make.jl
+          MUMPS_PREFIX: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich-mumps"
+          SCALAPACK_PREFIX: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich-scalapack"
+          JULIA_MPI_PATH: "${{steps.set-up-mumps.outputs.prefix}}/opt/mpich"
+          JULIA_MPI_Fortran_COMPILER: "${{steps.set-up-mumps.outputs.mpif90}}"
+          FC: "${{steps.set-up-mumps.outputs.prefix}}/opt/gcc/bin/gfortran"
