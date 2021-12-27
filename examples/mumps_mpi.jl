@@ -1,3 +1,5 @@
+using Printf
+
 using MUMPS
 import MPI
 
@@ -33,7 +35,7 @@ end
 finalize(mumps);
 
 # 2. Solve a complex problem.
-mumps = Mumps{Complex128}(mumps_unsymmetric, default_icntl, default_cntl64);
+mumps = Mumps{ComplexF64}(mumps_unsymmetric, default_icntl, default_cntl64);
 
 # Define problem on the host.
 if MPI.Comm_rank(comm) == root

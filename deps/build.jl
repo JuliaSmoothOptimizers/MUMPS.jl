@@ -1,20 +1,20 @@
 using Libdl
 using SHA
 
-mumps_prefix = "/usr"
-scalapack_prefix = "/usr"
-for (jvar, evar) in ((:var_mumps_prefix, "MUMPS_PREFIX"),
-                     (:var_scalapack_prefix, "SCALAPACK_PREFIX"))
-  @eval begin
-    try
-      $jvar = ENV[$evar]
-      push!(DL_LOAD_PATH, joinpath($jvar, "lib"))
-    catch
-      nothing
-    end
+function add_to_path(var)
+  if var ∈ keys(ENV)
+    path = joinpath(ENV[var], "lib")
+    @info "searching $path"
+    push!(DL_LOAD_PATH, path)
+  else
+    @info "$var not in ENV"
   end
 end
-mumps_libdir = joinpath(mumps_prefix, "lib")
+
+mumps_prefix = "/usr"
+scalapack_prefix = "/usr"
+add_to_path("MUMPS_PREFIX")
+add_to_path("SCALAPACK_PREFIX")
 scalapack_libdir = joinpath(scalapack_prefix, "lib")
 
 # look for MUMPS
@@ -24,7 +24,7 @@ try
   libmumps = Libdl.dlopen("libmumps_common.$(Libdl.dlext)")
   global found_libmumps = true
   global libmumps_path = Libdl.dlpath(libmumps)
-  Libdl.dlclose(libmumps)
+  # Libdl.dlclose(libmumps)
 catch
   error("unable to locate libmumps_common.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
 end
