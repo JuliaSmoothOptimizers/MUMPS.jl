@@ -37,21 +37,15 @@ LinearAlgebra,
 SparseArrays
 
 function __init__()
-    if haskey(ENV,"MUMPS_PREFIX")
-        global MUMPS_LIB_S = joinpath(ENV["MUMPS_PREFIX"],"lib/libsmumps.dylib")
-        global MUMPS_LIB_D = joinpath(ENV["MUMPS_PREFIX"],"lib/libdmumps.dylib")
-        global MUMPS_LIB_C = joinpath(ENV["MUMPS_PREFIX"],"lib/libcmumps.dylib")
-        global MUMPS_LIB_Z = joinpath(ENV["MUMPS_PREFIX"],"lib/libzmumps.dylib")
-    else
-        global MUMPS_LIB_S = "/usr/local/opt/brewsci-mumps/lib/libsmumps.dylib"
-        global MUMPS_LIB_D = "/usr/local/opt/brewsci-mumps/lib/libdmumps.dylib"
-        global MUMPS_LIB_C = "/usr/local/opt/brewsci-mumps/lib/libcmumps.dylib"
-        global MUMPS_LIB_Z = "/usr/local/opt/brewsci-mumps/lib/libzmumps.dylib"
-    end
-    global LIB_S = dlopen(MUMPS_LIB_S)
-    global LIB_D = dlopen(MUMPS_LIB_D)
-    global LIB_C = dlopen(MUMPS_LIB_C)
-    global LIB_Z = dlopen(MUMPS_LIB_Z)
+  if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
+    include("../deps/deps.jl")
+  else
+    error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
+  end
+  global LIB_S = dlopen(libsmumps)
+  global LIB_D = dlopen(libdmumps)
+  global LIB_C = dlopen(libcmumps)
+  global LIB_Z = dlopen(libzmumps)
 end
 
 include("mumps_types.jl")

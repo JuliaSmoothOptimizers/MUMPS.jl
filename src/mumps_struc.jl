@@ -12,7 +12,7 @@ mutable struct MUMPSException <: Exception
 end
 const MUMPSValueDataType = Union{Float32, Float64, ComplexF32, ComplexF64}
 
-const MUMPS_VERSION = "5.2.0"
+const MUMPS_VERSION = "5.4.1"
 const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
@@ -28,6 +28,7 @@ mutable struct Mumps{TC,TR}
     dkeep::NTuple{230,TR}
     keep8::NTuple{150,MUMPS_INT8}
     n::MUMPS_INT
+    nblk::MUMPS_INT
 
     nz_alloc::MUMPS_INT
 
@@ -48,6 +49,9 @@ mutable struct Mumps{TC,TR}
     eltvar::Ptr{MUMPS_INT}
     a_elt::Ptr{TC}
 
+    blkptr::Ptr{MUMPS_INT}
+    blkvar::Ptr{MUMPS_INT}
+
     perm_in::Ptr{MUMPS_INT}
 
     sym_perm::Ptr{MUMPS_INT}
@@ -55,7 +59,6 @@ mutable struct Mumps{TC,TR}
 
     colsca::Ptr{TR}
     rowsca::Ptr{TR}
-
     colsca_from_mumps::MUMPS_INT
     rowsca_from_mumps::MUMPS_INT
 

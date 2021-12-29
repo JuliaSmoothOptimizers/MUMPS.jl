@@ -18,18 +18,34 @@ add_to_path("SCALAPACK_PREFIX")
 scalapack_libdir = joinpath(scalapack_prefix, "lib")
 
 # look for MUMPS
-found_libmumps = false
-libmumps_path = ""
+libsmumps_path = ""
+libdmumps_path = ""
+libcmumps_path = ""
+libzmumps_path = ""
 try
-  libmumps = Libdl.dlopen("libmumps_common.$(Libdl.dlext)")
-  global found_libmumps = true
-  global libmumps_path = Libdl.dlpath(libmumps)
-  # Libdl.dlclose(libmumps)
+  libmumps = Libdl.dlopen("libsmumps.$(Libdl.dlext)")
+  global libsmumps_path = Libdl.dlpath(libmumps)
 catch
-  error("unable to locate libmumps_common.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
+  error("unable to locate libsmumps.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
 end
-
-@info "" found_libmumps libmumps_path
+try
+  libmumps = Libdl.dlopen("libdmumps.$(Libdl.dlext)")
+  global libdmumps_path = Libdl.dlpath(libmumps)
+catch
+  error("unable to locate libdmumps.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
+end
+try
+  libmumps = Libdl.dlopen("libcmumps.$(Libdl.dlext)")
+  global libcmumps_path = Libdl.dlpath(libmumps)
+catch
+  error("unable to locate libcmumps.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
+end
+try
+  libmumps = Libdl.dlopen("libzmumps.$(Libdl.dlext)")
+  global libzmumps_path = Libdl.dlpath(libmumps)
+catch
+  error("unable to locate libzmumps.$(Libdl.dlext)... please install MUMPS or set MUMPS_PREFIX")
+end
 
 # if we found MUMPS, see if libmumps_simple is there
 found_libmumps_simple = false
@@ -78,6 +94,10 @@ end
 
 if found_libmumps_simple
   open(joinpath(depsdir, "deps.jl"), "w") do io
-    write(io, "const libmumps_simple = \"$(libmumps_simple_path)\"")
+    write(io, "const libmumps_simple = \"$(libmumps_simple_path)\"\n")
+    write(io, "const libsmumps = \"$(libsmumps_path)\"\n")
+    write(io, "const libdmumps = \"$(libdmumps_path)\"\n")
+    write(io, "const libcmumps = \"$(libcmumps_path)\"\n")
+    write(io, "const libzmumps = \"$(libzmumps_path)\"")
   end
 end

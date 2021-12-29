@@ -1,4 +1,4 @@
-# this file provides the low-level interface with the MUMPS 5.1.2 library
+# this file provides the low-level interface with the MUMPS library
 # by controlling access to the pointers contained in the Mumps object.
 # Many functions are unsafe and are marked as such.
 # None of these functions change the JOB parameter.
@@ -17,7 +17,7 @@
 """
     invoke_mumps_unsafe!(mumps)
 
-Call the appropriate mumps C-library, passing to it the Mumps object `mumps`
+Call the appropriate mumps C-library, passing to it the Mumps object `mumps`.
 
 This is a low-level function, meaning that you have complete control over what
 operations are done, based on the MUMPS manual.
@@ -28,7 +28,7 @@ initialized.
 See also: [`invoke_mumps!`](@ref)
 """
 @inline function invoke_mumps_unsafe!(mumps::Mumps{TC,TR}) where {TC,TR}
-    MPI.Initialized() ? nothing : throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
+    MPI.Initialized() || throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
     if TC==Float32
         cfun = :smumps_c
         LIB = LIB_S
@@ -48,6 +48,7 @@ See also: [`invoke_mumps!`](@ref)
     mumps.err = mumps.infog[1];
     return nothing
 end
+
 """
     invoke_mumps!(mumps)
 
