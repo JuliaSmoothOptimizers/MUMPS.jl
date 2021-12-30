@@ -4,8 +4,9 @@ using MPI
 
 
 function __init__()
-  if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
-    include("../deps/deps.jl")
+  _DEPS_FILE = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
+  if isfile(_DEPS_FILE)
+    include(_DEPS_FILE)
   else
     error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
   end
