@@ -16,25 +16,15 @@ mumps_symmetric
 
 
 """
-    associate_matrix!(mumps,A)
-Register the matrix `A` with the `Mumps` object `mumps`.
+    associate_matrix!(mumps, n, irow, jcol, vals)
+Register the sparse matrix given in coordinate format with the `Mumps` object `mumps`.
 This function makes it possible to define the matrix on the host
 only. If the matrix is defined on all nodes, there is no need to
 use this function.
 """
-associate_matrix!(args...;kwargs...) = provide_matrix!(args...;kwargs...)
 associate_matrix!(mumps::Mumps, n::Integer, irow::Vector, jcol::Vector, vals::Vector) =
     associate_matrix!(mumps,sparse(n,n,irow,jcol,vals))
 
-
-"""
-    associate_rhs!(mumps,rhs)
-Register the right-hand side(s) `rhs` with the `Mumps`
-object `mumps`. This function makes it possible to define the right-
--hand side(s) on the host only. If the right-hand side(s) are defined
-on all nodes, there is no need to use this function.
-"""
-associate_rhs! = provide_rhs!
 
 """
     get_solution(mumps) -> x
@@ -61,10 +51,10 @@ Combined associate_matrix / factorize.
 Presume that `A` is available on all nodes.
 """
 function factorize!(mumps::Mumps,A::AbstractArray)
-    provide_matrix!(mumps,A)
+    associate_matrix!(mumps,A)
     factorize!(mumps)
-    mumps.icntl[33]==1 ? mumps.det = det(mumps) : nothing
-    return nothing
+    mumps.icntl[33]==1 && (mumps.det = det(mumps))
+    return mumps
 end
 
 
@@ -78,10 +68,10 @@ forward or transposed system. The solution is stored internally and must
 be retrieved with `get_solution()`."""
 function solve!(mumps::Mumps; transposed::Bool=false)
     # suppress_printing!(mumps)
-    transposed ? transpose!(mumps) : nothing
+    transposed && transpose!(mumps)
     mumps_solve!(mumps)
-    transposed ? transpose!(mumps) : nothing
-    return nothing
+    transposed && transpose!(mumps)
+    return mumps
 end
 
 
@@ -93,7 +83,7 @@ The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
 The solution is retrieved and returned."""
 function solve(mumps::Mumps,rhs::AbstractArray; transposed::Bool=false)
-    provide_rhs!(mumps, rhs)
+    associate_rhs!(mumps, rhs)
     solve!(mumps; transposed=transposed)
     return get_sol(mumps)
 end
@@ -119,8 +109,8 @@ The solution is retrieved and returned.
 function solve(A::AbstractArray{T}, rhs::AbstractArray{V}; sym::Integer=mumps_unsymmetric) where {T,V}
     mumps = Mumps{promote_type(T,V)}(sym)
     # suppress_printing!(mumps)
-    provide_matrix!(mumps,A)
-    provide_rhs!(mumps,rhs)
+    associate_matrix!(mumps,A)
+    associate_rhs!(mumps,rhs)
     solve!(mumps)
     return get_sol(mumps)
 end
