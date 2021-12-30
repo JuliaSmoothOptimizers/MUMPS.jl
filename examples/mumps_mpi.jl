@@ -12,7 +12,8 @@ mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl64)
 
 # Define problem on the host.
 if MPI.Comm_rank(comm) == root
-  A = rand(4,4); A = sparse(A + A')
+  A = rand(4, 4)
+  A = sparse(A + A')
   associate_matrix!(mumps, A)
   rhs = rand(4)
   associate_rhs!(mumps, rhs)
@@ -28,7 +29,7 @@ MPI.Barrier(comm)
 # overwrites rhs, so only exists on the host.
 if MPI.Comm_rank(comm) == root
   x = get_solution(mumps)
-  rel_err = norm(x - A\rhs) / norm(x)
+  rel_err = norm(x - A \ rhs) / norm(x)
   @printf("Error: %7.1e\n", rel_err)
 end
 
@@ -39,7 +40,8 @@ mumps = Mumps{ComplexF64}(mumps_unsymmetric, default_icntl, default_cntl64)
 
 # Define problem on the host.
 if MPI.Comm_rank(comm) == root
-  A = rand(4,4) + im * rand(4,4); A = sparse(A + A')
+  A = rand(4, 4) + im * rand(4, 4)
+  A = sparse(A + A')
   associate_matrix!(mumps, A)
   rhs = rand(4) + im * rand(4)
   associate_rhs!(mumps, rhs)
@@ -55,7 +57,7 @@ MPI.Barrier(comm)
 # overwrites rhs, so only exists on the host.
 if MPI.Comm_rank(comm) == root
   x = get_solution(mumps)
-  rel_err = norm(x - A\rhs) / norm(x)
+  rel_err = norm(x - A \ rhs) / norm(x)
   @printf("Error: %7.1e\n", rel_err)
 end
 

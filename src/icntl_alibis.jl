@@ -6,7 +6,68 @@
 # sparse_rhs!, dense_rhs!,
 # toggle_null_pivot!
 
-const ICNTL_DEFAULT = (6, 0, 6, 2, 0, 7, 7, 77, 1, 0, 0, 1, 0, 20, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 333, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)
+const ICNTL_DEFAULT = (
+  6,
+  0,
+  6,
+  2,
+  0,
+  7,
+  7,
+  77,
+  1,
+  0,
+  0,
+  1,
+  0,
+  20,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  -32,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  333,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+)
 
 """
     default_icntl!(mumps)
@@ -14,62 +75,62 @@ const ICNTL_DEFAULT = (6, 0, 6, 2, 0, 7, 7, 77, 1, 0, 0, 1, 0, 20, 0, 0, 0, 0, 0
 reset ICNTL to its default
 """
 function default_icntl!(mumps::Mumps)
-    mumps.icntl = ICNTL_DEFAULT
-    return nothing
+  mumps.icntl = ICNTL_DEFAULT
+  return nothing
 end
 
-set_error_stream!(mumps::Mumps,i) = begin
-  set_icntl!(mumps,1,i; displaylevel=0)
+set_error_stream!(mumps::Mumps, i) = begin
+  set_icntl!(mumps, 1, i; displaylevel = 0)
   return mumps
 end
-set_diagnostics_stream!(mumps::Mumps,i) = begin
-  set_icntl!(mumps,2,i; displaylevel=0)
+set_diagnostics_stream!(mumps::Mumps, i) = begin
+  set_icntl!(mumps, 2, i; displaylevel = 0)
   return mumps
 end
-set_info_stream!(mumps::Mumps,i) = begin
-  set_icntl!(mumps,3,i; displaylevel=0)
+set_info_stream!(mumps::Mumps, i) = begin
+  set_icntl!(mumps, 3, i; displaylevel = 0)
   return mumps
 end
-set_print_level!(mumps::Mumps,i) = begin
-  set_icntl!(mumps,4,i; displaylevel=0)
+set_print_level!(mumps::Mumps, i) = begin
+  set_icntl!(mumps, 4, i; displaylevel = 0)
   return mumps
 end
 
 suppress_printing!(mumps::Mumps) = begin
-  set_print_level!(mumps,1)
+  set_print_level!(mumps, 1)
   return mumps
 end
 toggle_printing!(mumps::Mumps) = begin
-  set_print_level!(mumps,mod1(mumps.icntl[4]+1,2))
+  set_print_level!(mumps, mod1(mumps.icntl[4] + 1, 2))
   return mumps
 end
 suppress_display! = suppress_printing!
 toggle_display! = toggle_printing!
 
 sparse_matrix!(mumps::Mumps) = begin
-  set_icntl!(mumps,5,0; displaylevel=0)
+  set_icntl!(mumps, 5, 0; displaylevel = 0)
   return mumps
 end
 dense_matrix!(mumps::Mumps) = begin
-  set_icntl!(mumps,5,1; displaylevel=0)
+  set_icntl!(mumps, 5, 1; displaylevel = 0)
   return mumps
 end
 
 LinearAlgebra.transpose!(mumps::Mumps) = begin
-  set_icntl!(mumps,9,mod(mumps.icntl[9]+1,2); displaylevel=0)
+  set_icntl!(mumps, 9, mod(mumps.icntl[9] + 1, 2); displaylevel = 0)
   return mumps
 end
 
 sparse_rhs!(mumps::Mumps) = begin
-  set_icntl!(mumps, 20, 1; displaylevel=0)
+  set_icntl!(mumps, 20, 1; displaylevel = 0)
   return mumps
 end
 dense_rhs!(mumps::Mumps) = begin
-  set_icntl!(mumps, 20, 0; displaylevel=0)
+  set_icntl!(mumps, 20, 0; displaylevel = 0)
   return mumps
 end
 
 toggle_null_pivot!(mumps::Mumps) = begin
-  set_icntl!(mumps,24,mod(mumps.icntl[24]+1,2); displaylevel=0)
+  set_icntl!(mumps, 24, mod(mumps.icntl[24] + 1, 2); displaylevel = 0)
   return mumps
 end

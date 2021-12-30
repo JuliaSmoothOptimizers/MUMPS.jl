@@ -2,8 +2,8 @@
 
 # For now both A and rhs will be converted to Float64.
 A = random_matrix(Float16, [1, 2, 3, 4], 4, 4)
-rhs = Array{Float32}([1., 4., 9., 16.])
-x = solve(A, rhs, sym=mumps_unsymmetric)
+rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
+x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs)
 @test(relres <= 1.0f-5)
@@ -51,7 +51,7 @@ relres = norm(A * x - rhs) / norm(rhs)
 # For now both A and rhs will be converted to ComplexF64.
 A = random_matrix(ComplexF16, [1, 2, 3, 4], 4, 4)
 rhs = Array{Int16}([1, 4, 9, 16])
-x = solve(A, rhs, sym=mumps_unsymmetric)
+x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs)
 @test(relres <= 1.0e-5)

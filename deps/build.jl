@@ -92,7 +92,9 @@ else
     end
     run(`tar zxf $(libmumps_simple_archive)`)
     cd("mumps_simple-$(libmumps_simple_ver)")
-    run(`make mumps_prefix=$mumps_prefix scalapack_libdir=$scalapack_libdir scalapack_libs= blas_libs=`)
+    run(
+      `make mumps_prefix=$mumps_prefix scalapack_libdir=$scalapack_libdir scalapack_libs= blas_libs=`,
+    )
     run(`make install prefix=$prefix`)
     try
       libmumps_simple = Libdl.dlopen(joinpath(libdir, "libmumps_simple.$(Libdl.dlext)"))
