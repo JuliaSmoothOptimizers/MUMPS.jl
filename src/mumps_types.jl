@@ -1,4 +1,4 @@
-const MUMPS_INT = Cint
+const MUMPS_INT = haskey(ENV, "MUMPS_PREFIX") ? Cint : Int64
 const MUMPS_INT8 = Int64
 
 const SMUMPS_COMPLEX = Cfloat

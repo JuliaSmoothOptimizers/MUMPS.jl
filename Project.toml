@@ -11,7 +11,6 @@ MUMPS_jll = "ca64183c-ec4f-5579-95d5-17e128c21291"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-MPI = "^0.7,^0.8,^0.9"
 MUMPS_jll = "= 5.4.1"
 julia = "^1.6"
 
