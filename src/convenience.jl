@@ -6,66 +6,6 @@
 #
 # Any function which alters the JOB state lives here.
 
-# export mumps_solve!, mumps_solve,
-# mumps_factorize!, mumps_factorize,
-# mumps_det!, mumps_det,
-# mumps_schur_complement!, mumps_schur_complement,
-# mumps_select_inv!, mumps_select_inv,
-# initialize!, finalize!
-
-
-# """
-#     Mumps{T}(; sym=0, par=1) -> mumps
-#     Mumps(A; sym=0, par=1) -> mumps
-#     Mumps(A, rhs; sym=0, par=1) -> mumps
-#
-# Create an instance of a `Mumps` object with the same type as matrix `A`
-# and simultaneously provide `A` to it.
-#
-# Optional arguments `sym` and `par` correspond to the MUMPS 5.1.2 paremeters.
-# They are:
-#     `sym` = 0 for unsymmetric, 1 for symm pos def, 2 for general symm
-#     `par` = 0 for host participating in parallel calculation, 1 otherwise
-#
-# If not arguments are passed, create an initialized but empty instance of `Mumps`
-# """
-# Mumps{T}(;sym=0,par=1) where T = Mumps{T}(sym,par,DEFAULT_FORTRAN_COMMUNICATOR)
-# function Mumps(A::AbstractArray{T}; kwargs...) where T
-#     if !haskey(kwargs,:sym)
-#         if issymmetric(A)
-#             kwargs = (kwargs...,:sym => 2)
-#         else
-#             kwargs = (kwargs...,:sym => 0)
-#         end
-#     end
-#     mumps = Mumps{T}(;kwargs...)
-#     typeof(A)<:Array ? set_icntl!(mumps,5,1; displaylevel=0) : nothing
-#     provide_matrix!(mumps,A)
-#     return mumps
-# end
-# function Mumps(A::AbstractArray{T}, rhs::AbstractArray{TA}; kwargs...) where {T,TA}
-#     if !haskey(kwargs,:sym)
-#         if issymmetric(A)
-#             kwargs = (kwargs...,:sym => 2)
-#         else
-#             kwargs = (kwargs...,:sym => 0)
-#         end
-#     end
-#     mumps = Mumps{promote_type(T,TA)}(;kwargs...)
-#     typeof(A)<:Array ? set_icntl!(mumps,5,1) : nothing
-#     provide_matrix!(mumps,A)
-#     if typeof(rhs)<:AbstractSparseArray
-#         set_icntl!(mumps,20,1; displaylevel=0)
-#     elseif typeof(rhs)<:Array
-#         set_icntl!(mumps,20,0; displaylevel=0)
-#     else
-#         throw(MUMPSException("unrecognized array type for rhs"))
-#     end
-#     provide_rhs!(mumps,rhs)
-#     return mumps
-# end
-
-
 """
     mumps_solve!(x,A,y; kwargs...)
     mumps_solve!(x,mumps)
