@@ -1,4 +1,4 @@
-# this file mirros the relevant content of the "[sdcz]mumps_c.h" file of MUMPS 5.2.0
+# this file mirros the relevant content of the "[sdcz]mumps_c.h" file of MUMPS
 # `gc_haven`, contains Julia references to protect the pointers passed to C
 # from gargage collection.
 export Mumps, MUMPSException

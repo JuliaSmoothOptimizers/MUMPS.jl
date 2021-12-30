@@ -248,7 +248,7 @@ provide_rhs!(mumps::Mumps,rhs::AbstractVector) = provide_rhs!(mumps,repeat(rhs,1
 
 
 """
-    get_rhs!(y,mumps)
+    get_rhs!(x,mumps)
 
 Retrieve right hand side from `mumps`, storing it in pre-allocated `x`
 
