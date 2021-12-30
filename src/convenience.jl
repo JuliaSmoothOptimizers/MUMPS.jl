@@ -320,10 +320,10 @@ function LinearAlgebra.ldiv!(x,mumps::Mumps,y)
     end
     mumps_solve!(x,mumps,y)
 end
-function LinearAlgebra.inv(mumps::Mumps)
-    suppress_display!(mumps)
-    y = sparse(1:mumps.n,1:mumps.n,1:mumps.n,mumps.n,mumps.n)
-    mumps_select_inv!(y,mumps)
-    finalize!(mumps)
-    return y
-end
+# function LinearAlgebra.inv(mumps::Mumps)
+#     suppress_display!(mumps)
+#     y = sparse(1:mumps.n,1:mumps.n,1:mumps.n,mumps.n,mumps.n)
+#     mumps_select_inv!(y,mumps)
+#     finalize!(mumps)
+#     return y
+# end
