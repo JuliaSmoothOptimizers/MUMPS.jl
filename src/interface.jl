@@ -3,17 +3,6 @@
 # Many functions are unsafe and are marked as such.
 # None of these functions change the JOB parameter.
 
-# export invoke_mumps!,
-# set_icntl!, set_job!,
-# provide_matrix!,
-# provide_rhs!,
-# get_rhs!, get_rhs,
-# get_sol!, get_sol,
-# set_schur_centralized_by_column!,
-# get_schur_complement!, get_schur_complement
-
-
-
 """
     invoke_mumps_unsafe!(mumps)
 
