@@ -35,7 +35,7 @@ See also: [`invoke_mumps!`](@ref)
     ccall(sym,Cvoid,(Ref{Mumps{TC,TR}},), mumps)
 
     mumps.err = mumps.infog[1];
-    return nothing
+    return mumps
 end
 
 """
@@ -71,7 +71,7 @@ function set_icntl!(mumps::Mumps,i::Integer,val::Integer; displaylevel=mumps.icn
     icntl = mumps.icntl
     mumps.icntl = (icntl[1:i-1]...,convert(MUMPS_INT,val),icntl[i+1:end]...)
     displaylevel>0 ? display_icntl(stdout,mumps.icntl,i,val) : nothing
-    return nothing
+    return mumps
 end
 
 
@@ -86,7 +86,7 @@ function set_cntl!(mumps::Mumps{TC,TR},i::Integer,val::AbstractFloat; displaylev
     cntl = mumps.cntl
     mumps.cntl = (cntl[1:i-1]...,convert(TR,val),cntl[i+1:end]...)
     displaylevel>0 ? display_cntl(stdout,mumps.cntl,i,val) : nothing
-    return nothing
+    return mumps
 end
 
 
@@ -97,7 +97,7 @@ Set the phase to `job`. See MUMPS manual for options.
 """
 function set_job!(mumps::Mumps,i)
     mumps.job=i
-    return nothing
+    return mumps
 end
 
 
@@ -111,7 +111,7 @@ function set_save_dir!(mumps,dir::String)
     i = length(dir+1)
     save_dir = mumps.save_dir
     mumps.save_dir = (dir...,'\0',save_dir[i+2:end]...)
-    return nothing
+    return mumps
 end
 
 
@@ -125,42 +125,39 @@ function set_save_prefix!(mumps,prefix::String)
     i = length(prefix+1)
     save_prefix = mumps.save_prefix
     mumps.save_prefix = (prefix...,'\0',save_prefix[i+2:end]...)
-    return nothing
+    return mumps
 end
 
 
 """
-    provide_matrix!(mumps,A)
+    associate_matrix!(mumps,A)
 
-Provide a square matrix `A` to a `mumps` object. It internally converts
+Register the square matrix `A` to a `mumps` object. It internally converts
 `A` to be consistent with the ICNTL[5] setting.
 
 If needed, it tries to convert element type of `A` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-See also: [`provide_rhs!`](@ref)
+See also: [`associate_rhs!`](@ref)
 """
-function provide_matrix!(mumps::Mumps{T},A::AbstractArray{TA}) where {T,TA}
+function associate_matrix!(mumps::Mumps{T},A::AbstractArray{TA}) where {T,TA}
     size(A,1)==size(A,2) ? nothing : throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
-    # if !(T==TA)
-    #     @warn "matrix with element type $TA will attempt be converted to Mumps type $T"
-    # end
+    T == TA || (@warn "matrix with element type $TA: will attempt conversion to Mumps type $T")
     if is_matrix_assembled(mumps)
-        # typeof(A)<:SparseMatrixCSC ? nothing : (@warn "matrix is dense, but ICNTL[5]=$(mumps.icntl[5]) indicates assembled. attempting to convert matrix to sparse")
-        _provide_matrix_assembled!(mumps,convert(SparseMatrixCSC,A))
+        typeof(A)<:SparseMatrixCSC || (@warn "matrix is dense, but ICNTL[5]=$(mumps.icntl[5]) indicates assembled. attempting to convert matrix to sparse")
+        return _associate_matrix_assembled!(mumps,convert(SparseMatrixCSC,A))
     else
-        # !(typeof(A)<:SparseMatrixCSC) ? nothing : (@warn "matrix is sparse, but ICNTL[5]=$(mumps.icntl[5]) indicates elemental. attempting to convert matrix to dense")
-        _provide_matrix_elemental!(mumps,convert(Matrix,A))
+        typeof(A)<:SparseMatrixCSC && (@warn "matrix is sparse, but ICNTL[5]=$(mumps.icntl[5]) indicates elemental. attempting to convert matrix to dense")
+        return _associate_matrix_elemental!(mumps,convert(Matrix,A))
     end
 end
-function _provide_matrix_assembled!(mumps::Mumps,A::SparseMatrixCSC{T}) where T
+function _associate_matrix_assembled!(mumps::Mumps,A::SparseMatrixCSC{T}) where T
     if is_matrix_distributed(mumps)
-        _provide_matrix_assembled_distributed!(mumps,A)
-    else
-        _provide_matrix_assembled_centralized!(mumps,A)
+        return _associate_matrix_assembled_distributed!(mumps,A)
     end
+    return _associate_matrix_assembled_centralized!(mumps,A)
 end
-function _provide_matrix_assembled_centralized!(mumps::Mumps{T},A::SparseMatrixCSC) where T
+function _associate_matrix_assembled_centralized!(mumps::Mumps{T},A::SparseMatrixCSC) where T
     if is_symmetric(mumps)
         I,J,V = findnz(triu(A))
     else
@@ -171,13 +168,12 @@ function _provide_matrix_assembled_centralized!(mumps::Mumps{T},A::SparseMatrixC
     mumps.n = A.n
     mumps.nnz = length(V)
     append!(mumps._gc_haven,[Ref(irn),Ref(jcn),Ref(a)])
-    return nothing
+    return mumps
 end
-function _provide_matrix_assembled_distributed!(mumps::Mumps{T},A::SparseMatrixCSC) where T
+function _associate_matrix_assembled_distributed!(mumps::Mumps{T},A::SparseMatrixCSC) where T
     throw(MUMPSException("not written yet."))
-    return nothing
 end
-function _provide_matrix_elemental!(mumps::Mumps{T},A::Array) where T
+function _associate_matrix_elemental!(mumps::Mumps{T},A::Array) where T
     mumps.n = size(A,1)
     mumps.nelt = 1
     eltptr = convert.(MUMPS_INT,[1,mumps.n+1])
@@ -190,30 +186,29 @@ function _provide_matrix_elemental!(mumps::Mumps{T},A::Array) where T
     end
     mumps.a_elt = pointer(a_elt)
     append!(mumps._gc_haven,[Ref(eltptr),Ref(eltvar),Ref(a_elt)])
-    return nothing
+    return mumps
 end
 
 
 """
-    provide_rhs!(mumps,y)
+    associate_rhs!(mumps, rhs)
 
-Provide a RHS matrix or vector `rhs` to a `mumps` object. It internally converts
+Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It internally converts
 `rhs` to be consistent with the ICNTL[20] setting, and additionally allocates
 `mumps.rhs` according to the ICNTL[21] setting.
 
 If needed, it tries to convert element type of `rhs` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-See also: [`provide_matrix!`](@ref)
+See also: [`associate_matrix!`](@ref)
 """
-function provide_rhs!(mumps::Mumps,rhs::AbstractMatrix)
+function associate_rhs!(mumps::Mumps,rhs::AbstractMatrix)
     if is_rhs_dense(mumps)
-        provide_rhs_dense!(mumps,rhs)
-    else
-        provide_rhs_sparse!(mumps,rhs)
+        return associate_rhs_dense!(mumps,rhs)
     end
+    return associate_rhs_sparse!(mumps,rhs)
 end
-function provide_rhs_sparse!(mumps::Mumps{T},rhs::AbstractMatrix) where T
+function associate_rhs_sparse!(mumps::Mumps{T},rhs::AbstractMatrix) where T
     rhs = convert(SparseMatrixCSC,rhs)
 
     mumps.nz_rhs = length(rhs.nzval)
@@ -233,17 +228,17 @@ function provide_rhs_sparse!(mumps::Mumps{T},rhs::AbstractMatrix) where T
         push!(mumps._gc_haven,Ref(y))
     end
     append!(mumps._gc_haven,[Ref(rhs_sparse),Ref(irhs_sparse),Ref(irhs_ptr)])
-    return nothing
+    return mumps
 end
-function provide_rhs_dense!(mumps::Mumps{T},rhs::AbstractMatrix) where T
+function associate_rhs_dense!(mumps::Mumps{T},rhs::AbstractMatrix) where T
     y = convert(Matrix{T},rhs)[:]
     mumps.rhs = pointer(y)
     mumps.lrhs = size(rhs,1)
     mumps.nrhs = size(rhs,2)
     push!(mumps._gc_haven,Ref(y))
-    return nothing
+    return mumps
 end
-provide_rhs!(mumps::Mumps,rhs::AbstractVector) = provide_rhs!(mumps,repeat(rhs,1,1))
+associate_rhs!(mumps::Mumps,rhs::AbstractVector) = associate_rhs!(mumps,repeat(rhs,1,1))
 
 
 
@@ -259,13 +254,13 @@ function get_rhs!(x,mumps::Mumps)
         if has_rhs(mumps)
             get_rhs_unsafe!(x,mumps)
         else
-            # @warn "mumps has no rhs"
+            @warn "no rhs registered"
         end
     end
-    return nothing
+    return x
 end
 function get_rhs_unsafe!(x::SparseMatrixCSC,mumps::Mumps)
-    !is_rhs_dense(mumps) ? nothing : throw(MUMPSException("rhs is dense, target is sparse. try with dense target"))
+    is_rhs_dense(mumps) && throw(MUMPSException("rhs is dense, target is sparse. try with dense target"))
     for i ∈ LinearIndices(x.colptr)
         x.colptr[i] = unsafe_load(mumps.irhs_ptr,i)
     end
@@ -273,14 +268,14 @@ function get_rhs_unsafe!(x::SparseMatrixCSC,mumps::Mumps)
         x.rowval[i] = unsafe_load(mumps.irhs_sparse,i)
         x.nzval[i] = unsafe_load(mumps.rhs_sparse,i)
     end
-    return nothing
+    return x
 end
 function get_rhs_unsafe!(x::Union{SubArray,Array},mumps::Mumps)
-    is_rhs_dense(mumps) ? nothing : throw(MUMPSException("rhs is sparse, target is dense. try with sparse target"))
+    is_rhs_dense(mumps) || throw(MUMPSException("rhs is sparse, target is dense. try with sparse target"))
     for i ∈ LinearIndices(x)
         x[i] = unsafe_load(mumps.rhs,i)
     end
-    return nothing
+    return x
 end
 """
     get_rhs(mumps) -> y
@@ -302,7 +297,6 @@ function get_rhs(mumps::Mumps{T}) where T
         x = Array{T}(undef,m,n)
     end
     get_rhs!(x,mumps)
-    return x
 end
 
 
@@ -316,21 +310,21 @@ See also: [`get_rhs!`](@ref), [`get_rhs`](@ref), [`get_sol`](@ref)
 function get_sol!(x::Union{SubArray,Array},mumps::Mumps)
     if !is_finalized(mumps)
         if mumps.job ∉ [3,5,6]
-            # @warn "mumps has not passed through a solution phase"
+            @error "mumps has not passed through a solution phase"
         end
         if has_rhs(mumps)
             get_sol_unsafe!(x,mumps)
         else
-            # @warn "mumps has no rhs"
+            @warn "no rhs registered"
         end
     end
-    return nothing
+    return x
 end
 function get_sol_unsafe!(x::Union{SubArray,Array},mumps::Mumps)
     for i ∈ LinearIndices(x)
         x[i] = unsafe_load(mumps.rhs,i)
     end
-    return nothing
+    return x
 end
 """
     get_sol(mumps) -> x
@@ -340,12 +334,8 @@ Retrieve solution from `mumps`
 See also: [`get_rhs!`](@ref), [`get_rhs`](@ref), [`get_sol!`](@ref)
 """
 function get_sol(mumps::Mumps{T}) where T
-    if mumps.job ∉ [3,5,6]
-        # @warn "mumps has not passed through a solution phase"
-    end
     x = Array{T}(undef,mumps.lrhs,mumps.nrhs)
     get_sol!(x,mumps)
-    return x
 end
 
 
@@ -357,14 +347,14 @@ Retrieve Schur complement matrix from `mumps` into pre-allocated `S`
 See also: [`get_schur_complement`](@ref), [`mumps_schur!`](@ref), [`mumps_schur`](@ref)
 """
 function get_schur_complement!(S,mumps::Mumps)
-    has_schur(mumps) ? nothing : "schur complement not yet allocated."
+    has_schur(mumps) || throw(MUMPSException("schur complement not yet allocated."))
     get_schur_complement_unsafe!(S,mumps)
 end
 function get_schur_complement_unsafe!(S,mumps::Mumps)
     for i ∈ LinearIndices(S)
         S[i] = unsafe_load(mumps.schur,i)
     end
-    return nothing
+    return S
 end
 """
     get_schur_complement(mumps) -> S
@@ -376,7 +366,6 @@ See also: [`get_schur_complement!`](@ref), [`mumps_schur!`](@ref), [`mumps_schur
 function get_schur_complement(mumps::Mumps{T}) where T
     S = Array{T}(undef,mumps.size_schur,mumps.size_schur)
     get_schur_complement!(S,mumps)
-    return S
 end
 
 
@@ -401,13 +390,13 @@ function set_schur_centralized_by_column!(mumps::Mumps{T},schur_inds::AbstractAr
     mumps.schur = pointer(schur)
     set_icntl!(mumps,19,3)
     append!(mumps._gc_haven,[Ref(listvar_schur),Ref(schur)])
+    return mumps
 end
 
 
 function LinearAlgebra.det(mumps::Mumps{T}) where T
     if !has_det(mumps)
-        # @warn "ICNTL[33]=0, determinant not computed"
-        d = T<:Complex ? complex(NaN,NaN) : NaN
+        throw(MUMPSException("ICNTL[33]=0, determinant not computed"))
     else
         if T<:Complex
             d = complex(mumps.rinfog[12],mumps.rinfog[13])*2^mumps.infog[34]
@@ -415,7 +404,7 @@ function LinearAlgebra.det(mumps::Mumps{T}) where T
             d = mumps.rinfog[12]*2^mumps.infog[34]
         end
     end
-    return convert(T,d)
+    return T(d)
 end
 
 

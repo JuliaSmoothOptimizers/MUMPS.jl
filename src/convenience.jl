@@ -28,7 +28,6 @@ function mumps_solve!(mumps::Mumps)
         mumps.job=6
     end
     invoke_mumps!(mumps)
-    return nothing
 end
 function mumps_solve!(x::AbstractArray,mumps::Mumps)
     mumps_solve!(mumps)
@@ -39,7 +38,7 @@ function mumps_solve!(x::AbstractArray,A::AbstractArray,rhs::AbstractArray; kwar
     suppress_display!(mumps)
     set_icntl!(mumps,24,1) # null pivot -- check whether this is necessary/a good idea
     mumps_solve!(x,mumps)
-    finalize!(mumps)
+    # finalize!(mumps)
 end
 function mumps_solve!(x::AbstractArray,mumps::Mumps,rhs::AbstractArray)
     provide_rhs!(mumps,rhs)
@@ -72,17 +71,14 @@ function mumps_solve(mumps::Mumps)
     end
     x = convert(Matrix,x)
     mumps_solve!(x,mumps)
-    return x
 end
 function mumps_solve(A::AbstractArray,rhs::AbstractArray{T,N}; kwargs...) where {T,N}
     x = fill(convert(promote_type(eltype(A),eltype(rhs)),NaN),size(rhs)...)
     mumps_solve!(x,A,rhs; kwargs...)
-    return x
 end
 function mumps_solve(mumps::Mumps,rhs::AbstractArray)
     x = copy(convert(Matrix,rhs))
     mumps_solve!(x,mumps,rhs)
-    return x
 end
 
 
@@ -119,7 +115,6 @@ function mumps_factorize(A::AbstractArray)
     mumps = Mumps(A)
     suppress_display!(mumps)
     mumps_factorize!(mumps)
-    return mumps
 end
 
 
@@ -141,11 +136,11 @@ See also: [`mumps_det`](@ref)
 """
 function mumps_det!(mumps::Mumps; discard=true)
     if has_det(mumps) && mumps.job>1
-        return nothing
+        return mumps
     end
     set_icntl!(mumps,31,Int(discard))
     set_icntl!(mumps,33,1)
-    mumps.job>0 ? mumps.job=1 : nothing
+    mumps.job>0 && (mumps.job=1)
     mumps_factorize!(mumps)
 end
 """
@@ -231,11 +226,12 @@ function mumps_select_inv!(x::AbstractSparseArray,mumps::Mumps)
     get_rhs!(x,mumps)
 end
 function mumps_select_inv!(x,A)
-    size(x)==size(A) ? nothing : throw(MUMPSException("target and matrix must have same size"))
+    size(x)==size(A) || throw(MUMPSException("target and matrix must have same size"))
     mumps = Mumps(A)
     suppress_display!(mumps)
     mumps_select_inv!(x,mumps)
     finalize!(mumps)
+    return x
 end
 """
     mumps_select_inv(A,x) -> A⁻¹
@@ -250,14 +246,12 @@ entries via `i(k),j(k) = I[k],J[k]`.
 See also: [`mumps_select_inv!`](@ref)
 """
 function mumps_select_inv(A,x::AbstractSparseArray)
-    y = copy(x)
+    y = similar(x)
     mumps_select_inv!(y,A)
-    return y
 end
 function mumps_select_inv(A,I::AbstractArray{Int},J::AbstractArray{Int})
     x = sparse(I,J,fill(one(eltype(A)),length(I)),size(A)...)
     mumps_select_inv!(x,A)
-    return x
 end
 
 
@@ -285,13 +279,12 @@ See also: [`initialize`](@ref)
 """
 function finalize!(mumps::Mumps)
     suppress_display!(mumps)
-    return is_finalized(mumps) ? nothing : finalize_unsafe!(mumps)
+    return is_finalized(mumps) ? mumps : finalize_unsafe!(mumps)
 end
 function finalize_unsafe!(mumps::Mumps)
     mumps._finalized=true
     mumps.job=-2
     invoke_mumps_unsafe!(mumps)
-    return nothing
 end
 
 
