@@ -399,9 +399,9 @@ function LinearAlgebra.det(mumps::Mumps{T}) where {T}
     throw(MUMPSException("ICNTL[33]=0, determinant not computed"))
   else
     if T <: Complex
-      d = complex(mumps.rinfog[12], mumps.rinfog[13]) * 2^mumps.infog[34]
+      d = complex(mumps.rinfog[12], mumps.rinfog[13]) * T(2)^mumps.infog[34]
     else
-      d = mumps.rinfog[12] * 2^mumps.infog[34]
+      d = mumps.rinfog[12] * T(2)^mumps.infog[34]
     end
   end
   return T(d)
