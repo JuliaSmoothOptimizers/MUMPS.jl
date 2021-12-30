@@ -10,10 +10,14 @@ function __init__()
   else
     error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
   end
-  global LIB_S = dlopen(libsmumps)
-  global LIB_D = dlopen(libdmumps)
-  global LIB_C = dlopen(libcmumps)
-  global LIB_Z = dlopen(libzmumps)
+  if (libmumps_simple == "julia_registryci_automerge")
+    @error "MUMPS library not properly installed but module is loaded for AutoMerge"
+  else
+    global LIB_S = dlopen(libsmumps)
+    global LIB_D = dlopen(libdmumps)
+    global LIB_C = dlopen(libcmumps)
+    global LIB_Z = dlopen(libzmumps)
+  end
 end
 
 include("mumps_types.jl")
