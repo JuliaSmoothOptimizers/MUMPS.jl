@@ -23,11 +23,21 @@ root = 0
 MPI.Init()
 comm = MPI.COMM_WORLD
 
-@testset "float: " begin include("mumps_test_float.jl") end
-@testset "test: " begin include("mumps_test.jl") end
-@testset "float complex: " begin include("mumps_test_float_complex.jl") end
-@testset " complex: " begin include("mumps_test_complex.jl") end
-@testset "mixed: " begin include("mumps_test_mixed.jl") end
+@testset "float: " begin
+  include("mumps_test_float.jl")
+end
+@testset "test: " begin
+  include("mumps_test.jl")
+end
+@testset "float complex: " begin
+  include("mumps_test_float_complex.jl")
+end
+@testset " complex: " begin
+  include("mumps_test_complex.jl")
+end
+@testset "mixed: " begin
+  include("mumps_test_mixed.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
