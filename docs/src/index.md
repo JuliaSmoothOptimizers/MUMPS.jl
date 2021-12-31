@@ -2,51 +2,45 @@
 
 MUMPS is a library for the solution of large linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
-definiteness. The factorization and solve phases can be performed in parallel.
+definiteness. The factorization and solve phases can be performed in parallel
+via MPI by way of [MPI.jl](https://github.com/JuliaParallel/MPI.jl).
+In our experience, MPICH works more reliably than OpenMPI with MPI.jl.
 
 ## How to Install
 
 ### Prerequisites
 
-Because BinDeps is essentially broken, you must install MUMPS outside of Julia.
-On macOS, we recommend using [Homebrew](https://brew.sh).
-On Linux, we recommend using [Linuxbrew](http://linuxbrew.sh).
-In both cases, the commands are the same:
+Currently, MUMPS must be installed outside of Julia.
+On macOS and Linux, we recommend using [Homebrew](https://brew.sh).
+
+The commands to install MUMPS are:
 ```bash
 $ brew tap brewsci/num
-$ brew install brewsci-mumps  # use brew options brewsci-mumps for build options
+$ brew tap dpo/mumps-jl
+$ brew install mpich-mumps  # use brew options mpich-mumps for build options
 ```
 
-Note: `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl.
+Note: on Linux, `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl, and installation will fail.
 See the Troubleshooting section below.
-
-All examples above install OpenMPI.
-If you wish to use MPICH, you will have to build MUMPS by hand.
 
 ### Building MUMPS.jl
 
-If MUMPS and SCALAPACK are not in standard locations where BinDeps will find them, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
+If MUMPS and SCALAPACK are not in standard locations, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
 
-The Homebrew and Linuxbrew methods above install MUMPS and SCALAPACK in nonstandard locations.
+The Homebrew method above installs MUMPS and SCALAPACK in nonstandard locations.
 You can define
 ```JULIA
-julia> ENV["MUMPS_PREFIX"] = "/usr/local/opt/brewsci-mumps"
-julia> ENV["SCALAPACK_PREFIX"] = "/usr/local/opt/brewsci-scalapack"
+julia> prefix = chomp(String(read(`brew --prefix`)))
+julia> ENV["MUMPS_PREFIX"] = joinpath(prefix, "opt", "mpich-mumps")
+julia> ENV["SCALAPACK_PREFIX"] = joinpath(prefix, "opt", "mpich-scalapack")
 ```
-on macOS, and something of the form
-```JULIA
-julia> ENV["MUMPS_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-mumps"
-julia> ENV["SCALAPACK_PREFIX"] = "/home/linuxbrew/.linuxbrew/opt/brewsci-scalapack"
-```
-on Linux.
 
 At the Julia prompt, type
 
 ```JULIA
-julia> using Pkg
-julia> Pkg.clone("https://github.com/JuliaSmoothOptimizers/MUMPS.jl.git")
-julia> Pkg.build("MUMPS")
-julia> Pkg.test("MUMPS")
+pkg> add MUMPS
+pkg> build MUMPS
+pkg> test MUMPS
 ```
 
 ## Troubleshooting
@@ -208,8 +202,8 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 * [ ] User-selected permutation
 * [X] Out-of-core option (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
 * [X] Determinant (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [ ] Compute entries of the inverse
+* [X] Compute entries of the inverse (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
 * [X] Control iterative refinement (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [ ] Obtain a Schur complement
-* [ ] Solve with sparse right-hand sides
+* [X] Obtain a Schur complement (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
+* [X] Solve with sparse right-hand sides (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
 * [ ] Sequential, version with no MPI requirement
