@@ -276,7 +276,7 @@ function display_icntl(io::IO, icntl, i, val)
     end
   elseif i == 20
     print(io, "rhs: ")
-    0 < val < 4 ? print(io, "sparse, ") : nothing
+    0 < val < 4 && print(io, "sparse, ")
     if val == 1
       print(io, "sparsity-exploting acceleration of solution ", automatic)
     elseif val == 2
@@ -422,7 +422,6 @@ function display_icntl(io::IO, icntl, i, val)
     print(io, "not used")
   end
   print(io, "\n")
-  return nothing
 end
 
 """
@@ -456,5 +455,4 @@ function display_cntl(io::IO, cntl, i, val)
     print(io, "not used")
   end
   print(io, "\n")
-  return nothing
 end

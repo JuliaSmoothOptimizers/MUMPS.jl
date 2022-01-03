@@ -53,7 +53,7 @@ initialized.
 
 See also: [`invoke_mumps_unsafe!`](@ref)
 """
-invoke_mumps!(mumps::Mumps) = is_finalized(mumps) ? nothing : invoke_mumps_unsafe!(mumps)
+invoke_mumps!(mumps::Mumps) = is_finalized(mumps) ? mumps : invoke_mumps_unsafe!(mumps)
 # function check_finalized(mumps::Mumps)
 # if mumps._finalized
 # throw(MUMPSException("Mumps object already finalized"))
@@ -70,7 +70,7 @@ See also: [`display_icntl`](@ref)
 function set_icntl!(mumps::Mumps, i::Integer, val::Integer; displaylevel = mumps.icntl[4] - 1)
   icntl = mumps.icntl
   mumps.icntl = (icntl[1:(i - 1)]..., convert(MUMPS_INT, val), icntl[(i + 1):end]...)
-  displaylevel > 0 ? display_icntl(stdout, mumps.icntl, i, val) : nothing
+  displaylevel > 0 && display_icntl(stdout, mumps.icntl, i, val)
   return mumps
 end
 
@@ -89,7 +89,7 @@ function set_cntl!(
 ) where {TC, TR}
   cntl = mumps.cntl
   mumps.cntl = (cntl[1:(i - 1)]..., convert(TR, val), cntl[(i + 1):end]...)
-  displaylevel > 0 ? display_cntl(stdout, mumps.cntl, i, val) : nothing
+  displaylevel > 0 && display_cntl(stdout, mumps.cntl, i, val)
   return mumps
 end
 
@@ -109,8 +109,8 @@ end
 set name of directory in which to store out-of-core files.
 """
 function set_save_dir!(mumps, dir::String)
-  length(dir) ≤ 255 ? nothing :
-  throw(MUMPSException("directory name has $(length(dir)) characters, must be ≤255"))
+  length(dir) ≤ 255 ||
+  throw(MUMPSException("directory name has $(length(dir)) characters, must be ≤ 255"))
   i = length(dir + 1)
   save_dir = mumps.save_dir
   mumps.save_dir = (dir..., '\0', save_dir[(i + 2):end]...)
@@ -123,8 +123,8 @@ end
 prefix for out-of-core files.
 """
 function set_save_prefix!(mumps, prefix::String)
-  length(prefix) ≤ 255 ? nothing :
-  throw(MUMPSException("prefix name has $(length(prefix)) characters, must be ≤255"))
+  length(prefix) ≤ 255 ||
+  throw(MUMPSException("prefix name has $(length(prefix)) characters, must be ≤ 255"))
   i = length(prefix + 1)
   save_prefix = mumps.save_prefix
   mumps.save_prefix = (prefix..., '\0', save_prefix[(i + 2):end]...)
@@ -143,7 +143,7 @@ type of `mumps`, throwing a warning in this case.
 See also: [`associate_rhs!`](@ref)
 """
 function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
-  size(A, 1) == size(A, 2) ? nothing :
+  size(A, 1) == size(A, 2) ||
   throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
   T == TA || (@warn "matrix with element type $TA: will attempt conversion to Mumps type $T")
   if is_matrix_assembled(mumps)
