@@ -110,7 +110,7 @@ set name of directory in which to store out-of-core files.
 """
 function set_save_dir!(mumps, dir::String)
   length(dir) ≤ 255 ||
-  throw(MUMPSException("directory name has $(length(dir)) characters, must be ≤ 255"))
+    throw(MUMPSException("directory name has $(length(dir)) characters, must be ≤ 255"))
   i = length(dir + 1)
   save_dir = mumps.save_dir
   mumps.save_dir = (dir..., '\0', save_dir[(i + 2):end]...)
@@ -124,7 +124,7 @@ prefix for out-of-core files.
 """
 function set_save_prefix!(mumps, prefix::String)
   length(prefix) ≤ 255 ||
-  throw(MUMPSException("prefix name has $(length(prefix)) characters, must be ≤ 255"))
+    throw(MUMPSException("prefix name has $(length(prefix)) characters, must be ≤ 255"))
   i = length(prefix + 1)
   save_prefix = mumps.save_prefix
   mumps.save_prefix = (prefix..., '\0', save_prefix[(i + 2):end]...)
@@ -144,7 +144,7 @@ See also: [`associate_rhs!`](@ref)
 """
 function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
   size(A, 1) == size(A, 2) ||
-  throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
+    throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
   T == TA || (@warn "matrix with element type $TA: will attempt conversion to Mumps type $T")
   if is_matrix_assembled(mumps)
     typeof(A) <: SparseMatrixCSC ||
