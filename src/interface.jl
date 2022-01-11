@@ -16,27 +16,21 @@ initialized.
 
 See also: [`invoke_mumps!`](@ref)
 """
-@inline function invoke_mumps_unsafe!(mumps::Mumps{TC, TR}) where {TC, TR}
-  MPI.Initialized() ||
-    throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
-  if TC == Float32
-    cfun = :smumps_c
-    LIB = LIB_S
-  elseif TC == Float64
-    cfun = :dmumps_c
-    LIB = LIB_D
-  elseif TC == ComplexF32
-    cfun = :cmumps_c
-    LIB = LIB_C
-  elseif TC == ComplexF64
-    cfun = :zmumps_c
-    LIB = LIB_Z
-  end
-  sym = dlsym(LIB, cfun)
-  ccall(sym, Cvoid, (Ref{Mumps{TC, TR}},), mumps)
+invoke_mumps_unsafe!
 
-  mumps.err = mumps.infog[1]
-  return mumps
+for (fname, lname, elty, subty) in (("smumps_c", libsmumps, Float32   , Float32),
+                                    ("dmumps_c", libdmumps, Float64   , Float64),
+                                    ("cmumps_c", libcmumps, ComplexF32, Float32),
+                                    ("zmumps_c", libzmumps, ComplexF64, Float64))
+
+  @eval begin
+    function invoke_mumps_unsafe!(mumps :: Mumps{$elty,$subty})
+      MPI.Initialized() || throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
+      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty,$subty}},), mumps)
+      mumps.err = mumps.infog[1]
+      return mumps
+    end
+  end
 end
 
 """
