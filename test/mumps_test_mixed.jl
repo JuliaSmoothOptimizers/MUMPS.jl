@@ -1,12 +1,11 @@
 # Test mixed-type examples.
 
-# For now both A and rhs will be converted to Float64.
 A = random_matrix(Float16, [1, 2, 3, 4], 4, 4)
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
 x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs)
-@test(relres <= eps(Float64)^(1 / 3))
+@test(relres <= eps(Float32)^(1 / 3))
 
 # Here, MUMPS will run in complex single precision.
 mumps = Mumps{ComplexF32}(mumps_unsymmetric, default_icntl, default_cntl32)
@@ -54,4 +53,4 @@ rhs = Array{Int16}([1, 4, 9, 16])
 x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs)
-@test(relres <= eps(Float64)^(1 / 3))
+@test(relres <= eps(Float32)^(1 / 3))
