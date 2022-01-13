@@ -31,25 +31,7 @@ module MUMPS
 
 using MPI, Libdl, LinearAlgebra, SparseArrays
 
-if haskey(ENV, "MUMPS_PREFIX")
-  const libsmumps = joinpath(ENV["MUMPS_PREFIX"], "lib/libsmumps.$dlext")
-  const libdmumps = joinpath(ENV["MUMPS_PREFIX"], "lib/libdmumps.$dlext")
-  const libcmumps = joinpath(ENV["MUMPS_PREFIX"], "lib/libcmumps.$dlext")
-  const libzmumps = joinpath(ENV["MUMPS_PREFIX"], "lib/libzmumps.$dlext")
-else
-  using MUMPS_jll
-end
-
 # include("MUMPS_original.jl")
-# include("MUMPS_C-API.jl")
-
-include("mumps_types.jl")
-include("mumps_struc.jl")
-include("interface.jl")
-include("convenience.jl")
-include("icntl_alibis.jl")
-include("printing.jl")
-
-include("exported_methods.jl")
+include("MUMPS_C-API.jl")
 
 end

@@ -1,3 +1,5 @@
+# this file mirrors the "mumps_c_types.h" header file of MUMPS 5.2.2
+
 const MUMPS_INT = Cint
 const MUMPS_INT8 = Int64
 
