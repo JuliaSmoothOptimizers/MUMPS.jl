@@ -20,7 +20,7 @@ as `x=mumps_solve(A,y)`, or `mumps_solve!(x,A,y)`.
 The package also extends Base.det, Base.\\, LinearAlgebra.ldiv! and LinearAlgebra.inv to
 work with mumps objects.
 
-Note, unless working with the low-level interface, we discourage setting the `JOB`
+Note, unless working with the low-level interace, we discourage setting the `JOB`
 parameter manually, as this can lead to unsafe operation.
 
 The goal is to give the advanced user low-level access to MUMPS, while simultaneously
@@ -28,8 +28,6 @@ giving the ordinary user safe functions that grant access to most of what
 MUMPS has to offer.
 """
 module MUMPS
-
-using MPI, Libdl, LinearAlgebra, SparseArrays
 
 # include("MUMPS_original.jl")
 include("MUMPS_C-API.jl")

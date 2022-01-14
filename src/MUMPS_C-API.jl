@@ -1,3 +1,7 @@
+using Libdl, LinearAlgebra, SparseArrays
+
+using MPI
+
 function __init__()
   _DEPS_FILE = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
   if isfile(_DEPS_FILE)
