@@ -1,4 +1,4 @@
-name: CI
+name: CI-Homebrew
 on:
   push:
     branches:

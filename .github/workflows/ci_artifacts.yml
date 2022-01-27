@@ -1,4 +1,4 @@
-name: CI
+name: CI-Artifacts
 on:
   push:
     branches:
