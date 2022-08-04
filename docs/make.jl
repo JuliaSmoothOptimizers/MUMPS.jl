@@ -4,7 +4,7 @@ makedocs(
   modules = [MUMPS],
   doctest = true,
   linkcheck = true,
-  strict = true,
+  strict = true, # FIXME
   format = Documenter.HTML(
     assets = ["assets/style.css"],
     prettyurls = get(ENV, "CI", nothing) == "true",
