@@ -7,7 +7,8 @@ function __init__()
   if isfile(_DEPS_FILE)
     include(_DEPS_FILE)
   else
-    haskey(ENV, "MUMPS_PREFIX") && error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
+    haskey(ENV, "MUMPS_PREFIX") &&
+      error("MUMPS library not properly installed. Please run Pkg.build(\"MUMPS\")")
   end
 end
 

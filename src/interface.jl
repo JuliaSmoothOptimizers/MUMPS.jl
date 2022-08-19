@@ -18,15 +18,17 @@ See also: [`invoke_mumps!`](@ref)
 """
 invoke_mumps_unsafe!
 
-for (fname, lname, elty, subty) in (("smumps_c", libsmumps, Float32   , Float32),
-                                    ("dmumps_c", libdmumps, Float64   , Float64),
-                                    ("cmumps_c", libcmumps, ComplexF32, Float32),
-                                    ("zmumps_c", libzmumps, ComplexF64, Float64))
-
+for (fname, lname, elty, subty) in (
+  ("smumps_c", libsmumps, Float32, Float32),
+  ("dmumps_c", libdmumps, Float64, Float64),
+  ("cmumps_c", libcmumps, ComplexF32, Float32),
+  ("zmumps_c", libzmumps, ComplexF64, Float64),
+)
   @eval begin
-    function invoke_mumps_unsafe!(mumps :: Mumps{$elty,$subty})
-      MPI.Initialized() || throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
-      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty,$subty}},), mumps)
+    function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty})
+      MPI.Initialized() ||
+        throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
+      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty}},), mumps)
       mumps.err = mumps.infog[1]
       return mumps
     end
