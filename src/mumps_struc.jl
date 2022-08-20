@@ -12,7 +12,7 @@ mutable struct MUMPSException <: Exception
 end
 const MUMPSValueDataType = Union{Float32, Float64, ComplexF32, ComplexF64}
 
-const MUMPS_VERSION = "5.4.1"
+const MUMPS_VERSION = "5.5.1"
 const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
