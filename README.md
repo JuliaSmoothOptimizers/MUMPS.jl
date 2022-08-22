@@ -1,79 +1,41 @@
-# A [Julia](http://julialang.org) Interface to [MUMPS](http://mumps.enseeiht.fr)
+# A [Julia](http://julialang.org) Interface to [MUMPS](https://graal.ens-lyon.fr/MUMPS/index.php?page=home)
 
-OSX and Linux: [![CI](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/actions/workflows/ci.yml)
-[![](https://img.shields.io/badge/docs-latest-3f51b5.svg)](https://JuliaSmoothOptimizers.github.io/MUMPS.jl/latest)
-[![Coverage Status](https://coveralls.io/repos/JuliaSmoothOptimizers/MUMPS.jl/badge.svg?branch=main&service=github)](https://coveralls.io/github/JuliaSmoothOptimizers/MUMPS.jl?branch=main)
+[![docs-stable][docs-stable-img]][docs-stable-url]
+[![docs-dev][docs-dev-img]][docs-dev-url]
+[![build-gh][build-gh-img]][build-gh-url]
+[![build-cirrus][build-cirrus-img]][build-cirrus-url]
+[![codecov][codecov-img]][codecov-url]
+[![doi][doi-img]][doi-url]
 
-MUMPS is a library for the solution of large linear systems using a
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://JuliaSmoothOptimizers.github.io/MUMPS.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-purple.svg
+[docs-dev-url]: https://JuliaSmoothOptimizers.github.io/MUMPS.jl/dev
+[build-gh-img]: https://github.com/JuliaSmoothOptimizers/MUMPS.jl/workflows/CI/badge.svg?branch=main
+[build-gh-url]: https://github.com/JuliaSmoothOptimizers/MUMPS.jl/actions
+[build-cirrus-img]: https://img.shields.io/cirrus/github/JuliaSmoothOptimizers/MUMPS.jl?logo=Cirrus%20CI
+[build-cirrus-url]: https://cirrus-ci.com/github/JuliaSmoothOptimizers/MUMPS.jl
+[codecov-img]: https://codecov.io/gh/JuliaSmoothOptimizers/MUMPS.jl/branch/main/graph/badge.svg
+[codecov-url]: https://app.codecov.io/gh/JuliaSmoothOptimizers/MUMPS.jl
+[doi-img]: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3271646-blue.svg
+[doi-url]: https://doi.org/10.5281/zenodo.3271646
+
+MUMPS is a library for the solution of large square linear systems using a
 factorization. Structure can be exploited, such as symmetry, or symmetry and
 definiteness. The factorization and solve phases can be performed in parallel
 via MPI by way of [MPI.jl](https://github.com/JuliaParallel/MPI.jl).
-In our experience, MPICH works more reliably than OpenMPI with MPI.jl.
+
+## How to Cite
+
+If you use MUMPS.jl in your work, please cite using the format given in [`CITATION.bib`](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/blob/main/CITATION.bib)
 
 ## How to Install
 
-### Prerequisites
-
-Currently, MUMPS must be installed outside of Julia.
-On macOS and Linux, we recommend using [Homebrew](https://brew.sh).
-
-The commands to install MUMPS are:
-```bash
-$ brew tap brewsci/num
-$ brew tap dpo/mumps-jl
-$ brew install mpich-mumps  # use brew options mpich-mumps for build options
-```
-
-Note: on Linux, `apt-get install libmumps-dev` installs a version of OpenMPI that is too old for MPI.jl, and installation will fail.
-See the Troubleshooting section below.
-
-### Building MUMPS.jl
-
-If MUMPS and SCALAPACK are not in standard locations, you can help by setting the environment variables `MUMPS_PREFIX` and `SCALAPACK_PREFIX`.
-
-The Homebrew method above installs MUMPS and SCALAPACK in nonstandard locations.
-You can define
-```JULIA
-julia> prefix = chomp(String(read(`brew --prefix`)))
-julia> ENV["MUMPS_PREFIX"] = joinpath(prefix, "opt", "mpich-mumps")
-julia> ENV["SCALAPACK_PREFIX"] = joinpath(prefix, "opt", "mpich-scalapack")
-```
-
-At the Julia prompt, type
-
-```JULIA
+```julia
+julia> ]
 pkg> add MUMPS
-pkg> build MUMPS
 pkg> test MUMPS
 ```
-
-## Troubleshooting
-
-On macOS or Linux, if you see the error message
-```
-[ 11%] Building Fortran object CMakeFiles/gen_constants.dir/gen_constants.f90.o
-│ /home/ubuntu/.julia/packages/MPI/U5ujD/deps/gen_constants.f90:43:43:
-│
-│    call output("MPI_NO_OP       ", MPI_NO_OP)
-│                                            1
-│ Error: Symbol ‘mpi_no_op’ at (1) has no IMPLICIT type
-```
-your OpenMPI library is [too old](https://github.com/JuliaParallel/MPI.jl/issues/39#issuecomment-441093933).
-
-If you are running macOS and see error messages of the form
-```
-PMIx has detected a temporary directory name that results in a path that is too long for the Unix domain socket:
-
-  Temp dir:
-  /var/folders/rq/p5nq9tv17p5drlk49755jjz80000gn/T/openmpi-sessions-501@your_computer_name_0/44473
-
-Try setting your TMPDIR environmental variable to point to something shorter in length
-```
-simply exit Julia and set the environment variable `TMPDIR` to, e.g., `\tmp`:
-```bash
-$ export TMPDIR=/tmp
-```
-The issue has to do with OpenMPI and is [documented in their faq](https://www.open-mpi.org/faq/?category=osx#startup-errors-with-open-mpi-2.0.x).
 
 ## How to Use
 
@@ -81,16 +43,15 @@ The main data type holding information on a factorization is `Mumps`. Remember
 to initialize MPI before attempting to create a `Mumps` object. A simple
 session is as follows:
 
-````JULIA
-julia> using MUMPS
-julia> using MPI
-julia> MPI.Init()
-julia> A = sprand(10, 10, .2) + speye(10); rhs = rand(10)
-julia> x = solve(A, rhs)  # Mumps object is created and destroyed
-julia> norm(x - A \ rhs) / norm(x)
-2.640677159735313e-16
-julia> MPI.Finalize()     # if you're finished
-````
+```julia
+using MUMPS, MPI, SparseArrays
+MPI.Init()
+A = sprand(10, 10, 0.2) + I
+rhs = rand(10)
+x = solve(A, rhs)
+norm(x - A \ rhs) / norm(x)
+MPI.Finalize()
+```
 
 It is possible to separate the initialization, the analysis/factorization,
 and the solve phases. It is also possible to access the information reported by
@@ -99,23 +60,24 @@ MUMPS after the factorization and solve phases, and to modify this information
 
 When creating an instance of a `Mumps` object explicitly, it is important to
 specify in advance what arithmetic should be used. Single and double precision
-real (`Float32` and `Float64`) and complex (`Complex64` and `Complex128`)
+real (`Float32` and `Float64`) and complex (`ComplexF32` and `ComplexF64`)
 arithmetics are supported.
 
 For instance,
 
-````JULIA
-julia> MPI.Init()
-julia> mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64)  # Real, general unsymmetric
-julia> A = sparse(rand(4,4)); rhs = rand(4)       # Happens on all cores
-julia> associate_matrix!(mumps, A)
-julia> factorize!(mumps)
-julia> associate_rhs!(mumps, rhs)
-julia> solve!(mumps)
-julia> x = get_solution(mumps)
-julia> finalize(mumps)
-julia> MPI.Finalize()
-````
+```julia
+MPI.Init()
+mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64)
+A = sparse(rand(4,4))
+rhs = rand(4)
+associate_matrix!(mumps, A)
+factorize!(mumps)
+associate_rhs!(mumps, rhs)
+solve!(mumps)
+x = get_solution(mumps)
+finalize(mumps)
+MPI.Finalize()
+```
 
 Once the arithmetic of the `Mumps` instance has been specified, it cannot be
 changed. The module is flexible in that various data types may be used to
@@ -125,11 +87,12 @@ converted to sparse format.
 
 For intance,
 
-```JULIA
-julia> mumps = Mumps{Complex128}(mumps_unsymmetric, default_icntl, default_cntl64)
-julia> A = rand(Int16, 4, 4); rhs = rand(Float32, 4)
-julia> associate_matrix!(mumps, A)  # A is converted to a sparse Complex128 matrix
-julia> associate_rhs!(mumps, rhs)   # rhs is converted to a Complex128 array
+```julia
+mumps = Mumps{ComplexF64}(mumps_unsymmetric, default_icntl, default_cntl64)
+A = rand(Int16, 4, 4)
+rhs = rand(Float32, 4)
+associate_matrix!(mumps, A)  # A is converted to a sparse ComplexF64 matrix
+associate_rhs!(mumps, rhs)   # rhs is converted to a Complex64 vector
 ```
 
 See [test](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/tree/main/test) for more examples.
@@ -150,7 +113,7 @@ Constant            | Meaning
 `default_cntl32`    | array of default real parameters in single precision
 `default_cntl64`    | array of default real parameters in double precision
 
-See Sections 5.1 and 5.2 of the [MUMPS User's Manual](http://mumps.enseeiht.fr/index.php?page=doc) for a description of the integer and real control arrays.
+See Section 5 of the [MUMPS User's Manual](https://graal.ens-lyon.fr/MUMPS/index.php?page=doc) for a description of the integer and real control arrays.
 
 ### Methods
 
@@ -158,7 +121,7 @@ A `Mumps` object is created using the default constructor, which must be
 supplied with:
 
 * the data type for the arithmetic to be used, as a type parameter, i.e.,
-  `Mumps{Float64}(...)` or `Mumps{Complex128}(...)`
+  `Mumps{Float64}(...)` or `Mumps{ComplexF64}(...)`
 * `sym`: one of the constants `mumps_unsymmetric`, `mumps_definite` or
   `mumps_symmetric`. Note that there is no support for Hermitian complex
   matrices in MUMPS. Therefore, we recommend to always use `mumps_unsymmetric`
@@ -191,23 +154,24 @@ Method             | Description
 
 ## Parallel Execution
 
-MPI is controled by way of [MPI.jl](https://github.com/lcw/MPI.jl).
+MPI is controled by way of [MPI.jl](https://github.com/JuliaParallel/MPI.jl).
 Look for the lines that say `NUMBER OF WORKING PROCESSES` in the output of
 
-````
+```shell
 mpirun -np 4 julia examples/mumps_mpi.jl
-````
+```
 
-## To Do (Pull Requests Welcome!)
+## Custom Installation
 
-* [X] Support double precision complex arithmetic (in [99c23fe](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/99c23fe87e7c985fe3062d78ab7664b82a6b8dba))
-* [X] Support single precision real and complex arithmetic (in [654814a](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/654814a5e5800260011d2f26f7fb6de179609cfa))
-* [ ] Support distributed matrices / vectors
-* [ ] User-selected permutation
-* [X] Out-of-core option (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [X] Determinant (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [X] Compute entries of the inverse (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
-* [X] Control iterative refinement (in [73e829b](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/73e829b52fe3d20c70c2733607ba9820cda03ed6#diff-d41d8cd98f00b204e9800998ecf8427e))
-* [X] Obtain a Schur complement (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
-* [X] Solve with sparse right-hand sides (in [002b34eb](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/commit/002b34eb861657118c05fa08f2b0eb5aababe22c))
-* [ ] Sequential, version with no MPI requirement
+**Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
+
+To use your custom MUMPS, set the environment variable `JULIA_MUMPS_LIBRARY_PATH`
+to point to the shared library before `using MUMPS`. Note that MUMPS version 5.5.1 is needed.
+
+For example:
+```julia
+ENV["JULIA_MUMPS_LIBRARY_PATH"] = "~/Applications/MUMPS_5.5.1/lib"
+using MUMPS
+```
+
+Alternatively, you can create an entry in `.julia/config/startup.jl` or set these permanently through your operating system.
