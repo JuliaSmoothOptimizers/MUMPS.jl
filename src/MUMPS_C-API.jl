@@ -3,7 +3,7 @@ using Libdl, LinearAlgebra, SparseArrays
 using MPI
 
 if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
-  println("Custom Installation")
+  @info("Custom Installation")
   const libsmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libsmumps.$dlext")
   const libdmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
   const libcmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
