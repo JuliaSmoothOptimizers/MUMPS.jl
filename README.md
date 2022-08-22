@@ -165,11 +165,8 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 
 **Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
 
-To use your custom MUMPS, set the environmental variables `JULIA_MUMPS_LIBRARY_PATH`
-to point the shared library. Note that **MUMPS** version 5.5.1 is needed.
-
-**Very important note: you must set these environment variables before
-calling `using MUMPS` in every Julia session.**
+To use your custom MUMPS, set the environment variable `JULIA_MUMPS_LIBRARY_PATH`
+to point to the shared library before `using MUMPS`. Note that **MUMPS** version 5.5.1 is needed.
 
 For example:
 ```julia
