@@ -16,7 +16,7 @@ initialized.
 
 See also: [`invoke_mumps!`](@ref)
 """
-invoke_mumps_unsafe!
+function invoke_mumps_unsafe! end
 
 for (fname, lname, elty, subty) in (
   ("smumps_c", libsmumps, Float32, Float32),
@@ -152,12 +152,14 @@ function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
     return _associate_matrix_elemental!(mumps, convert(Matrix, A))
   end
 end
+
 function _associate_matrix_assembled!(mumps::Mumps, A::SparseMatrixCSC{T}) where {T}
   if is_matrix_distributed(mumps)
     return _associate_matrix_assembled_distributed!(mumps, A)
   end
   return _associate_matrix_assembled_centralized!(mumps, A)
 end
+
 function _associate_matrix_assembled_centralized!(mumps::Mumps{T}, A::SparseMatrixCSC) where {T}
   if is_symmetric(mumps)
     I, J, V = findnz(triu(A))
@@ -171,9 +173,11 @@ function _associate_matrix_assembled_centralized!(mumps::Mumps{T}, A::SparseMatr
   append!(mumps._gc_haven, [Ref(irn), Ref(jcn), Ref(a)])
   return mumps
 end
+
 function _associate_matrix_assembled_distributed!(mumps::Mumps{T}, A::SparseMatrixCSC) where {T}
   throw(MUMPSException("not written yet."))
 end
+
 function _associate_matrix_elemental!(mumps::Mumps{T}, A::Array) where {T}
   mumps.n = size(A, 1)
   mumps.nelt = 1
@@ -208,6 +212,7 @@ function associate_rhs!(mumps::Mumps, rhs::AbstractMatrix)
   end
   return associate_rhs_sparse!(mumps, rhs)
 end
+
 function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   rhs = convert(SparseMatrixCSC, rhs)
 
@@ -230,6 +235,7 @@ function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   append!(mumps._gc_haven, [Ref(rhs_sparse), Ref(irhs_sparse), Ref(irhs_ptr)])
   return mumps
 end
+
 function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   y = convert(Matrix{T}, rhs)[:]
   mumps.rhs = pointer(y)
@@ -238,6 +244,7 @@ function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   push!(mumps._gc_haven, Ref(y))
   return mumps
 end
+
 associate_rhs!(mumps::Mumps, rhs::AbstractVector) = associate_rhs!(mumps, repeat(rhs, 1, 1))
 
 """
@@ -257,6 +264,7 @@ function get_rhs!(x, mumps::Mumps)
   end
   return x
 end
+
 function get_rhs_unsafe!(x::SparseMatrixCSC, mumps::Mumps)
   is_rhs_dense(mumps) &&
     throw(MUMPSException("rhs is dense, target is sparse. try with dense target"))
@@ -269,6 +277,7 @@ function get_rhs_unsafe!(x::SparseMatrixCSC, mumps::Mumps)
   end
   return x
 end
+
 function get_rhs_unsafe!(x::Union{SubArray, Array}, mumps::Mumps)
   is_rhs_dense(mumps) ||
     throw(MUMPSException("rhs is sparse, target is dense. try with sparse target"))
@@ -277,6 +286,7 @@ function get_rhs_unsafe!(x::Union{SubArray, Array}, mumps::Mumps)
   end
   return x
 end
+
 """
     get_rhs(mumps) -> y
 
@@ -319,12 +329,14 @@ function get_sol!(x::Union{SubArray, Array}, mumps::Mumps)
   end
   return x
 end
+
 function get_sol_unsafe!(x::Union{SubArray, Array}, mumps::Mumps)
   for i ∈ LinearIndices(x)
     x[i] = unsafe_load(mumps.rhs, i)
   end
   return x
 end
+
 """
     get_sol(mumps) -> x
 
@@ -348,12 +360,14 @@ function get_schur!(S, mumps::Mumps)
   has_schur(mumps) || throw(MUMPSException("schur complement not yet allocated."))
   get_schur_unsafe!(S, mumps)
 end
+
 function get_schur_unsafe!(S, mumps::Mumps)
   for i ∈ LinearIndices(S)
     S[i] = unsafe_load(mumps.schur, i)
   end
   return S
 end
+
 """
     get_schur(mumps) -> S
 
@@ -429,4 +443,5 @@ has_rhs(mumps::Mumps) = mumps.nrhs * mumps.lrhs > 0 || mumps.nz_rhs > 0
 has_schur(mumps::Mumps) = mumps.size_schur > 0
 
 LinearAlgebra.issymmetric(mumps::Mumps) = is_symmetric(mumps)
+
 LinearAlgebra.isposdef(mumps::Mumps) = is_posdef(mumps)

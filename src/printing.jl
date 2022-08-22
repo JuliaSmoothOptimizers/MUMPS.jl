@@ -94,8 +94,12 @@ Show the complete ICNTL integer array of `mumps`, with descriptions
 
 See also: [`set_icntl!`](@ref)
 """
+function display_icntl end
+
 display_icntl(mumps::Mumps) = display_icntl(stdout, mumps)
+
 display_icntl(io::IO, mumps::Mumps) = display_icntl(io, mumps.icntl)
+
 function display_icntl(io::IO, icntl)
   for i ∈ eachindex(icntl)
     display_icntl(io, icntl, i, icntl[i])
@@ -431,12 +435,16 @@ Show the complete CNTL real array of `mumps`, with descriptions
 
 See also: [`set_cntl!`](@ref)
 """
+function display_cntl end
+
 display_cntl(io::IO, mumps::Mumps) = display_cntl(io, mumps.mumps.cntl)
+
 function display_cntl(io::IO, cntl)
   for i ∈ eachindex(cntl)
     display_icntl(io, cntl, i, cntl[i])
   end
 end
+
 function display_cntl(io::IO, cntl, i, val)
   print(io, "$i,\t$val\t")
   if i == 1

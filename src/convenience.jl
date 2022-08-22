@@ -17,6 +17,8 @@ If `y` is not given, `mumps` must have previously been provided `y`
 
 See also: [`mumps_solve`](@ref), [`get_sol!`](@ref), [`get_sol`](@ref)
 """
+function mumps_solve! end
+
 function mumps_solve!(mumps::Mumps)
   if mumps.job ∈ [2, 4] # if already factored, just solve
     mumps.job = 3
@@ -29,10 +31,12 @@ function mumps_solve!(mumps::Mumps)
   end
   invoke_mumps!(mumps)
 end
+
 function mumps_solve!(x::AbstractArray, mumps::Mumps)
   mumps_solve!(mumps)
   get_sol!(x, mumps)
 end
+
 function mumps_solve!(x::AbstractArray, A::AbstractArray, rhs::AbstractArray; kwargs...)
   mumps = Mumps(A, rhs; kwargs...)
   suppress_display!(mumps)
@@ -40,6 +44,7 @@ function mumps_solve!(x::AbstractArray, A::AbstractArray, rhs::AbstractArray; kw
   mumps_solve!(x, mumps)
   # finalize!(mumps)
 end
+
 function mumps_solve!(x::AbstractArray, mumps::Mumps, rhs::AbstractArray)
   provide_rhs!(mumps, rhs)
   if mumps.job ∈ [2, 4] # if already factored, just solve
@@ -52,6 +57,7 @@ function mumps_solve!(x::AbstractArray, mumps::Mumps, rhs::AbstractArray)
   end
   mumps_solve!(x, mumps)
 end
+
 """
     mumps_solve(A,y) -> x
     mumps_solve(mumps,y) -> x
@@ -63,6 +69,8 @@ If only input is `mumps` must also have been provided `y`.
 
 See also: [`mumps_solve!`](@ref)
 """
+function mumps_solve end
+
 function mumps_solve(mumps::Mumps)
   if mumps.job ∈ [3, 5, 6]
     x = get_sol(mumps)
@@ -72,10 +80,12 @@ function mumps_solve(mumps::Mumps)
   x = convert(Matrix, x)
   mumps_solve!(x, mumps)
 end
+
 function mumps_solve(A::AbstractArray, rhs::AbstractArray{T, N}; kwargs...) where {T, N}
   x = fill(convert(promote_type(eltype(A), eltype(rhs)), NaN), size(rhs)...)
   mumps_solve!(x, A, rhs; kwargs...)
 end
+
 function mumps_solve(mumps::Mumps, rhs::AbstractArray)
   x = copy(convert(Matrix, rhs))
   mumps_solve!(x, mumps, rhs)
@@ -101,6 +111,7 @@ function mumps_factorize!(mumps::Mumps)
   end
   invoke_mumps!(mumps)
 end
+
 """
     mumps_factorize(A) -> mumps
 
@@ -128,7 +139,7 @@ Determinant can be computed from mutated `mumps` by just `det(mumps)`
 Optional keyward `discard` controls whether LU factors are discarded via
 ICNTL[31]. This is useful if you only care about the determinant and don't
 want to do any further computation with `mumps`. Use `discard=2` to throw
-away only L. See manual for [MUMPS 5.1.2](http://mumps.enseeiht.fr/doc/userguide_5.2.0.pdf#page=42).
+away only L.
 
 See also: [`mumps_det`](@ref)
 """
@@ -141,6 +152,7 @@ function mumps_det!(mumps::Mumps; discard = true)
   mumps.job > 0 && (mumps.job = 1)
   mumps_factorize!(mumps)
 end
+
 """
     mumps_det(A) -> det
 
@@ -166,6 +178,8 @@ If `x` is sparse, Schur indices determined from populated rows of `x`
 
 See also: [`mumps_schur`](@ref), [`get_schur!`](@ref), [`get_schur`](@ref)
 """
+function mumps_schur! end
+
 function mumps_schur!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   set_schur_centralized_by_column!(mumps, schur_inds)
   if mumps.job ∈ [1] # if analyzed only, factorize
@@ -175,9 +189,11 @@ function mumps_schur!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   end
   invoke_mumps!(mumps)
 end
-mumps_schur!(mumps::Mumps, x::SparseMatrixCSC) =
-  mumps_schur!(mumps, unique!(sort(x.rowval)))
+
+mumps_schur!(mumps::Mumps, x::SparseMatrixCSC) = mumps_schur!(mumps, unique!(sort(x.rowval)))
+
 mumps_schur!(mumps::Mumps, x::SparseVector) = mumps_schur!(mumps, x.nzind)
+
 """
     mumps_schur(A,schur_inds) -> S
     mumps_schur(A,x) -> S
@@ -208,6 +224,8 @@ with matrix `A`.
 
 See also: [`mumps_select_inv`](@ref), [`get_rhs!`](@ref), [`get_rhs`](@ref)
 """
+function mumps_select_inv! end
+
 function mumps_select_inv!(x::AbstractSparseArray, mumps::Mumps)
   set_icntl!(mumps, 30, 1)
   set_icntl!(mumps, 20, 3)
@@ -222,6 +240,7 @@ function mumps_select_inv!(x::AbstractSparseArray, mumps::Mumps)
   invoke_mumps!(mumps)
   get_rhs!(x, mumps)
 end
+
 function mumps_select_inv!(x, A)
   size(x) == size(A) || throw(MUMPSException("target and matrix must have same size"))
   mumps = Mumps(A)
@@ -230,6 +249,7 @@ function mumps_select_inv!(x, A)
   finalize!(mumps)
   return x
 end
+
 """
     mumps_select_inv(A,x) -> A⁻¹
     mumps_select_inv(A,I,J) -> A⁻¹
@@ -242,10 +262,13 @@ entries via `i(k),j(k) = I[k],J[k]`.
 
 See also: [`mumps_select_inv!`](@ref)
 """
+function mumps_select_inv end
+
 function mumps_select_inv(A, x::AbstractSparseArray)
   y = similar(x)
   mumps_select_inv!(y, A)
 end
+
 function mumps_select_inv(A, I::AbstractArray{Int}, J::AbstractArray{Int})
   x = sparse(I, J, fill(one(eltype(A)), length(I)), size(A)...)
   mumps_select_inv!(x, A)
@@ -270,12 +293,13 @@ end
 
 Release the pointers contained in `mumps`
 
-See also: [`initialize`](@ref)
+See also: [`initialize!`](@ref)
 """
 function finalize!(mumps::Mumps)
   suppress_display!(mumps)
   return is_finalized(mumps) ? mumps : finalize_unsafe!(mumps)
 end
+
 function finalize_unsafe!(mumps::Mumps)
   mumps._finalized = true
   mumps.job = -2
@@ -290,6 +314,7 @@ function Base.:\(mumps::Mumps, y)
   x = mumps_solve(mumps, y)
   return x
 end
+
 function LinearAlgebra.ldiv!(mumps::Mumps, y)
   suppress_display!(mumps)
   if mumps.job < 2
@@ -300,6 +325,7 @@ function LinearAlgebra.ldiv!(mumps::Mumps, y)
   provide_rhs!(mumps, y)
   mumps_solve!(y, mumps)
 end
+
 function LinearAlgebra.ldiv!(x, mumps::Mumps, y)
   suppress_display!(mumps)
   if mumps.job < 2
@@ -307,6 +333,7 @@ function LinearAlgebra.ldiv!(x, mumps::Mumps, y)
   end
   mumps_solve!(x, mumps, y)
 end
+
 # function LinearAlgebra.inv(mumps::Mumps)
 #     suppress_display!(mumps)
 #     y = sparse(1:mumps.n,1:mumps.n,1:mumps.n,mumps.n,mumps.n)

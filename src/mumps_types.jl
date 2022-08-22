@@ -1,4 +1,4 @@
-# this file mirrors the "mumps_c_types.h" header file of MUMPS 5.2.2
+# this file mirrors the "mumps_c_types.h" header file
 
 const MUMPS_INT = Cint
 const MUMPS_INT8 = Int64
@@ -13,10 +13,12 @@ mutable struct Mumps_complex
   r::Cfloat
   i::Cfloat
 end
+
 mutable struct Mumps_double_complex
   r::Cdouble
   i::Cdouble
 end
+
 const CMUMPS_COMPLEX = Mumps_complex
 const CMUMPS_REAL = Cfloat
 
