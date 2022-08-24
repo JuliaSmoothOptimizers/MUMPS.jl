@@ -175,8 +175,7 @@ function mumps_schur!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   end
   invoke_mumps!(mumps)
 end
-mumps_schur!(mumps::Mumps, x::SparseMatrixCSC) =
-  mumps_schur!(mumps, unique!(sort(x.rowval)))
+mumps_schur!(mumps::Mumps, x::SparseMatrixCSC) = mumps_schur!(mumps, unique!(sort(x.rowval)))
 mumps_schur!(mumps::Mumps, x::SparseVector) = mumps_schur!(mumps, x.nzind)
 """
     mumps_schur(A,schur_inds) -> S
