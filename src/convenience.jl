@@ -190,7 +190,8 @@ function mumps_schur_complement!(mumps::Mumps, schur_inds::AbstractArray{Int, 1}
   invoke_mumps!(mumps)
 end
 
-mumps_schur_complement!(mumps::Mumps, x::SparseMatrixCSC) = mumps_schur_complement!(mumps, unique!(sort(x.rowval)))
+mumps_schur_complement!(mumps::Mumps, x::SparseMatrixCSC) =
+  mumps_schur_complement!(mumps, unique!(sort(x.rowval)))
 
 mumps_schur_complement!(mumps::Mumps, x::SparseVector) = mumps_schur_complement!(mumps, x.nzind)
 
