@@ -350,18 +350,18 @@ function get_sol(mumps::Mumps{T}) where {T}
 end
 
 """
-    get_schur!(S,mumps)
+    get_schur_complement!(S,mumps)
 
 Retrieve Schur complement matrix from `mumps` into pre-allocated `S`
 
-See also: [`get_schur`](@ref), [`mumps_schur!`](@ref), [`mumps_schur`](@ref)
+See also: [`get_schur_complement`](@ref), [`mumps_schur_complement!`](@ref), [`mumps_schur_complement`](@ref)
 """
-function get_schur!(S, mumps::Mumps)
+function get_schur_complement!(S, mumps::Mumps)
   has_schur(mumps) || throw(MUMPSException("schur complement not yet allocated."))
-  get_schur_unsafe!(S, mumps)
+  get_schur_complement_unsafe!(S, mumps)
 end
 
-function get_schur_unsafe!(S, mumps::Mumps)
+function get_schur_complement_unsafe!(S, mumps::Mumps)
   for i ∈ LinearIndices(S)
     S[i] = unsafe_load(mumps.schur, i)
   end
@@ -369,15 +369,15 @@ function get_schur_unsafe!(S, mumps::Mumps)
 end
 
 """
-    get_schur(mumps) -> S
+    get_schur_complement(mumps) -> S
 
 Retrieve Schur complement matrix `S` from `mumps`
 
-See also: [`get_schur!`](@ref), [`mumps_schur!`](@ref), [`mumps_schur`](@ref)
+See also: [`get_schur_complement!`](@ref), [`mumps_schur_complement!`](@ref), [`mumps_schur_complement`](@ref)
 """
-function get_schur(mumps::Mumps{T}) where {T}
+function get_schur_complement(mumps::Mumps{T}) where {T}
   S = Array{T}(undef, mumps.size_schur, mumps.size_schur)
-  get_schur!(S, mumps)
+  get_schur_complement!(S, mumps)
 end
 
 """
@@ -386,7 +386,7 @@ end
 Set up Schur complement matrix calculation for the "centralized by column"
 method suggested in the MUMPS manual
 
-See also: [`mumps_schur!`](@ref), [`mumps_schur`](@ref)
+See also: [`mumps_schur_complement!`](@ref), [`mumps_schur_complement`](@ref)
 """
 function set_schur_centralized_by_column!(mumps::Mumps{T}, schur_inds::AbstractArray{Int}) where {T}
   mumps.size_schur = length(schur_inds)

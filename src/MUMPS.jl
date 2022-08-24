@@ -11,7 +11,7 @@ This mode of operation gives the user complete control as described
 in the MUMPS manual, though it exposes unsafe operations, so beware.
 
 More convenient are the use of the functions [`mumps_solve`](@ref), [`mumps_factorize`](@ref),
-[`mumps_det`](@ref), [`mumps_schur`](@ref), and [`mumps_select_inv`](@ref), which all have
+[`mumps_det`](@ref), [`mumps_schur_complement`](@ref), and [`mumps_select_inv`](@ref), which all have
 mutating counterparts (such as [`mumps_solve!`](@ref)). These can take matrices
 and right hand sides directly, so, for example, the equation `A*x=y`, solved
 in Base by `x=A\\y` or `LinearAlbegra.ldiv!(x,A,y)`, can be solved with MUMPS

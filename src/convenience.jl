@@ -170,17 +170,17 @@ function mumps_det(A)
 end
 
 """
-    mumps_schur!(mumps, schur_inds)
-    mumps_schur!(mumps, x)
+    mumps_schur_complement!(mumps, schur_inds)
+    mumps_schur_complement!(mumps, x)
 
 `schur_inds` is integer array of Schur indices.
 If `x` is sparse, Schur indices determined from populated rows of `x`
 
-See also: [`mumps_schur`](@ref), [`get_schur!`](@ref), [`get_schur`](@ref)
+See also: [`mumps_schur_complement`](@ref), [`get_schur_complement!`](@ref), [`get_schur_complement`](@ref)
 """
-function mumps_schur! end
+function mumps_schur_complement! end
 
-function mumps_schur!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
+function mumps_schur_complement!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   set_schur_centralized_by_column!(mumps, schur_inds)
   if mumps.job ∈ [1] # if analyzed only, factorize
     mumps.job = 2
@@ -190,26 +190,26 @@ function mumps_schur!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   invoke_mumps!(mumps)
 end
 
-mumps_schur!(mumps::Mumps, x::SparseMatrixCSC) = mumps_schur!(mumps, unique!(sort(x.rowval)))
+mumps_schur_complement!(mumps::Mumps, x::SparseMatrixCSC) = mumps_schur_complement!(mumps, unique!(sort(x.rowval)))
 
-mumps_schur!(mumps::Mumps, x::SparseVector) = mumps_schur!(mumps, x.nzind)
+mumps_schur_complement!(mumps::Mumps, x::SparseVector) = mumps_schur_complement!(mumps, x.nzind)
 
 """
-    mumps_schur(A,schur_inds) -> S
-    mumps_schur(A,x) -> S
+    mumps_schur_complement(A,schur_inds) -> S
+    mumps_schur_complement(A,x) -> S
 
 `schur_inds` is integer array
 `x` is sparse, populated rows are Schur indices
 `S` is Schur complement matrix.
 
-See also: [`mumps_schur!`](@ref)
+See also: [`mumps_schur_complement!`](@ref)
 """
-function mumps_schur(A::AbstractArray, x)
+function mumps_schur_complement(A::AbstractArray, x)
   mumps = Mumps(A)
   suppress_display!(mumps)
   set_icntl!(mumps, 8, 0) # turn scaling off, not used with schur anyway (suppresses warning message with schur)
-  mumps_schur!(mumps, x)
-  S = get_schur(mumps)
+  mumps_schur_complement!(mumps, x)
+  S = get_schur_complement(mumps)
   finalize!(mumps)
   return S
 end
