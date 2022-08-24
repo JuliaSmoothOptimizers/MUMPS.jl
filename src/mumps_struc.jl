@@ -16,7 +16,7 @@ const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
 """
-mirror of structre in [sdcz]mumps_c.h
+Mirror of structre in `[sdcz]mumps_c.h`.
 """
 mutable struct Mumps{TC, TR}
   sym::MUMPS_INT # MANDATORY 0 for unsymmetric, 1 for symmetric and posdef, 2 for general symmetric. All others treated as 0
