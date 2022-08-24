@@ -8,7 +8,7 @@ makedocs(
   strict = true,
   format = Documenter.HTML(
     assets = ["assets/style.css"],
-    ansicolor=true,
+    ansicolor = true,
     prettyurls = get(ENV, "CI", nothing) == "true",
   ),
   sitename = "MUMPS.jl",
