@@ -20,7 +20,9 @@ Retrieve the solution of the system solved by `solve()`. This
 function makes it possible to ask MUMPS to assemble the final solution
 on the host only, and to retrieve it there.
 """
-get_solution = get_sol
+function get_solution end
+
+get_solution(args...; kwargs...) = get_sol(args...; kwargs...)
 
 """
     factorize!(mumps)
@@ -33,6 +35,7 @@ function factorize!(mumps::Mumps)
   # suppress_printing!(mumps)
   mumps_factorize!(mumps)
 end
+
 """
     factorize!(mumps,A)
 Combined associate_matrix / factorize.
@@ -52,7 +55,8 @@ The matrix and right-hand side(s) must have been previously registered
 with `associate_matrix()` and `associate_rhs()`. The optional keyword
 argument `transposed` indicates whether the user wants to solve the
 forward or transposed system. The solution is stored internally and must
-be retrieved with `get_solution()`."""
+be retrieved with `get_solution()`.
+"""
 function solve!(mumps::Mumps; transposed::Bool = false)
   # suppress_printing!(mumps)
   transposed && transpose!(mumps)
@@ -67,26 +71,30 @@ Combined associate_rhs / solve.
 Presume that `rhs` is available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
-The solution is retrieved and returned."""
+The solution is retrieved and returned.
+"""
 function solve(mumps::Mumps, rhs::AbstractArray; transposed::Bool = false)
   associate_rhs!(mumps, rhs)
   solve!(mumps; transposed = transposed)
   return get_sol(mumps)
 end
+
 """
-    solve(mumps,A,rhs; transposed=false)
+    solve(mumps, A, rhs; transposed=false)
 Combined analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `transposed` indicates whether
 the user wants to solve the forward or transposed system.
-The solution is retrieved and returned."""
+The solution is retrieved and returned.
+"""
 function solve(mumps::Mumps, A::AbstractArray, rhs::AbstractArray; transposed::Bool = false)
   # suppress_printing!(mumps)
   factorize!(mumps, A)
   return solve(mumps, rhs; transposed = transposed)
 end
+
 """
-    solve(A,rhs;sym=mumps_unsymmetric)
+    solve(A, rhs; sym=mumps_unsymmetric)
 Combined initialize / analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `sym` indicates the symmetry of `A`.

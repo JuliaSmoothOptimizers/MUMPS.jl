@@ -1,6 +1,5 @@
-# this file mirros the relevant content of the "[sdcz]mumps_c.h" file of MUMPS
-# `gc_haven`, contains Julia references to protect the pointers passed to C
-# from gargage collection.
+# this file mirrors the relevant content of the "[sdcz]mumps_c.h" file of MUMPS
+# `gc_haven`, contains Julia references to protect the pointers passed to C from gargage collection.
 export Mumps, MUMPSException
 
 """
@@ -16,7 +15,9 @@ const MUMPS_VERSION = "5.5.1"
 const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
-# mirror of structre in [sdcz]mumps_c.h
+"""
+Mirror of structre in `[sdcz]mumps_c.h`.
+"""
 mutable struct Mumps{TC, TR}
   sym::MUMPS_INT # MANDATORY 0 for unsymmetric, 1 for symmetric and posdef, 2 for general symmetric. All others treated as 0
   par::MUMPS_INT # MANDATORY 0 host not involved in parallel factorization and solve, 1 host is involved
