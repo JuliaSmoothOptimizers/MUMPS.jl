@@ -1,20 +1,20 @@
 name = "MUMPS"
 uuid = "55d2b088-9f4e-11e9-26c0-150b02ea6a46"
-authors = ["Dominique Orban <dominique.orban@gmail.com>","William R Sweeney <wrsweeney2@gmail.com>", "Alexis Montoison <alexis.montoison@polymtl.ca >"]
+authors = ["Dominique Orban <dominique.orban@gmail.com>", "William R Sweeney <wrsweeney2@gmail.com>", "Alexis Montoison <alexis.montoison@polymtl.ca >"]
 version = "1.3.0"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
-MUMPS_jll = "ca64183c-ec4f-5579-95d5-17e128c21291"
+MUMPS_seq_jll = "d7ed1dd3-d0ae-5e8e-bfb4-87a502085b8d"
+OpenBLAS32_jll = "656ef2d0-ae68-5445-9ca0-591084a874a2"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 MPI = "^0.19"
-MUMPS_jll = "= 5.5.1"
-
 julia = "^1.6"
+MUMPS_seq_jll = "= 5.5.1"
 
 [extras]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
