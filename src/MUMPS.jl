@@ -39,8 +39,10 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   const libcmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
   const libzmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
   const libmumps_common = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libmumps_common.$dlext")
+  const MUMPS_INSTALLATION = "CUSTOM"
 else
   using MUMPS_jll
+  const MUMPS_INSTALLATION = "YGGDRASIL"
 end
 
 include("mumps_types.jl")

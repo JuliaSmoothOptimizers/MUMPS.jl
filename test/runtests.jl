@@ -5,6 +5,8 @@ using MPI
 using MUMPS
 using SparseArrays
 
+@info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
+
 function random_matrix(t, σ, nrow, ncol)
   # t = data type
   # σ = vector of desired singular values
