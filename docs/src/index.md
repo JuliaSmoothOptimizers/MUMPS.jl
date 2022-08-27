@@ -142,12 +142,16 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 **Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
 
 To use your custom MUMPS, set the environment variable `JULIA_MUMPS_LIBRARY_PATH`
-to point to the shared library before `using MUMPS`. Note that MUMPS version 5.5.1 is needed.
+to point to the shared library before `using MUMPS`.
+Note that the same version of MUMPS as used by the `MUMPS_jll` artifact is needed.
 
-For example:
-```julia
-ENV["JULIA_MUMPS_LIBRARY_PATH"] = "~/Applications/MUMPS_5.5.1/lib"
-using MUMPS
+For example, macOS users may install precompiled MUMPS binaries from the Homebrew tap `dpo/mumps-jl` as follows:
+```bash
+brew tap dpo/mumps-jl
+brew install mpich-mumps
+export JULIA_MUMPS_LIBRARY_PATH=$(brew --prefix)/opt/mpich-mumps/lib
 ```
 
-Alternatively, you can create an entry in `.julia/config/startup.jl` or set these permanently through your operating system.
+Apple Silicon users should remember to use `arch x86_64 brew` to refer to Intel binaries run through Rosetta, as we do not (yet) ship Silicon binaries of MUMPS via Homebrew.
+
+The `JULIA_MUMPS_LIBRARY_PATH` environment variable may be set permanently in the shell's startup file, or in `$HOME/.julia/config/startup.jl`.
