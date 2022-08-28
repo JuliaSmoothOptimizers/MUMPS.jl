@@ -47,8 +47,28 @@ end
 
 using MKL_jll
 
+@enum Threading begin
+    THREADING_INTEL
+    THREADING_SEQUENTIAL
+    THREADING_PGI
+    THREADING_GNU
+    THREADING_TBB
+end
+
+@enum Interface begin
+    INTERFACE_LP64
+    INTERFACE_ILP64
+    INTERFACE_GNU
+end
+
 function __init__()
   if VERSION ≥ v"1.7"
+    if Sys.isapple()
+      err = ccall((:MKL_Set_Threading_Layer, MKL_jll.libmkl_rt_path), Cint, (Cint,), THREADING_SEQUENTIAL)
+      err == -1 && throw(ErrorException("MKL_Set_Threading_Layer() returned -1"))
+    end
+    err = ccall((:MKL_Set_Interface_Layer, MKL_jll.libmkl_rt_path), Cint, (Cint,), INTERFACE_LP64)
+    err == -1 && throw(ErrorException("MKL_Set_Interface_Layer() returned -1"))
     config = LinearAlgebra.BLAS.lbt_get_config()
     if !any(lib -> lib.interface == :lp64, config.loaded_libs)
       LinearAlgebra.BLAS.lbt_forward(MKL_jll.libmkl_rt_path)
