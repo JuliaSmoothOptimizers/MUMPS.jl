@@ -1,9 +1,11 @@
 using Test
-
+using Random
 using LinearAlgebra
 using MPI
 using MUMPS
 using SparseArrays
+
+Random.seed!(666)  # Random tests are diabolical
 
 @info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
 
