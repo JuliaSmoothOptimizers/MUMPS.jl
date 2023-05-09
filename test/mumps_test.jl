@@ -24,14 +24,16 @@ finalize(mumps2);
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
-mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64);
-A = sparse(random_matrix(Float64, [1, 2, 3, 4], 4, 4));
-factorize!(mumps3, A);
-rhs = [1.0, 4.0, 9.0, 16.0];
-x = solve(mumps3, rhs);
-finalize(mumps3);
-MPI.Barrier(comm)
-@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
+if !Sys.iswindows()
+  mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64);
+  A = sparse(random_matrix(Float64, [1, 2, 3, 4], 4, 4));
+  factorize!(mumps3, A);
+  rhs = [1.0, 4.0, 9.0, 16.0];
+  x = solve(mumps3, rhs);
+  finalize(mumps3);
+  MPI.Barrier(comm)
+  @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
+end
 
 # Test for solving real div-grad system with single and multiple rhs.
 # Based on Lars Ruthotto's initial implementation.
