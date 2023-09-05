@@ -230,7 +230,7 @@ function mumps_select_inv! end
 function mumps_select_inv!(x::AbstractSparseArray, mumps::Mumps)
   set_icntl!(mumps, 30, 1)
   set_icntl!(mumps, 20, 3)
-  provide_rhs!(mumps, x)
+  associate_rhs!(mumps, x)
   if mumps.job ∈ [2, 4] # if already factored, just solve
     mumps.job = 3
   elseif mumps.job ∈ [1] # if analyzed only, factorize and solve
@@ -323,7 +323,7 @@ function LinearAlgebra.ldiv!(mumps::Mumps, y)
   else
     mumps.job = 2
   end
-  provide_rhs!(mumps, y)
+  associate_rhs!(mumps, y)
   mumps_solve!(y, mumps)
 end
 
