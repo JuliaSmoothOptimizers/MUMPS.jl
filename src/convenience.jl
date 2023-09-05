@@ -46,7 +46,7 @@ function mumps_solve!(x::AbstractArray, A::AbstractArray, rhs::AbstractArray; kw
 end
 
 function mumps_solve!(x::AbstractArray, mumps::Mumps, rhs::AbstractArray)
-  provide_rhs!(mumps, rhs)
+  associate_rhs!(mumps, rhs)
   if mumps.job ∈ [2, 4] # if already factored, just solve
   elseif mumps.job ∈ [1] # if analyzed only, factorize and solve
     mumps.job = 5
