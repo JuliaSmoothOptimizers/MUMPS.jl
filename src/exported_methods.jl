@@ -110,7 +110,9 @@ function solve(
   associate_matrix!(mumps, A)
   associate_rhs!(mumps, rhs)
   solve!(mumps)
-  return get_sol(mumps)
+  x = get_sol(mumps)
+  finalize(mumps)
+  return x
 end
 
 """
