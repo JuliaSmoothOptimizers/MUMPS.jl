@@ -26,4 +26,4 @@ MUMPS supports real and complex, single and double precision arithmetic.
 
 ## How to Cite
 
-If you use MUMPS.jl in your work, please cite using the format given in [`CITATION.bib`](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/blob/main/CITATION.bib)
+If you use MUMPS.jl in your work, please cite using the format given in [`CITATION.cff`](https://github.com/JuliaSmoothOptimizers/MUMPS.jl/blob/main/CITATION.cff)
