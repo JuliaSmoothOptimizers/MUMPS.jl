@@ -156,13 +156,14 @@ function Mumps{T}(
   icntl::Array{TI, 1},
   cntl::Array{V, 1};
   par = 1,
+  comm::Integer = DEFAULT_FORTRAN_COMMUNICATOR,
 ) where {TI <: Integer, T <: MUMPSValueDataType, V <: AbstractFloat}
 
   # Set default pivot threshold if required.
   if cntl[1] == -1
     cntl[1] = (sym == mumps_definite) ? 0.0 : 0.01
   end
-  mumps = Mumps{T}(sym, par)
+  mumps = Mumps{T}(sym, par, comm)
   for i ∈ eachindex(icntl)
     set_icntl!(mumps, i, icntl[i]; displaylevel = 0)
   end
