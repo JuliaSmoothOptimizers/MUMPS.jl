@@ -1,0 +1,45 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  MUMPS.jl: A Julia Interface to MUMPS
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Alexis
+    family-names: Montoison
+    email: alexis.montoison@polymtl.ca
+    affiliation: >-
+      GERAD and Department of Mathematics and
+      Industrial Engineering, Polytechnique Montréal,
+      QC, Canada.
+    orcid: 'https://orcid.org/0000-0002-1825-1639'
+  - given-names: Dominique
+    family-names: Orban
+    email: dominique.orban@gerad.ca
+    orcid: 'https://orcid.org/0000-0002-8017-7687'
+    affiliation: >-
+      GERAD and Department of Mathematics and
+      Industrial Engineering, Polytechnique Montréal,
+      QC, Canada
+  - email: wrsweeney2@gmail.com
+    given-names: William R.
+    family-names: Sweeney
+  - given-names: contributors
+identifiers:
+  - description: Zenodo archive
+    type: doi
+    value: 10.5281/zenodo.3271646
+keywords:
+  - Linear Algebra
+  - Julia
+  - Matrix Factorization
+  - Least Squares
+license: MPL-2.0
+version: 1.4.1
+date-released: '2024-02-04'
+repository-code: >-
+  https://github.com/JuliaSmoothOptimizers/MUMPS.jl
