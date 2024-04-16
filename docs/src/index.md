@@ -20,7 +20,7 @@ to initialize MPI before attempting to create a `Mumps` object. A simple
 session is as follows:
 
 ```julia
-using MUMPS, MPI, SparseArrays
+using MUMPS, MPI, SparseArrays, LinearAlgebra
 MPI.Init()
 A = sprand(10, 10, 0.2) + I
 rhs = rand(10)
