@@ -148,9 +148,13 @@ converted to MUMPS's internal representation.
 
 See also: [`associate_rhs!`](@ref)
 """
-function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}; unsafe::Bool=false) where {T, TA}
+function associate_matrix!(
+  mumps::Mumps{T},
+  A::AbstractArray{TA};
+  unsafe::Bool = false,
+) where {T, TA}
   if !unsafe
-      A = deepcopy(A)
+    A = deepcopy(A)
   end
   size(A, 1) == size(A, 2) ||
     throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
@@ -234,7 +238,7 @@ when the type is converted.
 
 See also: [`associate_matrix!`](@ref)
 """
-function associate_rhs!(mumps::Mumps, rhs::AbstractMatrix; unsafe::Bool=false)
+function associate_rhs!(mumps::Mumps, rhs::AbstractMatrix; unsafe::Bool = false)
   if !unsafe
     rhs = deepcopy(rhs)
   end
@@ -279,7 +283,8 @@ function associate_rhs_dense_unsafe!(mumps::Mumps{T}, rhs::AbstractMatrix) where
   return mumps
 end
 
-associate_rhs!(mumps::Mumps, rhs::AbstractVector; kwargs...) = associate_rhs!(mumps, reshape(rhs, length(rhs), 1); kwargs...)
+associate_rhs!(mumps::Mumps, rhs::AbstractVector; kwargs...) =
+  associate_rhs!(mumps, reshape(rhs, length(rhs), 1); kwargs...)
 
 """
     get_rhs!(x,mumps)
