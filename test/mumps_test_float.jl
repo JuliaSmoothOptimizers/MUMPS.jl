@@ -12,11 +12,11 @@ MPI.Barrier(comm)
 
 mumps1_unsafe = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
 A = sparse(Diagonal(Array{Float32}([1.0, 2.0, 3.0, 4.0])))
-associate_matrix!(mumps1_unsafe, A; unsafe=true)
+associate_matrix!(mumps1_unsafe, A; unsafe = true)
 factorize!(mumps1_unsafe);  # Analyze and factorize.
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
 orig_rhs = copy(rhs)
-associate_rhs!(mumps1_unsafe, rhs; unsafe=true)
+associate_rhs!(mumps1_unsafe, rhs; unsafe = true)
 solve!(mumps1_unsafe)
 x = similar(orig_rhs)
 get_sol!(x, mumps1_unsafe)
@@ -45,11 +45,11 @@ MPI.Barrier(comm)
 
 mumps3_unsafe = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4))
-associate_matrix!(mumps3_unsafe, A; unsafe=true)
+associate_matrix!(mumps3_unsafe, A; unsafe = true)
 factorize!(mumps3_unsafe);  # Analyze and factorize.
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
 orig_rhs = copy(rhs)
-associate_rhs!(mumps3_unsafe, rhs; unsafe=true)
+associate_rhs!(mumps3_unsafe, rhs; unsafe = true)
 solve!(mumps3_unsafe)
 x = similar(orig_rhs)
 get_sol!(x, mumps3_unsafe)
