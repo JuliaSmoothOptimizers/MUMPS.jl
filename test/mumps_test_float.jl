@@ -10,6 +10,20 @@ finalize(mumps1)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
+mumps1_unsafe = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
+A = sparse(Diagonal(Array{Float32}([1.0, 2.0, 3.0, 4.0])))
+associate_matrix_unsafe!(mumps1_unsafe, A)
+factorize!(mumps1_unsafe);  # Analyze and factorize.
+rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
+orig_rhs = copy(rhs)
+associate_rhs_unsafe!(mumps1_unsafe, rhs)
+solve!(mumps1_unsafe)
+x = similar(orig_rhs)
+get_sol!(x, mumps1_unsafe)
+finalize(mumps1_unsafe)
+MPI.Barrier(comm)
+@test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
+
 mumps2 = Mumps{Float32}(mumps_symmetric, icntl, default_cntl32)
 A = random_matrix(Float32, [1, 2, 3, 4], 4, 4);
 A = sparse(A + A');
@@ -28,6 +42,20 @@ x = solve(mumps3, rhs)
 finalize(mumps3)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
+
+mumps3_unsafe = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
+A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4))
+associate_matrix_unsafe!(mumps3_unsafe, A)
+factorize!(mumps3_unsafe);  # Analyze and factorize.
+rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
+orig_rhs = copy(rhs)
+associate_rhs_unsafe!(mumps3_unsafe, rhs)
+solve!(mumps3_unsafe)
+x = similar(orig_rhs)
+get_sol!(x, mumps3_unsafe)
+finalize(mumps3_unsafe)
+MPI.Barrier(comm)
+@test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
 # Test convenience interface.
 

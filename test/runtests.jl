@@ -3,6 +3,7 @@ using Random
 using LinearAlgebra
 using MPI
 using MUMPS
+using MUMPS: get_sol!
 using SparseArrays
 
 Random.seed!(666)  # Random tests are diabolical
