@@ -170,7 +170,9 @@ function _associate_matrix_assembled_centralized!(mumps::Mumps{T}, A::SparseMatr
   mumps.irn, mumps.jcn, mumps.a = pointer.((irn, jcn, a))
   mumps.n = A.n
   mumps.nnz = length(V)
-  append!(mumps._gc_haven, [Ref(irn), Ref(jcn), Ref(a)])
+  mumps._irn_gc_haven = irn
+  mumps._jcn_gc_haven = jcn
+  mumps._a_gc_haven = a
   return mumps
 end
 
@@ -190,7 +192,9 @@ function _associate_matrix_elemental!(mumps::Mumps{T}, A::Array) where {T}
     a_elt = convert.(T, A[:])
   end
   mumps.a_elt = pointer(a_elt)
-  append!(mumps._gc_haven, [Ref(eltptr), Ref(eltvar), Ref(a_elt)])
+  mumps._eltprt_gc_haven = eltptr
+  mumps._eltvar_gc_haven = eltv
+  mumps._a_elt_gc_haven = a_elt
   return mumps
 end
 
@@ -230,8 +234,11 @@ function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
     y = fill(convert(T, NaN), prod(size(rhs)))
     mumps.rhs = pointer(y)
     mumps.lrhs = size(rhs, 1)
-    push!(mumps._gc_haven, Ref(y))
+    mumps._y_gc_haven = y
   end
+  mumps._rhs_sparse_gc_haven = rhs_sparse
+  mumps._irhs_sparse_gc_haven = irhs_sparse
+  mumps._irhs_ptr_gc_haven = irhs_ptr
   append!(mumps._gc_haven, [Ref(rhs_sparse), Ref(irhs_sparse), Ref(irhs_ptr)])
   return mumps
 end
@@ -241,7 +248,7 @@ function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   mumps.rhs = pointer(y)
   mumps.lrhs = size(rhs, 1)
   mumps.nrhs = size(rhs, 2)
-  push!(mumps._gc_haven, Ref(y))
+  mumps._y_gc_haven = vec(y)
   return mumps
 end
 
@@ -400,7 +407,8 @@ function set_schur_centralized_by_column!(mumps::Mumps{T}, schur_inds::AbstractA
   schur = Array{T}(undef, mumps.size_schur^2)
   mumps.schur = pointer(schur)
   set_icntl!(mumps, 19, 3)
-  append!(mumps._gc_haven, [Ref(listvar_schur), Ref(schur)])
+  mumps._listvar_schur_gc_haven = listvar_schur
+  mumps._schur_gc_haven = schur
   return mumps
 end
 
