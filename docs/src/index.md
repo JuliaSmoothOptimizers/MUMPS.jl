@@ -123,10 +123,8 @@ Method                    | Description
 --------------------------|------------
 `finalize`                | Finalize a `Mumps` object. Must be done before calling `MPI.Finalize()`
 `associate_matrix!`       | Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only.
-`associate_matrix_unsafe!`| Register a matrix with the `Mumps` object. This function makes it possible to define the data on the host only. Passes MUMPS pointers to the arguments' data where possible.
 `factorize!`              | Factorize the matrix registered with the `Mumps` object.
 `associate_rhs!`          | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only.
-`associate_rhs_unsafe!`   | Register right-hand sides with the `Mumps` object. This function makes it possible to define the data on the host only. Passes MUMPS pointers to the arguments' data where possible.
 `solve!`                  | Solve the linear system for the given right-hand side.
 `get_solution`            | Retrieve the solution from the `Mumps` object. This function makes it possible for the solution to be assembled on the host only.
 
