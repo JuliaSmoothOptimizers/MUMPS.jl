@@ -1,5 +1,5 @@
 # this file mirrors the relevant content of the "[sdcz]mumps_c.h" file of MUMPS
-# `gc_haven`, contains Julia references to protect the pointers passed to C from gargage collection.
+# `_*_gc_haven`, contains Julia references to protect the pointers passed to C from gargage collection.
 export Mumps, MUMPSException
 
 """
@@ -121,14 +121,26 @@ mutable struct Mumps{TC, TR}
   det::TC
   err::Int
 
-  _gc_haven::Array{Ref, 1}
+  # Individual _*_gc_haven Ref's for each variable, so that we can overwrite them to avoid
+  # accumulating Ref's to unused variables
+  _irn_gc_haven::Vector{MUMPS_INT}
+  _jcn_gc_haven::Vector{MUMPS_INT}
+  _a_gc_haven::Vector{TC}
+  _eltptr_gc_haven::Vector{MUMPS_INT}
+  _eltvar_gc_haven::Vector{MUMPS_INT}
+  _a_elt_gc_haven::Vector{TC}
+  _y_gc_haven::Vector{TC}
+  _rhs_sparse_gc_haven::Vector{TC}
+  _irhs_sparse_gc_haven::Vector{MUMPS_INT}
+  _irhs_ptr_gc_haven::Vector{MUMPS_INT}
+  _listvar_schur_ptr_gc_haven::Vector{MUMPS_INT}
+  _schur_gc_haven::Vector{TC}
   _finalized::Bool
 
   function Mumps{T}(sym::Integer, par::Integer, comm::Integer) where {T <: MUMPSValueDataType}
     !MPI.Initialized() ? throw(MUMPSException("Initialize MPI first")) : nothing
     mumps = new{T, real(T)}(sym, par, -1, comm)
     invoke_mumps_unsafe!(mumps)
-    mumps._gc_haven = Array{Ref, 1}(undef, 0)
     mumps._finalized = false
     finalizer(finalize!, mumps)
     return mumps
