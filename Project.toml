@@ -12,7 +12,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 MPI = "^0.20"
-MUMPS_jll = "= 5.6.2"
+MUMPS_jll = "= 5.7.3"
 
 julia = "^1.6"
 
