@@ -128,7 +128,7 @@ function set_save_prefix!(mumps, prefix::String)
 end
 
 """
-    associate_matrix!(mumps,A)
+    associate_matrix!(mumps,A; unsafe=false)
 
 Register the square matrix `A` to a `mumps` object. It internally converts
 `A` to be consistent with the ICNTL[5] setting.
@@ -136,37 +136,22 @@ Register the square matrix `A` to a `mumps` object. It internally converts
 If needed, it tries to convert element type of `A` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-Note that this function makes a copy of `A`. If you do not want to make a copy, use
-[`associate_matrix_unsafe!`](@ref). If the type of `A` needs to be converted, this
-function may copy `A` twice - to avoid this use [`associate_matrix_unsafe!`](@ref)
-instead.
+Note that by default this function makes a copy of `A`. If you do not want to make a copy,
+pass `unsafe=true`. If the type of `A` needs to be converted, this function may copy `A`
+twice - to avoid this use `unsafe=true`.
 
-See also: [`associate_matrix_unsafe!`](@ref), [`associate_rhs!`](@ref)
+When `unsafe=true` is passed, if the type of `A` is already consistent with the type of
+`mumps`, then pointers to `A`'s memory are passed directly to MUMPS, so modifying `A` will
+modify the matrix in `mumps`.  If `A` is not already consistent, a copy will be made when
+the type is converted. Warning: A dense, symmetric matrix will always be copied when it is
+converted to MUMPS's internal representation.
+
+See also: [`associate_rhs!`](@ref)
 """
-function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
-    # If the type of `A` is not already consistent with the type of `mumps`, this will
-    # cause an extra (and pointless) copy.
-    return associate_matrix_unsafe!(mumps, deepcopy(A))
-end
-
-"""
-    associate_matrix_unsafe!(mumps,A)
-
-Register the square matrix `A` to a `mumps` object. It internally converts
-`A` to be consistent with the ICNTL[5] setting.
-
-If needed, it tries to convert element type of `A` to be consistent with
-type of `mumps`, throwing a warning in this case.
-
-If the type of `A` was already consistent with the type of `mumps`, then pointers to `A`'s
-memory are passed directly to MUMPS, so modifying `A` will modify the matrix in `mumps`.
-If `A` was not already consistent, a copy will be made when the type is converted.
-
-*Warning:* A dense, symmetric matrix will always be copied when it is converted to MUMPS's internal representation.
-
-See also: [`associate_matrix!`](@ref), [`associate_rhs_unsafe!`](@ref)
-"""
-function associate_matrix_unsafe!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
+function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}; unsafe::Bool=false) where {T, TA}
+  if !unsafe
+      A = deepcopy(A)
+  end
   size(A, 1) == size(A, 2) ||
     throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
   T == TA || (@warn "matrix with element type $TA: will attempt conversion to Mumps type $T")
@@ -229,7 +214,7 @@ function _associate_matrix_elemental!(mumps::Mumps{T}, A::Matrix) where {T}
 end
 
 """
-    associate_rhs!(mumps, rhs)
+    associate_rhs!(mumps, rhs; unsafe=false)
 
 Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It internally converts
 `rhs` to be consistent with the ICNTL[20] setting, and additionally allocates
@@ -238,34 +223,21 @@ Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It in
 If needed, it tries to convert element type of `rhs` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-Note that this function makes a copy of `rhs`. If you do not want to make a copy, use
-[`associate_rhs_unsafe!`](@ref). If the type of `rhs` needs to be converted, this function
-may copy `rhs` twice - to avoid this use [`associate_rhs_unsafe!`](@ref) instead.
+Note that this function makes a copy of `rhs`. If you do not want to make a copy, pass
+`unsafe=false`. If the type of `rhs` needs to be converted, this function may copy `rhs`
+twice - to avoid this use `unsafe=false`.
 
-See also: [`associate_rhs_unsafe!`](@ref), [`associate_matrix!`](@ref)
+When `unsafe=false` is passed, if the type of `rhs` is already consistent with the type of
+`mumps`, then pointers to `rhs`'s memory are passed directly to MUMPS, so modifying `rhs`
+will modify the rhs in `mumps`.  If `rhs` is not already consistent, a copy will be made
+when the type is converted.
+
+See also: [`associate_matrix!`](@ref)
 """
-function associate_rhs!(mumps::Mumps, rhs::AbstractArray)
-    return associate_rhs_unsafe!(mumps, deepcopy(rhs))
-end
-
-"""
-    associate_rhs_unsafe!(mumps, rhs)
-
-Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It internally converts
-`rhs` to be consistent with the ICNTL[20] setting, and additionally allocates
-`mumps.rhs` according to the ICNTL[21] setting.
-
-If needed, it tries to convert element type of `rhs` to be consistent with
-type of `mumps`, throwing a warning in this case.
-
-If the type of `rhs` was already consistent with the type of `mumps`, then pointers to
-`rhs`'s memory are passed directly to MUMPS, so modifying `rhs` will modify the rhs in
-`mumps`.  If `rhs` was not already consistent, a copy will be made when the type is
-converted.
-
-See also: [`associate_rhs!`](@ref), [`associate_matrix_unsafe!`](@ref)
-"""
-function associate_rhs_unsafe!(mumps::Mumps, rhs::AbstractMatrix)
+function associate_rhs!(mumps::Mumps, rhs::AbstractMatrix; unsafe::Bool=false)
+  if !unsafe
+    rhs = deepcopy(rhs)
+  end
   if is_rhs_dense(mumps)
     return associate_rhs_dense_unsafe!(mumps, rhs)
   end
@@ -307,7 +279,7 @@ function associate_rhs_dense_unsafe!(mumps::Mumps{T}, rhs::AbstractMatrix) where
   return mumps
 end
 
-associate_rhs_unsafe!(mumps::Mumps, rhs::AbstractVector) = associate_rhs_unsafe!(mumps, reshape(rhs, length(rhs), 1))
+associate_rhs!(mumps::Mumps, rhs::AbstractVector; kwargs...) = associate_rhs!(mumps, reshape(rhs, length(rhs), 1); kwargs...)
 
 """
     get_rhs!(x,mumps)

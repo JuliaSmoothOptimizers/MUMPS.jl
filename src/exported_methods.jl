@@ -1,6 +1,6 @@
 export get_icntl, default_icntl, default_cntl32, default_cntl64
 
-export associate_matrix!, associate_matrix_unsafe!, associate_rhs!, associate_rhs_unsafe!, get_solution, solve!, solve, factorize!
+export associate_matrix!, associate_rhs!, get_solution, solve!, solve, factorize!
 
 export mumps_unsymmetric, mumps_definite, mumps_symmetric
 
