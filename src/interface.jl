@@ -136,9 +136,37 @@ Register the square matrix `A` to a `mumps` object. It internally converts
 If needed, it tries to convert element type of `A` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-See also: [`associate_rhs!`](@ref)
+Note that this function makes a copy of `A`. If you do not want to make a copy, use
+[`associate_matrix_unsafe!`](@ref). If the type of `A` needs to be converted, this
+function may copy `A` twice - to avoid this use [`associate_matrix_unsafe!`](@ref)
+instead.
+
+See also: [`associate_matrix_unsafe!`](@ref), [`associate_rhs!`](@ref)
 """
 function associate_matrix!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
+    # If the type of `A` is not already consistent with the type of `mumps`, this will
+    # cause an extra (and pointless) copy.
+    return associate_matrix_unsafe!(mumps, deepcopy(A))
+end
+
+"""
+    associate_matrix_unsafe!(mumps,A)
+
+Register the square matrix `A` to a `mumps` object. It internally converts
+`A` to be consistent with the ICNTL[5] setting.
+
+If needed, it tries to convert element type of `A` to be consistent with
+type of `mumps`, throwing a warning in this case.
+
+If the type of `A` was already consistent with the type of `mumps`, then pointers to `A`'s
+memory are passed directly to MUMPS, so modifying `A` will modify the matrix in `mumps`.
+If `A` was not already consistent, a copy will be made when the type is converted.
+
+*Warning:* A dense, symmetric matrix will always be copied when it is converted to MUMPS's internal representation.
+
+See also: [`associate_matrix!`](@ref), [`associate_rhs_unsafe!`](@ref)
+"""
+function associate_matrix_unsafe!(mumps::Mumps{T}, A::AbstractArray{TA}) where {T, TA}
   size(A, 1) == size(A, 2) ||
     throw(MUMPSException("input matrix must be square, but it is $(size(A,1))×$(size(A,2))"))
   T == TA || (@warn "matrix with element type $TA: will attempt conversion to Mumps type $T")
@@ -166,7 +194,9 @@ function _associate_matrix_assembled_centralized!(mumps::Mumps{T}, A::SparseMatr
   else
     I, J, V = findnz(A)
   end
-  irn, jcn, a = convert.((Array{MUMPS_INT}, Array{MUMPS_INT}, Array{T}), (I, J, V))
+  irn = convert(Vector{MUMPS_INT}, I)
+  jcn = convert(Vector{MUMPS_INT}, J)
+  a = convert(Vector{T}, V)
   mumps.irn, mumps.jcn, mumps.a = pointer.((irn, jcn, a))
   mumps.n = A.n
   mumps.nnz = length(V)
@@ -180,7 +210,7 @@ function _associate_matrix_assembled_distributed!(mumps::Mumps{T}, A::SparseMatr
   throw(MUMPSException("not written yet."))
 end
 
-function _associate_matrix_elemental!(mumps::Mumps{T}, A::Array) where {T}
+function _associate_matrix_elemental!(mumps::Mumps{T}, A::Matrix) where {T}
   mumps.n = size(A, 1)
   mumps.nelt = 1
   eltptr = convert.(MUMPS_INT, [1, mumps.n + 1])
@@ -189,7 +219,7 @@ function _associate_matrix_elemental!(mumps::Mumps{T}, A::Array) where {T}
   if is_symmetric(mumps)
     a_elt = convert.(T, [A[i, j] for i ∈ 1:(mumps.n) for j ∈ 1:i])
   else
-    a_elt = convert.(T, A[:])
+    a_elt = convert(Matrix{T}, A)
   end
   mumps.a_elt = pointer(a_elt)
   mumps._eltprt_gc_haven = eltptr
@@ -208,24 +238,49 @@ Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It in
 If needed, it tries to convert element type of `rhs` to be consistent with
 type of `mumps`, throwing a warning in this case.
 
-See also: [`associate_matrix!`](@ref)
+Note that this function makes a copy of `rhs`. If you do not want to make a copy, use
+[`associate_rhs_unsafe!`](@ref). If the type of `rhs` needs to be converted, this function
+may copy `rhs` twice - to avoid this use [`associate_rhs_unsafe!`](@ref) instead.
+
+See also: [`associate_rhs_unsafe!`](@ref), [`associate_matrix!`](@ref)
 """
-function associate_rhs!(mumps::Mumps, rhs::AbstractMatrix)
-  if is_rhs_dense(mumps)
-    return associate_rhs_dense!(mumps, rhs)
-  end
-  return associate_rhs_sparse!(mumps, rhs)
+function associate_rhs!(mumps::Mumps, rhs::AbstractArray)
+    return associate_rhs_unsafe!(mumps, deepcopy(rhs))
 end
 
-function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
+"""
+    associate_rhs_unsafe!(mumps, rhs)
+
+Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It internally converts
+`rhs` to be consistent with the ICNTL[20] setting, and additionally allocates
+`mumps.rhs` according to the ICNTL[21] setting.
+
+If needed, it tries to convert element type of `rhs` to be consistent with
+type of `mumps`, throwing a warning in this case.
+
+If the type of `rhs` was already consistent with the type of `mumps`, then pointers to
+`rhs`'s memory are passed directly to MUMPS, so modifying `rhs` will modify the rhs in
+`mumps`.  If `rhs` was not already consistent, a copy will be made when the type is
+converted.
+
+See also: [`associate_rhs!`](@ref), [`associate_matrix_unsafe!`](@ref)
+"""
+function associate_rhs_unsafe!(mumps::Mumps, rhs::AbstractMatrix)
+  if is_rhs_dense(mumps)
+    return associate_rhs_dense_unsafe!(mumps, rhs)
+  end
+  return associate_rhs_sparse_unsafe!(mumps, rhs)
+end
+
+function associate_rhs_sparse_unsafe!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   rhs = convert(SparseMatrixCSC, rhs)
 
   mumps.nz_rhs = length(rhs.nzval)
   mumps.nrhs = size(rhs, 2)
 
-  rhs_sparse = convert.(T, rhs.nzval)
-  irhs_sparse = convert.(MUMPS_INT, rhs.rowval)
-  irhs_ptr = convert.(MUMPS_INT, rhs.colptr)
+  rhs_sparse = convert(Vector{T}, rhs.nzval)
+  irhs_sparse = convert(Vector{MUMPS_INT}, rhs.rowval)
+  irhs_ptr = convert(Vector{MUMPS_INT}, rhs.colptr)
 
   mumps.rhs_sparse = pointer(rhs_sparse)
   mumps.irhs_sparse = pointer(irhs_sparse)
@@ -243,8 +298,8 @@ function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   return mumps
 end
 
-function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
-  y = convert(Matrix{T}, rhs)[:]
+function associate_rhs_dense_unsafe!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
+  y = convert(Matrix{T}, rhs)
   mumps.rhs = pointer(y)
   mumps.lrhs = size(rhs, 1)
   mumps.nrhs = size(rhs, 2)
@@ -252,7 +307,7 @@ function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   return mumps
 end
 
-associate_rhs!(mumps::Mumps, rhs::AbstractVector) = associate_rhs!(mumps, repeat(rhs, 1, 1))
+associate_rhs_unsafe!(mumps::Mumps, rhs::AbstractVector) = associate_rhs_unsafe!(mumps, reshape(rhs, length(rhs), 1))
 
 """
     get_rhs!(x,mumps)
