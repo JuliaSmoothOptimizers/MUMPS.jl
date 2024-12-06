@@ -101,7 +101,7 @@ mutable struct Mumps{TC, TR}
   pivnul_list::Ptr{MUMPS_INT}
   mapping::Ptr{MUMPS_INT}
 
-  size_schur::MUMPS_INT
+  size_schur::MUMPS_INT8
   listvar_schur::Ptr{MUMPS_INT}
   schur::Ptr{TC}
 
