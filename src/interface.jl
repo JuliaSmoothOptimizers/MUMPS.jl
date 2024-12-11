@@ -439,7 +439,7 @@ function set_schur_centralized_by_column!(mumps::Mumps{T}, schur_inds::AbstractA
   schur = Array{T}(undef, mumps.size_schur^2)
   mumps.schur = pointer(schur)
   set_icntl!(mumps, 19, 3)
-  mumps._listvar_schur_gc_haven = listvar_schur
+  mumps._listvar_schur_ptr_gc_haven = listvar_schur
   mumps._schur_gc_haven = schur
   return mumps
 end
