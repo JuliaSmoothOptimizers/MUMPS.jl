@@ -133,6 +133,10 @@ mutable struct Mumps{TC, TR}
 
   instance_number::MUMPS_INT
 
+  # Additional fields added for MUMPS.jl
+  det::TC
+  err::Int
+
   # Individual _*_gc_haven Ref's for each variable, so that we can overwrite them to avoid
   # accumulating Ref's to unused variables
   _irn_gc_haven::Vector{MUMPS_INT}
