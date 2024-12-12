@@ -11,7 +11,7 @@ mutable struct MUMPSException <: Exception
 end
 const MUMPSValueDataType = Union{Float32, Float64, ComplexF32, ComplexF64}
 
-const MUMPS_VERSION = "5.6.2"
+const MUMPS_VERSION = "5.7.3"
 const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
@@ -23,11 +23,11 @@ mutable struct Mumps{TC, TR}
   par::MUMPS_INT # MANDATORY 0 host not involved in parallel factorization and solve, 1 host is involved
   job::MUMPS_INT # MANDATORY -1 initializes package, must come first, -2 terminates, 1 analysis, 2 factorization, 3 solve, 4=1&2, 5=2&3, 6=1&2&3
   comm_fortran::MUMPS_INT # MANDATORY valid MPI communicator
-  icntl::NTuple{60, MUMPS_INT}
-  keep::NTuple{500, MUMPS_INT}
-  cntl::NTuple{15, TR}
-  dkeep::NTuple{230, TR}
-  keep8::NTuple{150, MUMPS_INT8}
+  icntl::NTuple{60,MUMPS_INT}
+  keep::NTuple{500,MUMPS_INT}
+  cntl::NTuple{15,TR}
+  dkeep::NTuple{230,TR}
+  keep8::NTuple{150,MUMPS_INT8}
   n::MUMPS_INT
   nblk::MUMPS_INT
 
@@ -63,16 +63,26 @@ mutable struct Mumps{TC, TR}
   colsca_from_mumps::MUMPS_INT
   rowsca_from_mumps::MUMPS_INT
 
+  colsca_loc::Ptr{TR}
+  rowsca_loc::Ptr{TR}
+
+  rowind::Ptr{MUMPS_INT}
+  colind::Ptr{MUMPS_INT}
+  pivots::Ptr{TC}
+
   rhs::Ptr{TC}
   redrhs::Ptr{TC}
   rhs_sparse::Ptr{TC}
   sol_loc::Ptr{TC}
   rhs_loc::Ptr{TC}
+  rhsintr::Ptr{TC}
 
   irhs_sparse::Ptr{MUMPS_INT}
   irhs_ptr::Ptr{MUMPS_INT}
   isol_loc::Ptr{MUMPS_INT}
   irhs_loc::Ptr{MUMPS_INT}
+  glob2loc_rhs::Ptr{MUMPS_INT}
+  glob2loc_sol::Ptr{MUMPS_INT}
 
   nrhs::MUMPS_INT
   lrhs::MUMPS_INT
@@ -81,6 +91,7 @@ mutable struct Mumps{TC, TR}
   lsol_loc::MUMPS_INT
   nloc_rhs::MUMPS_INT
   lrhs_loc::MUMPS_INT
+  nsol_loc::MUMPS_INT
 
   schur_mloc::MUMPS_INT
   schur_nloc::MUMPS_INT
@@ -91,35 +102,36 @@ mutable struct Mumps{TC, TR}
   nprow::MUMPS_INT
   npcol::MUMPS_INT
 
-  info::NTuple{80, MUMPS_INT}
-  infog::NTuple{80, MUMPS_INT}
+  ld_rhsintr::MUMPS_INT
 
-  rinfo::NTuple{40, TR}
-  rinfog::NTuple{40, TR}
+  info::NTuple{80,MUMPS_INT}
+  infog::NTuple{80,MUMPS_INT}
+
+  rinfo::NTuple{40,TR}
+  rinfog::NTuple{40,TR}
 
   deficiency::MUMPS_INT
   pivnul_list::Ptr{MUMPS_INT}
   mapping::Ptr{MUMPS_INT}
+  singular_values::Ptr{TR}
 
-  size_schur::MUMPS_INT8
+  size_schur::MUMPS_INT
   listvar_schur::Ptr{MUMPS_INT}
   schur::Ptr{TC}
 
-  instance_number::MUMPS_INT
   wk_user::Ptr{TC}
 
-  version_number::NTuple{MUMPS_VERSION_MAX_LEN + 1 + 1, Cchar}
-  ooc_tmpdir::NTuple{256, Cchar}
-  ooc_prefix::NTuple{64, Cchar}
-  write_problem::NTuple{256, Cchar}
+  version_number::NTuple{MUMPS_VERSION_MAX_LEN+1+1,Cchar}
+  ooc_tmpdir::NTuple{1024,Cchar}
+  ooc_prefix::NTuple{256,Cchar}
+  write_problem::NTuple{1024,Cchar}
   lwk_user::MUMPS_INT
-  save_dir::NTuple{256, Cchar}
-  save_prefix::NTuple{256, Cchar}
+  save_dir::NTuple{1024,Cchar}
+  save_prefix ::NTuple{256,Cchar}
 
-  metis_options::NTuple{40, MUMPS_INT}
+  metis_options::NTuple{40,MUMPS_INT}
 
-  det::TC
-  err::Int
+  instance_number::MUMPS_INT
 
   # Individual _*_gc_haven Ref's for each variable, so that we can overwrite them to avoid
   # accumulating Ref's to unused variables
