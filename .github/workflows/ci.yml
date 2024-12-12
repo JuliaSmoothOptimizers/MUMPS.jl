@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         version: ['1.6', '1']
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         arch: [x64]
         allow_failure: [false]
         include:
@@ -27,15 +27,7 @@ jobs:
             arch: x64
             allow_failure: true
           - version: 'nightly'
-            os: macOS-latest
-            arch: x64
-            allow_failure: true
-          - version: '1.6'
-            os: windows-latest
-            arch: x64
-            allow_failure: true
-          - version: '1'
-            os: windows-latest
+            os: macos-latest
             arch: x64
             allow_failure: true
           - version: 'nightly'
@@ -43,8 +35,8 @@ jobs:
             arch: x64
             allow_failure: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
