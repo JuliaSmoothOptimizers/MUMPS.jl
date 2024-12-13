@@ -23,11 +23,11 @@ mutable struct Mumps{TC, TR}
   par::MUMPS_INT # MANDATORY 0 host not involved in parallel factorization and solve, 1 host is involved
   job::MUMPS_INT # MANDATORY -1 initializes package, must come first, -2 terminates, 1 analysis, 2 factorization, 3 solve, 4=1&2, 5=2&3, 6=1&2&3
   comm_fortran::MUMPS_INT # MANDATORY valid MPI communicator
-  icntl::NTuple{60,MUMPS_INT}
-  keep::NTuple{500,MUMPS_INT}
-  cntl::NTuple{15,TR}
-  dkeep::NTuple{230,TR}
-  keep8::NTuple{150,MUMPS_INT8}
+  icntl::NTuple{60, MUMPS_INT}
+  keep::NTuple{500, MUMPS_INT}
+  cntl::NTuple{15, TR}
+  dkeep::NTuple{230, TR}
+  keep8::NTuple{150, MUMPS_INT8}
   n::MUMPS_INT
   nblk::MUMPS_INT
 
@@ -104,11 +104,11 @@ mutable struct Mumps{TC, TR}
 
   ld_rhsintr::MUMPS_INT
 
-  info::NTuple{80,MUMPS_INT}
-  infog::NTuple{80,MUMPS_INT}
+  info::NTuple{80, MUMPS_INT}
+  infog::NTuple{80, MUMPS_INT}
 
-  rinfo::NTuple{40,TR}
-  rinfog::NTuple{40,TR}
+  rinfo::NTuple{40, TR}
+  rinfog::NTuple{40, TR}
 
   deficiency::MUMPS_INT
   pivnul_list::Ptr{MUMPS_INT}
@@ -121,15 +121,15 @@ mutable struct Mumps{TC, TR}
 
   wk_user::Ptr{TC}
 
-  version_number::NTuple{MUMPS_VERSION_MAX_LEN+1+1,Cchar}
-  ooc_tmpdir::NTuple{1024,Cchar}
-  ooc_prefix::NTuple{256,Cchar}
-  write_problem::NTuple{1024,Cchar}
+  version_number::NTuple{MUMPS_VERSION_MAX_LEN + 1 + 1, Cchar}
+  ooc_tmpdir::NTuple{1024, Cchar}
+  ooc_prefix::NTuple{256, Cchar}
+  write_problem::NTuple{1024, Cchar}
   lwk_user::MUMPS_INT
-  save_dir::NTuple{1024,Cchar}
-  save_prefix ::NTuple{256,Cchar}
+  save_dir::NTuple{1024, Cchar}
+  save_prefix::NTuple{256, Cchar}
 
-  metis_options::NTuple{40,MUMPS_INT}
+  metis_options::NTuple{40, MUMPS_INT}
 
   instance_number::MUMPS_INT
 
