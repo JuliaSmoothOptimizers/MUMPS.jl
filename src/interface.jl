@@ -107,9 +107,9 @@ set name of directory in which to store out-of-core files.
 function set_save_dir!(mumps, dir::String)
   length(dir) ≤ 255 ||
     throw(MUMPSException("directory name has $(length(dir)) characters, must be ≤ 255"))
-  i = length(dir + 1)
-  save_dir = mumps.save_dir
-  mumps.save_dir = (dir..., '\0', save_dir[(i + 2):end]...)
+  i, N = length(dir), length(mumps.save_dir)
+  # repeat avoids a type inference stack overflow, from the very long tuple
+  mumps.save_dir = (Cchar.(collect(dir))..., repeat([Cchar(0)],N-i)...)
   return mumps
 end
 
@@ -121,9 +121,8 @@ prefix for out-of-core files.
 function set_save_prefix!(mumps, prefix::String)
   length(prefix) ≤ 255 ||
     throw(MUMPSException("prefix name has $(length(prefix)) characters, must be ≤ 255"))
-  i = length(prefix + 1)
-  save_prefix = mumps.save_prefix
-  mumps.save_prefix = (prefix..., '\0', save_prefix[(i + 2):end]...)
+  i, N = length(prefix), length(mumps.save_prefix)
+  mumps.save_prefix = (Cchar.(collect(prefix))..., repeat([Cchar(0)],N-i)...)
   return mumps
 end
 

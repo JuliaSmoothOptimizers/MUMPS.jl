@@ -43,6 +43,9 @@ end
 @testset "mixed: " begin
   include("mumps_test_mixed.jl")
 end
+@testset "save: " begin
+  include("mumps_test_save.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
