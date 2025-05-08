@@ -1,4 +1,4 @@
-# A [Julia](http://julialang.org) Interface to [MUMPS](https://graal.ens-lyon.fr/MUMPS/index.php?page=home)
+# A [Julia](http://julialang.org) Interface to [MUMPS](https://mumps-solver.org/index.php?page=home)
 
 [![docs-stable][docs-stable-img]][docs-stable-url]
 [![docs-dev][docs-dev-img]][docs-dev-url]
