@@ -89,7 +89,7 @@ Constant            | Meaning
 `default_cntl32`    | array of default real parameters in single precision
 `default_cntl64`    | array of default real parameters in double precision
 
-See Section 5 of the [MUMPS User's Manual](https://graal.ens-lyon.fr/MUMPS/index.php?page=doc) for a description of the integer and real control arrays.
+See Section 5 of the [MUMPS User's Manual](https://mumps-solver.org/index.php?page=doc) for a description of the integer and real control arrays.
 
 ### Methods
 
