@@ -13,17 +13,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.6', '1']
-        os: [ubuntu-latest, macOS-latest]
+        version: ['lts', '1']
+        os: [ubuntu-latest, macos-latest]
         arch: [x64]
         allow_failure: [false]
         include:
-          - version: 'nightly'
+          - version: 'pre'
             os: ubuntu-latest
             arch: x64
             allow_failure: true
-          - version: 'nightly'
-            os: macOS-latest
+          - version: 'pre'
+            os: macos-latest
             arch: x64
             allow_failure: true
     steps:
@@ -40,11 +40,11 @@ jobs:
           echo "::set-output name=prefix::$(brew --prefix)"
           echo "JULIA_MUMPS_LIBRARY_PATH=$(brew --prefix)/opt/mpich-mumps/lib" >> $GITHUB_ENV
       - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         env:
           cache-name: cache-artifacts
         with:
