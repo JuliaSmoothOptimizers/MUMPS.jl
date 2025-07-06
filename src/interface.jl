@@ -269,7 +269,6 @@ function associate_rhs_sparse_unsafe!(mumps::Mumps{T}, rhs::AbstractMatrix) wher
   mumps._rhs_sparse_gc_haven = rhs_sparse
   mumps._irhs_sparse_gc_haven = irhs_sparse
   mumps._irhs_ptr_gc_haven = irhs_ptr
-  append!(mumps._gc_haven, [Ref(rhs_sparse), Ref(irhs_sparse), Ref(irhs_ptr)])
   return mumps
 end
 
