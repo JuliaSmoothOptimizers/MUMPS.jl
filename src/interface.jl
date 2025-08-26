@@ -19,10 +19,10 @@ See also: [`invoke_mumps!`](@ref)
 function invoke_mumps_unsafe! end
 
 for (fname, lname, elty, subty) in (
-  ("smumps_c", libsmumpspar, Float32, Float32),
-  ("dmumps_c", libdmumpspar, Float64, Float64),
-  ("cmumps_c", libcmumpspar, ComplexF32, Float32),
-  ("zmumps_c", libzmumpspar, ComplexF64, Float64),
+  ("smumps_c", libsmumps, Float32, Float32),
+  ("dmumps_c", libdmumps, Float64, Float64),
+  ("cmumps_c", libcmumps, ComplexF32, Float32),
+  ("zmumps_c", libzmumps, ComplexF64, Float64),
 )
   @eval begin
     function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty})
