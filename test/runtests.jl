@@ -46,6 +46,9 @@ end
 @testset "save: " begin
   include("mumps_test_save.jl")
 end
+@testset "user permutation: " begin
+  include("mumps_test_user_perm.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
