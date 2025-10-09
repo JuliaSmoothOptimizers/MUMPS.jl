@@ -1,6 +1,6 @@
 export get_icntl, default_icntl, default_cntl32, default_cntl64
 
-export associate_matrix!, associate_rhs!, get_solution, solve!, solve, factorize!
+export associate_matrix!, associate_rhs!, set_user_perm!, get_solution, solve!, solve, factorize!
 
 export mumps_unsymmetric, mumps_definite, mumps_symmetric
 
@@ -186,7 +186,7 @@ default_cntl64[5] = 0.0;  # what null pivots are reset to
 # default_cntl64[6-15] are not used.
 
 """
-    get_icntl(;det=false,verbose=false,ooc=false,itref=0)
+    get_icntl(;det=false,verbose=false,ooc=false,itref=0,user_perm=false)
 Obtain an array of integer control parameters.
 """
 function get_icntl(;
@@ -194,6 +194,7 @@ function get_icntl(;
   verbose::Bool = false,   # Output intermediate info.
   ooc::Bool = false,       # Store factors out of core.
   itref::Int = 0,          # Max steps of iterative refinement.
+  user_perm::Bool = false, # Use user-supplied permutation.
 )
   icntl = default_icntl[:]
   icntl[33] = det ? 1 : 0
@@ -202,6 +203,7 @@ function get_icntl(;
   end
   icntl[22] = ooc ? 1 : 0
   icntl[10] = itref
+  icntl[7] = user_perm ? 1 : 7  # 1 = user-supplied, 7 = automatic
   return icntl
 end
 

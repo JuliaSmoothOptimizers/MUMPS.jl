@@ -217,6 +217,49 @@ function _associate_matrix_elemental!(mumps::Mumps{T}, A::Matrix) where {T}
 end
 
 """
+    set_user_perm!(mumps, perm; unsafe=false)
+
+Provide a user-supplied permutation vector `perm` to the `mumps` object for reordering during analysis.
+This sets ICNTL[7] = 1 to indicate that a user-provided permutation should be used.
+
+The permutation vector `perm` should be a 1-based integer vector of length `n` (the matrix dimension)
+containing a permutation of the integers 1 through `n`.
+
+If needed, it tries to convert element type of `perm` to be consistent with
+MUMPS_INT type, throwing a warning in this case.
+
+Note that by default this function makes a copy of `perm`. If you do not want to make a copy, pass
+`unsafe=true`. If the type of `perm` needs to be converted, this function may copy `perm`
+twice - to avoid this use `unsafe=true`.
+
+When `unsafe=true` is passed, if the type of `perm` is already consistent with MUMPS_INT,
+then pointers to `perm`'s memory are passed directly to MUMPS, so modifying `perm` will
+modify the permutation in `mumps`. If `perm` is not already consistent, a copy will be made
+when the type is converted.
+
+See also: [`associate_matrix!`](@ref), [`set_icntl!`](@ref)
+"""
+function set_user_perm!(mumps::Mumps, perm::AbstractVector; unsafe::Bool = false)
+  if !unsafe
+    perm = copy(perm)
+  end
+  
+  # Convert to MUMPS_INT if needed
+  perm_mumps = convert(Vector{MUMPS_INT}, perm)
+  
+  # Set the permutation pointer
+  mumps.perm_in = pointer(perm_mumps)
+  
+  # Store reference to prevent garbage collection
+  mumps._perm_in_gc_haven = perm_mumps
+  
+  # Set ICNTL[7] = 1 to use user-supplied permutation
+  set_icntl!(mumps, 7, 1; displaylevel = 0)
+  
+  return mumps
+end
+
+"""
     associate_rhs!(mumps, rhs; unsafe=false)
 
 Register a dense or sparse RHS matrix or vector `rhs` to a `mumps` object. It internally converts

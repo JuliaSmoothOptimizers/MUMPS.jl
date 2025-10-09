@@ -151,6 +151,7 @@ mutable struct Mumps{TC, TR}
   _irhs_ptr_gc_haven::Vector{MUMPS_INT}
   _listvar_schur_ptr_gc_haven::Vector{MUMPS_INT}
   _schur_gc_haven::Vector{TC}
+  _perm_in_gc_haven::Vector{MUMPS_INT}
   _finalized::Bool
 
   function Mumps{T}(sym::Integer, par::Integer, comm::Integer) where {T <: MUMPSValueDataType}

@@ -170,7 +170,7 @@ function display_icntl(io::IO, icntl, i, val)
     if val == 0
       print(io, "Approximate Minimum Degree (AMD)")
     elseif val == 1
-      print(io, "given by user via PERM_IN (see provide_perm_in)")
+      print(io, "given by user via PERM_IN (see set_user_perm!)")
     elseif val == 2
       print(io, "Approximate Minimum Fill (AMF)")
     elseif val == 3
@@ -189,7 +189,7 @@ function display_icntl(io::IO, icntl, i, val)
     if val == -2
       print(io, "computed during analysis")
     elseif val == -1
-      print(io, "provided by user in COLSCA and ROWSCA (see provide_)")
+      print(io, "provided by user in COLSCA and ROWSCA (see set_user_perm!)")
     elseif val == 1
       print(io, "diagonal, computed during factorization")
     elseif val == 3
