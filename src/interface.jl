@@ -239,7 +239,7 @@ when the type is converted.
 
 See also: [`associate_matrix!`](@ref), [`set_icntl!`](@ref)
 """
-function provide_perm_in!(mumps::Mumps, perm::AbstractVector; unsafe::Bool = false)
+function provide_perm_in!(mumps::Mumps, perm::AbstractVector{<:Integer}; unsafe::Bool = false)
   if !unsafe
     perm = deepcopy(perm)
   end
