@@ -80,6 +80,9 @@ end
     end
   end
 end
+@testset "user permutation: " begin
+  include("mumps_test_user_perm.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
