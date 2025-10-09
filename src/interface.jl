@@ -217,7 +217,7 @@ function _associate_matrix_elemental!(mumps::Mumps{T}, A::Matrix) where {T}
 end
 
 """
-    provide_perm_in!(mumps, perm; unsafe=false)
+    set_user_perm!(mumps, perm; unsafe=false)
 
 Provide a user-supplied permutation vector `perm` to the `mumps` object for reordering during analysis.
 This sets ICNTL[7] = 1 to indicate that a user-provided permutation should be used.
@@ -239,7 +239,7 @@ when the type is converted.
 
 See also: [`associate_matrix!`](@ref), [`set_icntl!`](@ref)
 """
-function provide_perm_in!(mumps::Mumps, perm::AbstractVector{<:Integer}; unsafe::Bool = false)
+function set_user_perm!(mumps::Mumps, perm::AbstractVector; unsafe::Bool = false)
   if !unsafe
     perm = copy(perm)
   end

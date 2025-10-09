@@ -27,7 +27,7 @@ tol = sqrt(eps(Float64))
     # Test 2: Identity permutation (should give same result)
     mumps2 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
     identity_perm = [1, 2, 3, 4]
-    provide_perm_in!(mumps2, identity_perm)
+    set_user_perm!(mumps2, identity_perm)
     # Verify ICNTL[7] was set correctly
     @test mumps2.icntl[7] == 1
     x2 = solve(mumps2, A, rhs)
@@ -39,7 +39,7 @@ tol = sqrt(eps(Float64))
     # Test 3: Reverse permutation
     mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
     reverse_perm = [4, 3, 2, 1]
-    provide_perm_in!(mumps3, reverse_perm)
+    set_user_perm!(mumps3, reverse_perm)
     @test mumps3.icntl[7] == 1
     x3 = solve(mumps3, A, rhs)
     finalize(mumps3)
@@ -50,7 +50,7 @@ tol = sqrt(eps(Float64))
     icntl_user = get_icntl(user_perm=true)
     @test icntl_user[7] == 1
     mumps4 = Mumps{Float64}(mumps_unsymmetric, icntl_user, default_cntl64)
-    provide_perm_in!(mumps4, identity_perm)
+    set_user_perm!(mumps4, identity_perm)
     x4 = solve(mumps4, A, rhs)
     finalize(mumps4)
     MPI.Barrier(comm)
@@ -59,7 +59,7 @@ tol = sqrt(eps(Float64))
     # Test 5: Test unsafe option
     mumps5 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
     perm_unsafe = [1, 2, 3, 4]
-    provide_perm_in!(mumps5, perm_unsafe; unsafe=true)
+    set_user_perm!(mumps5, perm_unsafe; unsafe=true)
     @test mumps5.icntl[7] == 1
     x5 = solve(mumps5, A, rhs)
     finalize(mumps5)
@@ -74,7 +74,7 @@ tol = sqrt(eps(Float64))
     rhs_complex = complex([1.0, 4.0, 9.0, 16.0])
     
     mumps6 = Mumps{ComplexF64}(mumps_unsymmetric, icntl, default_cntl64)
-    provide_perm_in!(mumps6, identity_perm)
+    set_user_perm!(mumps6, identity_perm)
     @test mumps6.icntl[7] == 1
     x6 = solve(mumps6, A_complex, rhs_complex)
     finalize(mumps6)
@@ -84,7 +84,7 @@ tol = sqrt(eps(Float64))
     # Test 7: Test error handling for wrong permutation size
     mumps7 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
     wrong_size_perm = [1, 2, 3]  # Too short for 4x4 matrix
-    provide_perm_in!(mumps7, wrong_size_perm)  # This should still work, MUMPS will handle the error
+    set_user_perm!(mumps7, wrong_size_perm)  # This should still work, MUMPS will handle the error
     # We don't test the solve here since it would fail, just test that the function completes
     @test mumps7.icntl[7] == 1
     finalize(mumps7)
