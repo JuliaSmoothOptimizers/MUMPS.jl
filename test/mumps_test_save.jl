@@ -1,6 +1,6 @@
 A = SparseArrays.sprand(10, 10, 0.4)
 S = A + A'
-mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl64)
+mumps = quiet_mumps(Float64; sym = mumps_symmetric)
 associate_matrix!(mumps, S)
 MUMPS.set_job!(mumps, 1)
 MUMPS.invoke_mumps!(mumps)

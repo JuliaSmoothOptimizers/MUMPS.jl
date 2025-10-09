@@ -10,6 +10,9 @@ Random.seed!(666)  # Random tests are diabolical
 
 @info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
 
+# include test utilities to obtain quiet ICNTL settings
+include("test_utils.jl")
+
 function random_matrix(t, σ, nrow, ncol)
   # t = data type
   # σ = vector of desired singular values
@@ -29,25 +32,53 @@ MPI.Init()
 comm = MPI.COMM_WORLD
 
 @testset "float: " begin
-  include("mumps_test_float.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_float.jl")
+    end
+  end
 end
 @testset "test: " begin
-  include("mumps_test.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test.jl")
+    end
+  end
 end
 @testset "float complex: " begin
-  include("mumps_test_float_complex.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_float_complex.jl")
+    end
+  end
 end
 @testset " complex: " begin
-  include("mumps_test_complex.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_complex.jl")
+    end
+  end
 end
 @testset "mixed: " begin
-  include("mumps_test_mixed.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_mixed.jl")
+    end
+  end
 end
 @testset "save: " begin
-  include("mumps_test_save.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_save.jl")
+    end
+  end
 end
 @testset "user permutation: " begin
-  include("mumps_test_user_perm.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_user_perm.jl")
+    end
+  end
 end
 
 MPI.Barrier(comm)
