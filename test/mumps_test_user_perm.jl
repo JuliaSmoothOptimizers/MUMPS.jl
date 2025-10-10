@@ -20,14 +20,14 @@ tol = sqrt(eps(Float64))
   expected_x = [1.0, 2.0, 3.0, 4.0]
 
   # Test 1: Default ordering (should work)
-  mumps1 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps1 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   x1 = solve(mumps1, A, rhs)
   finalize(mumps1)
   MPI.Barrier(comm)
   @test(norm(A * x1 - rhs) <= tol * norm(rhs) * norm(A, 1))
 
   # Test 2: Identity permutation (should give same result)
-  mumps2 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps2 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   identity_perm = [1, 2, 3, 4]
   set_user_perm!(mumps2, identity_perm)
   # Verify ICNTL[7] was set correctly
@@ -39,7 +39,7 @@ tol = sqrt(eps(Float64))
   @test(norm(x2 - expected_x) <= tol * norm(expected_x))
 
   # Test 3: Reverse permutation
-  mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps3 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   reverse_perm = [4, 3, 2, 1]
   set_user_perm!(mumps3, reverse_perm)
   @test mumps3.icntl[7] == 1
@@ -51,7 +51,7 @@ tol = sqrt(eps(Float64))
   # Test 4: Test with get_icntl convenience function
   icntl_user = get_icntl(user_perm = true)
   @test icntl_user[7] == 1
-  mumps4 = Mumps{Float64}(mumps_unsymmetric, icntl_user, default_cntl64)
+  mumps4 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   set_user_perm!(mumps4, identity_perm)
   x4 = solve(mumps4, A, rhs)
   finalize(mumps4)
@@ -59,7 +59,7 @@ tol = sqrt(eps(Float64))
   @test(norm(A * x4 - rhs) <= tol * norm(rhs) * norm(A, 1))
 
   # Test 5: Test unsafe option
-  mumps5 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps5 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   perm_unsafe = [1, 2, 3, 4]
   set_user_perm!(mumps5, perm_unsafe; unsafe = true)
   @test mumps5.icntl[7] == 1
@@ -77,7 +77,7 @@ tol = sqrt(eps(Float64))
   ]))
   rhs_complex = complex([1.0, 4.0, 9.0, 16.0])
 
-  mumps6 = Mumps{ComplexF64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps6 = quiet_mumps(ComplexF64; sym = mumps_unsymmetric)
   set_user_perm!(mumps6, identity_perm)
   @test mumps6.icntl[7] == 1
   x6 = solve(mumps6, A_complex, rhs_complex)
@@ -86,7 +86,7 @@ tol = sqrt(eps(Float64))
   @test(norm(A_complex * x6 - rhs_complex) <= tol * norm(rhs_complex) * norm(A_complex, 1))
 
   # Test 7: Test error handling for wrong permutation size
-  mumps7 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  mumps7 = quiet_mumps(Float64; sym = mumps_unsymmetric)
   wrong_size_perm = [1, 2, 3]  # Too short for 4x4 matrix
   set_user_perm!(mumps7, wrong_size_perm)  # This should still work, MUMPS will handle the error
   # We don't test the solve here since it would fail, just test that the function completes
@@ -94,3 +94,4 @@ tol = sqrt(eps(Float64))
   finalize(mumps7)
   MPI.Barrier(comm)
 end
+

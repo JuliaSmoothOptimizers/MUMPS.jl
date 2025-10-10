@@ -243,19 +243,19 @@ function set_user_perm!(mumps::Mumps, perm::AbstractVector; unsafe::Bool = false
   if !unsafe
     perm = copy(perm)
   end
-  
+
   # Convert to MUMPS_INT if needed
   perm_mumps = convert(Vector{MUMPS_INT}, perm)
-  
+
   # Set the permutation pointer
   mumps.perm_in = pointer(perm_mumps)
-  
+
   # Store reference to prevent garbage collection
   mumps._perm_in_gc_haven = perm_mumps
-  
+
   # Set ICNTL[7] = 1 to use user-supplied permutation
   set_icntl!(mumps, 7, 1; displaylevel = 0)
-  
+
   return mumps
 end
 
