@@ -94,4 +94,3 @@ tol = sqrt(eps(Float64))
   finalize(mumps7)
   MPI.Barrier(comm)
 end
-
