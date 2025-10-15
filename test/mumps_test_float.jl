@@ -1,7 +1,7 @@
 icntl = get_icntl(det = true, ooc = true, itref = 1);
 tol = sqrt(eps(Float32))
 
-mumps1 = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
+mumps1 = quiet_mumps(Float32; sym = mumps_definite)
 A = sparse(Diagonal(Array{Float32}([1.0, 2.0, 3.0, 4.0])))
 factorize!(mumps1, A);  # Analyze and factorize.
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
@@ -10,7 +10,7 @@ finalize(mumps1)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-mumps1_unsafe = Mumps{Float32}(mumps_definite, icntl, default_cntl32);
+mumps1_unsafe = quiet_mumps(Float32; sym = mumps_definite)
 A = sparse(Diagonal(Array{Float32}([1.0, 2.0, 3.0, 4.0])))
 associate_matrix!(mumps1_unsafe, A; unsafe = true)
 factorize!(mumps1_unsafe);  # Analyze and factorize.
@@ -24,7 +24,7 @@ finalize(mumps1_unsafe)
 MPI.Barrier(comm)
 @test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
-mumps2 = Mumps{Float32}(mumps_symmetric, icntl, default_cntl32)
+mumps2 = quiet_mumps(Float32; sym = mumps_symmetric)
 A = random_matrix(Float32, [1, 2, 3, 4], 4, 4);
 A = sparse(A + A');
 factorize!(mumps2, A)
@@ -34,7 +34,7 @@ finalize(mumps2)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-mumps3 = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32)
+mumps3 = quiet_mumps(Float32; sym = mumps_unsymmetric)
 A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4))
 factorize!(mumps3, A)
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
@@ -43,7 +43,7 @@ finalize(mumps3)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-mumps3_unsafe = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
+mumps3_unsafe = quiet_mumps(Float32; sym = mumps_unsymmetric)
 A = sparse(random_matrix(Float32, [1, 2, 3, 4], 4, 4))
 associate_matrix!(mumps3_unsafe, A; unsafe = true)
 factorize!(mumps3_unsafe);  # Analyze and factorize.
