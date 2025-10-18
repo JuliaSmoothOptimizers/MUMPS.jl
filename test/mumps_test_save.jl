@@ -1,4 +1,8 @@
-A = SparseArrays.sprand(10, 10, 0.4)
+# Use deterministic sparse symmetric test matrix instead of random
+A = sparse([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+           [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+           [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+           10, 10)
 S = A + A'
 mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl64)
 associate_matrix!(mumps, S)

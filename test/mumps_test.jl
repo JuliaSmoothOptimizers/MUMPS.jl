@@ -29,8 +29,8 @@ MPI.Barrier(comm)
 @test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
 mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64);
-A = random_matrix(Float64, [1, 2, 3, 4], 4, 4);
-A = sparse(A + A');
+# Use deterministic symmetric test matrix instead of random
+A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0]);
 factorize!(mumps2, A);
 rhs = [1.0, 4.0, 9.0, 16.0];
 x = solve(mumps2, rhs);
@@ -39,7 +39,8 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
 mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64);
-A = sparse(random_matrix(Float64, [1, 2, 3, 4], 4, 4));
+# Use deterministic unsymmetric test matrix
+A = sparse([1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0]);
 factorize!(mumps3, A);
 rhs = [1.0, 4.0, 9.0, 16.0];
 x = solve(mumps3, rhs);
@@ -48,7 +49,8 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
 
 mumps3_unsafe = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl32);
-A = sparse(random_matrix(Float64, [1, 2, 3, 4], 4, 4))
+# Use deterministic unsymmetric test matrix
+A = sparse([1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0])
 associate_matrix!(mumps3_unsafe, A; unsafe = true)
 factorize!(mumps3_unsafe);  # Analyze and factorize.
 rhs = [1.0, 4.0, 9.0, 16.0]
