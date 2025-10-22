@@ -153,17 +153,12 @@ using MUMPS, MPI, SparseArrays
 
 MPI.Init()
 
-# Create custom control parameters
 icntl = default_icntl[:]
-icntl[13] = 0  # Allow ScaLAPACK (parallel factorization)
+icntl[13] = 0
 
-# Create MUMPS instance
 mumps = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
 A = sprand(100, 100, 0.1)
 factorize!(mumps, A)
-
-# To disable ScaLAPACK and force sequential factorization:
-# icntl[13] = 999  # Forces sequential unless workers > 999
 
 finalize(mumps)
 MPI.Finalize()
