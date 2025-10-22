@@ -32,35 +32,16 @@ module MUMPS
 using Libdl, LinearAlgebra, SparseArrays
 using MPI
 
-libsmumpspar = nothing
-libdmumpspar = nothing
-libcmumpspar = nothing
-libzmumpspar = nothing
-MUMPS_INSTALLATION = "UNKNOWN"
-
 if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   @info("Custom Installation")
-  global libsmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libsmumps.$dlext")
-  global libdmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
-  global libcmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
-  global libzmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
-  global MUMPS_INSTALLATION = "CUSTOM"
+  const libsmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libsmumps.$dlext")
+  const libdmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
+  const libcmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
+  const libzmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
+  const MUMPS_INSTALLATION = "CUSTOM"
 else
-  try
-    using MUMPS_jll
-    global MUMPS_INSTALLATION = "YGGDRASIL"
-    global libsmumpspar = MUMPS_jll.libsmumpspar
-    global libdmumpspar = MUMPS_jll.libdmumpspar
-    global libcmumpspar = MUMPS_jll.libcmumpspar
-    global libzmumpspar = MUMPS_jll.libzmumpspar
-  catch err
-    @warn "MUMPS_jll is unavailable or failed to initialize on this platform; MUMPS functionality will be disabled" error=err
-    global libsmumpspar = "libsmumpspar"
-    global libdmumpspar = "libdmumpspar"
-    global libcmumpspar = "libcmumpspar"
-    global libzmumpspar = "libzmumpspar"
-    global MUMPS_INSTALLATION = "UNAVAILABLE"
-  end
+  using MUMPS_jll
+  const MUMPS_INSTALLATION = "YGGDRASIL"
 end
 
 include("mumps_types.jl")
