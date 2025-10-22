@@ -7,7 +7,6 @@ using SparseArrays
 
 @info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
 
-
 include("get_div_grad.jl")
 root = 0
 
@@ -15,22 +14,53 @@ MPI.Init()
 comm = MPI.COMM_WORLD
 
 @testset "float: " begin
-  include("mumps_test_float.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_float.jl")
+    end
+  end
 end
 @testset "test: " begin
-  include("mumps_test.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test.jl")
+    end
+  end
 end
 @testset "float complex: " begin
-  include("mumps_test_float_complex.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_float_complex.jl")
+    end
+  end
 end
 @testset " complex: " begin
-  include("mumps_test_complex.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_complex.jl")
+    end
+  end
 end
 @testset "mixed: " begin
-  include("mumps_test_mixed.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_mixed.jl")
+    end
+  end
 end
 @testset "save: " begin
-  include("mumps_test_save.jl")
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_save.jl")
+    end
+  end
+end
+@testset "user permutation: " begin
+  redirect_stdout(devnull) do
+    redirect_stderr(devnull) do
+      include("mumps_test_user_perm.jl")
+    end
+  end
 end
 @testset "user permutation: " begin
   include("mumps_test_user_perm.jl")

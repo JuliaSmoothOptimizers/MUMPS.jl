@@ -5,7 +5,7 @@ icntl[3] = 0
 icntl[4] = 0
 tol = sqrt(eps(Float32))
 
-mumps1 = Mumps{ComplexF32}(mumps_definite, icntl, default_cntl32)
+mumps1 = quiet_mumps(ComplexF32; sym = mumps_definite)
 A = sparse(Diagonal([1.0, 2.0, 3.0, 4.0]))
 factorize!(mumps1, A);  # Analyze and factorize.
 rhs = [1.0, 4.0, 9.0, 16.0]
@@ -14,7 +14,7 @@ finalize(mumps1)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-mumps1_unsafe = Mumps{ComplexF32}(mumps_definite, icntl, default_cntl32);
+mumps1_unsafe = quiet_mumps(ComplexF32; sym = mumps_definite)
 A = sparse(Diagonal(Array{ComplexF32}([1.0, 2.0, 3.0, 4.0])))
 associate_matrix!(mumps1_unsafe, A; unsafe = true)
 factorize!(mumps1_unsafe);  # Analyze and factorize.
@@ -29,7 +29,6 @@ MPI.Barrier(comm)
 @test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
 mumps2 = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32)
-# Use deterministic symmetric test matrix
 A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0]);
 factorize!(mumps2, A)
 rhs = [1.0, 4.0, 9.0, 16.0]
@@ -39,7 +38,6 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
 mumps3 = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32)
-# Use deterministic complex unsymmetric test matrix
 A = sparse(ComplexF32[1.0+0.1im 0.5 0.2 0.0; 0.3 2.0+0.2im 0.5 0.1; 0.0 0.4 3.0+0.3im 0.5; 0.1 0.0 0.3 4.0+0.4im]);
 factorize!(mumps3, A)
 rhs = map(ComplexF32, [1.0, 4.0, 9.0, 16.0] + im * [1.0, 4.0, 9.0, 16.0])
@@ -49,7 +47,6 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
 mumps3_unsafe = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32);
-# Use deterministic complex unsymmetric test matrix
 A = sparse(ComplexF32[1.0+0.1im 0.5 0.2 0.0; 0.3 2.0+0.2im 0.5 0.1; 0.0 0.4 3.0+0.3im 0.5; 0.1 0.0 0.3 4.0+0.4im])
 associate_matrix!(mumps3_unsafe, A; unsafe = true)
 factorize!(mumps3_unsafe);  # Analyze and factorize.

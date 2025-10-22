@@ -4,7 +4,7 @@ A = sparse([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 10],
            [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
            10, 10)
 S = A + A'
-mumps = Mumps{Float64}(mumps_symmetric, default_icntl, default_cntl64)
+mumps = quiet_mumps(Float64; sym = mumps_symmetric)
 associate_matrix!(mumps, S)
 MUMPS.set_job!(mumps, 1)
 MUMPS.invoke_mumps!(mumps)
