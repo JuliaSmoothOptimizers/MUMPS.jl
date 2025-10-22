@@ -10,6 +10,14 @@ Random.seed!(666)  # Random tests are diabolical
 
 @info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
 
+if getproperty(MUMPS, :MUMPS_INSTALLATION) == "UNAVAILABLE"
+  @warn "MUMPS binary unavailable on this platform; skipping tests"
+  @testset "MUMPS: skipped on this platform" begin
+    @test true
+  end
+  exit()
+end
+
 # include test utilities to obtain quiet ICNTL settings
 include("test_utils.jl")
 

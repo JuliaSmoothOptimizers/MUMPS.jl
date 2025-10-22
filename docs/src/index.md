@@ -139,7 +139,7 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 
 ### ScaLAPACK Support
 
-MUMPS.jl relies on `MUMPS_jll.jl`, a precompiled version of MUMPS with **ScaLAPACK** and **parMETIS**, which provides improved performance for parallel factorization, particularly for operations involving the Schur complement on the root node when using MPI parallelism.
+**MUMPS binaries from MUMPS_jll** (compiled in Yggdrasil) include **ScaLAPACK** and **BLACS** support, which provides improved performance for parallel factorization, particularly for operations involving the Schur complement on the root node when using MPI parallelism.
 
 The use of ScaLAPACK is controlled by the `ICNTL[13]` parameter:
 
