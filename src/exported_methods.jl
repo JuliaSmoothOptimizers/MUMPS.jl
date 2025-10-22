@@ -136,7 +136,7 @@ default_icntl[9] = 1;  # 1: solve Ax=b, otherwise A'x=b
 default_icntl[10] = 0;  # max number of iterative refinement steps
 default_icntl[11] = 0;  # > 0: return stats collected during solve
 default_icntl[12] = 0;  # ordering during analysis
-default_icntl[13] = 0;  # >0: do not use ScaLapack on root frontal matrix
+default_icntl[13] = 0;  # 0: use ScaLAPACK (parallel), >0: sequential unless workers > value
 default_icntl[14] = 20;  # % workspace increase during analysis/fact
 default_icntl[15] = 0;  # (not used)
 default_icntl[16] = 0;  # (not used)

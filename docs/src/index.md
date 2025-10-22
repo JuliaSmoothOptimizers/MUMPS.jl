@@ -137,6 +137,35 @@ Look for the lines that say `NUMBER OF WORKING PROCESSES` in the output of
 mpirun -np 4 julia examples/mumps_mpi.jl
 ```
 
+### ScaLAPACK Support
+
+MUMPS is compiled with **ScaLAPACK** and **PARMETIS** support, which provides improved performance for parallel factorization, particularly for operations involving the Schur complement on the root node when using MPI parallelism.
+
+The use of ScaLAPACK is controlled by the `ICNTL[13]` parameter:
+
+* **`ICNTL[13] = 0`** (default): Enables parallel factorization using ScaLAPACK on the root frontal matrix. This is the recommended setting for most parallel computations.
+* **`ICNTL[13] > 0`**: Forces sequential factorization on the root frontal matrix unless the number of working processes exceeds the specified value. Use this if you want to disable ScaLAPACK or control when it is used based on the number of workers.
+
+#### Example: Controlling ScaLAPACK usage
+
+```julia
+using MUMPS, MPI, SparseArrays
+
+MPI.Init()
+
+icntl = default_icntl[:]
+icntl[13] = 0
+
+mumps = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+A = sprand(100, 100, 0.1)
+factorize!(mumps, A)
+
+finalize(mumps)
+MPI.Finalize()
+```
+
+For more details on control parameters, see Section 5 of the [MUMPS User's Manual](https://mumps-solver.org/index.php?page=doc).
+
 ## Custom Installation
 
 **Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
