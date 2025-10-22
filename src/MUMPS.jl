@@ -32,7 +32,6 @@ module MUMPS
 using Libdl, LinearAlgebra, SparseArrays
 using MPI
 
-# Library identifiers (either JLL-provided variables or fallback strings)
 libsmumpspar = nothing
 libdmumpspar = nothing
 libcmumpspar = nothing
@@ -47,18 +46,15 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   global libzmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
   global MUMPS_INSTALLATION = "CUSTOM"
 else
-  # Try to use Yggdrasil-provided binaries, but guard failures so precompile doesn't abort
   try
     using MUMPS_jll
     global MUMPS_INSTALLATION = "YGGDRASIL"
-    # Bring JLL library products into our namespace
     global libsmumpspar = MUMPS_jll.libsmumpspar
     global libdmumpspar = MUMPS_jll.libdmumpspar
     global libcmumpspar = MUMPS_jll.libcmumpspar
     global libzmumpspar = MUMPS_jll.libzmumpspar
   catch err
     @warn "MUMPS_jll is unavailable or failed to initialize on this platform; MUMPS functionality will be disabled" error=err
-    # Define placeholder library names so code can load, but any invocation will fail at runtime
     global libsmumpspar = "libsmumpspar"
     global libdmumpspar = "libdmumpspar"
     global libcmumpspar = "libcmumpspar"
