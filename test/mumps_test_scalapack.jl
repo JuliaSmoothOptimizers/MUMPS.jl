@@ -1,15 +1,8 @@
-# Test ScaLAPACK functionality
-
-if !isdefined(Main, :MUMPS)
-    using Test
-    using LinearAlgebra
-    using MPI
-    using MUMPS
-    using SparseArrays
-
-    MPI.Init()
-    comm = MPI.COMM_WORLD
-end
+using Test
+using LinearAlgebra
+using MPI
+using MUMPS
+using SparseArrays
 
 @testset "ScaLAPACK enabled (ICNTL[13]=0)" begin
     n = 20
@@ -23,7 +16,6 @@ end
     
     mumps = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64)
     
-    # Verify ICNTL[13] is set correctly
     @test mumps.icntl[13] == 0
     
     factorize!(mumps, A)
@@ -48,7 +40,6 @@ end
     
     mumps = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64)
     
-    # Verify ICNTL[13] is set correctly
     @test mumps.icntl[13] == 999
     
     factorize!(mumps, A)
@@ -72,7 +63,6 @@ end
     
     mumps = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
     
-    # Verify ICNTL[13] is set correctly
     @test mumps.icntl[13] == 0
     
     factorize!(mumps, A)
