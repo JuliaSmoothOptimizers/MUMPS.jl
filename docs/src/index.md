@@ -146,7 +146,7 @@ The use of ScaLAPACK is controlled by the `ICNTL[13]` parameter:
 * **`ICNTL[13] = 0`** (default): Enables parallel factorization using ScaLAPACK on the root frontal matrix. This is the recommended setting for most parallel computations.
 * **`ICNTL[13] > 0`**: Forces sequential factorization on the root frontal matrix unless the number of working processes exceeds the specified value. Use this if you want to disable ScaLAPACK or control when it is used based on the number of workers.
 
-#### Example: Controlling ScaLAPACK Usage
+#### Example: Controlling ScaLAPACK usage
 
 ```julia
 using MUMPS, MPI, SparseArrays
