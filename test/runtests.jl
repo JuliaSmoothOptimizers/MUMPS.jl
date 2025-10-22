@@ -83,6 +83,9 @@ end
 @testset "user permutation: " begin
   include("mumps_test_user_perm.jl")
 end
+@testset "ScaLAPACK: " begin
+  include("mumps_test_scalapack.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
