@@ -38,7 +38,14 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
 mumps3 = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32)
-A = sparse(ComplexF32[1.0+0.1im 0.5 0.2 0.0; 0.3 2.0+0.2im 0.5 0.1; 0.0 0.4 3.0+0.3im 0.5; 0.1 0.0 0.3 4.0+0.4im]);
+A = sparse(
+  ComplexF32[
+    1.0+0.1im 0.5 0.2 0.0;
+    0.3 2.0+0.2im 0.5 0.1;
+    0.0 0.4 3.0+0.3im 0.5;
+    0.1 0.0 0.3 4.0+0.4im
+  ],
+);
 factorize!(mumps3, A)
 rhs = map(ComplexF32, [1.0, 4.0, 9.0, 16.0] + im * [1.0, 4.0, 9.0, 16.0])
 x = solve(mumps3, rhs)
@@ -47,7 +54,14 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
 mumps3_unsafe = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32);
-A = sparse(ComplexF32[1.0+0.1im 0.5 0.2 0.0; 0.3 2.0+0.2im 0.5 0.1; 0.0 0.4 3.0+0.3im 0.5; 0.1 0.0 0.3 4.0+0.4im])
+A = sparse(
+  ComplexF32[
+    1.0+0.1im 0.5 0.2 0.0;
+    0.3 2.0+0.2im 0.5 0.1;
+    0.0 0.4 3.0+0.3im 0.5;
+    0.1 0.0 0.3 4.0+0.4im
+  ],
+)
 associate_matrix!(mumps3_unsafe, A; unsafe = true)
 factorize!(mumps3_unsafe);  # Analyze and factorize.
 rhs = Array{ComplexF32}([1.0, 4.0, 9.0, 16.0])
