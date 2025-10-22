@@ -9,6 +9,17 @@ using SparseArrays
 
 # Random tests removed - using deterministic test matrices instead (issue #15)
 
+# Silence helper used in some branches/tests; no-op safe fallback here
+if !isdefined(Main, :quiet_mumps)
+  function quiet_mumps(f::Function)
+    Base.redirect_stdout(devnull) do
+      Base.redirect_stderr(devnull) do
+        f()
+      end
+    end
+  end
+end
+
 include("get_div_grad.jl")
 root = 0
 
