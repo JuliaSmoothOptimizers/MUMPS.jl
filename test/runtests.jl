@@ -7,9 +7,13 @@ using SparseArrays
 
 @info("MUMPS_INSTALLATION: $(MUMPS.MUMPS_INSTALLATION)")
 
+# include test utilities to obtain quiet ICNTL settings
+include("test_utils.jl")
+
 include("get_div_grad.jl")
 root = 0
 
+# Initialize MPI.
 MPI.Init()
 comm = MPI.COMM_WORLD
 
