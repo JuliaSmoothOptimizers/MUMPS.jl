@@ -1,6 +1,6 @@
 # Test mixed-type examples.
 
-A = random_matrix(Float16, [1, 2, 3, 4], 4, 4)
+A = Float16[1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0]
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
 x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
@@ -48,7 +48,7 @@ relres = norm(A * x - rhs) / norm(rhs)
 @test(relres <= eps(Float32)^(1 / 3))
 
 # For now both A and rhs will be converted to ComplexF64.
-A = random_matrix(ComplexF16, [1, 2, 3, 4], 4, 4)
+A = ComplexF16[1.0+0.1im 0.5 0.2 0.0; 0.3 2.0+0.2im 0.5 0.1; 0.0 0.4 3.0+0.3im 0.5; 0.1 0.0 0.3 4.0+0.4im]
 rhs = Array{Int16}([1, 4, 9, 16])
 x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
