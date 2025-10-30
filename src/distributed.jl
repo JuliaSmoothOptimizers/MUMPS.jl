@@ -22,7 +22,7 @@ function is_darray(A)
         return false
     end
     try
-        import DistributedArrays
+        @eval import DistributedArrays
     catch
         return false
     end
@@ -47,7 +47,7 @@ function gather_on_root(A; root::Integer = 0, comm = MPI.COMM_WORLD)
         return A
     end
     try
-        import DistributedArrays
+        @eval import DistributedArrays
     catch
         return A
     end
