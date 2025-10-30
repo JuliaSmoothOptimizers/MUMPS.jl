@@ -1,8 +1,3 @@
-"""Tests for the optional distributed-array helpers.
-
-These tests are skipped when `DistributedArrays` is not installed.
-"""
-
 using Test
 using MPI
 using MUMPS
@@ -19,7 +14,6 @@ else
   rank = MPI.Comm_rank(comm)
 
   @testset "distributed helpers" begin
-    # create a small local array and distribute it
     localA = reshape(collect(1:12), 3, 4)
     darr = DistributedArrays.distribute(localA)
 
