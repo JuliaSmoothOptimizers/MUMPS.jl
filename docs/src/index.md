@@ -137,6 +137,43 @@ Look for the lines that say `NUMBER OF WORKING PROCESSES` in the output of
 mpirun -np 4 julia examples/mumps_mpi.jl
 ```
 
+## Distributed arrays (DArray)
+
+`DistributedArrays` has been added for workflows that use distributed matrices and vectors. It allows tests to validate behavior when data is stored in `DArray` form and interoperates with MPI-backed workflows.
+
+```julia
+using Distributed, DistributedArrays, MPI, MUMPS, SparseArrays
+
+MPI.Init()
+comm = MPI.COMM_WORLD
+rank = MPI.Comm_rank(comm)
+
+localA = reshape(collect(1:12), 3, 4)
+
+dA = DistributedArrays.distribute(localA)
+
+if rank == 0
+  A = Array(dA)
+
+  Asp = sparse(A[1:3, 1:3])
+  b = ones(3)
+
+  m = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64)
+  associate_matrix!(m, Asp)
+  factorize!(m)
+  associate_rhs!(m, b)
+  solve!(m)
+  x = get_solution(m)
+  println("Solution on root: ", x)
+  finalize(m)
+else
+  # non-root ranks typically do no work in this simple example
+end
+
+MPI.Barrier(comm)
+MPI.Finalize()
+```
+
 ### ScaLAPACK Support
 
 MUMPS is compiled with **ScaLAPACK** and **PARMETIS** support, which provides improved performance for parallel factorization, particularly for operations involving the Schur complement on the root node when using MPI parallelism.
