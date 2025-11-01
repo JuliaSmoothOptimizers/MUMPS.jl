@@ -2,14 +2,6 @@ using Test
 using MPI
 using MUMPS
 
-if Base.find_package("DistributedArrays") === nothing
-  @info "DistributedArrays not installed; skipping distributed helper tests"
-  @testset "distributed helpers: skipped (no DistributedArrays)" begin
-    @test true
-  end
-else
-  import DistributedArrays
-
   comm = MPI.COMM_WORLD
   rank = MPI.Comm_rank(comm)
 
