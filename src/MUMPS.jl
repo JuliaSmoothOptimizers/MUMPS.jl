@@ -50,7 +50,6 @@ include("interface.jl")
 include("convenience.jl")
 include("icntl_alibis.jl")
 include("printing.jl")
-include("distributed.jl")
 include("exported_methods.jl")
 
 end
