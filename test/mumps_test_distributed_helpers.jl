@@ -1,22 +1,28 @@
+"""Tests for the distributed-array helpers.
+
+These tests require `DistributedArrays` to be available in the test environment.
+"""
+
 using Test
 using MPI
 using MUMPS
+import DistributedArrays
 
-  comm = MPI.COMM_WORLD
-  rank = MPI.Comm_rank(comm)
+comm = MPI.COMM_WORLD
+rank = MPI.Comm_rank(comm)
 
-  @testset "distributed helpers" begin
-    localA = reshape(collect(1:12), 3, 4)
-    darr = DistributedArrays.distribute(localA)
+@testset "distributed helpers" begin
+  # create a small local array and distribute it
+  localA = reshape(collect(1:12), 3, 4)
+  darr = DistributedArrays.distribute(localA)
 
-    g = MUMPS.gather_on_root(darr; root = 0, comm = comm)
+  g = MUMPS.gather_on_root(darr; root = 0, comm = comm)
 
-    if rank == 0
-      @test isa(g, Array)
-      @test size(g) == size(localA)
-      @test all(g .== localA)
-    else
-      @test g === nothing
-    end
+  if rank == 0
+    @test isa(g, Array)
+    @test size(g) == size(localA)
+    @test all(g .== localA)
+  else
+    @test g === nothing
   end
 end
