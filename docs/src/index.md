@@ -142,32 +142,72 @@ mpirun -np 4 julia examples/mumps_mpi.jl
 `DistributedArrays` has been added for workflows that use distributed matrices and vectors. It allows tests to validate behavior when data is stored in `DArray` form and interoperates with MPI-backed workflows.
 
 ```julia
-using Distributed, DistributedArrays, MPI, MUMPS, SparseArrays
+using Distributed, DistributedArrays, MPI, MUMPS, SparseArrays, LinearAlgebra
 
 MPI.Init()
 comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 
-localA = reshape(collect(1:12), 3, 4)
+sqrtN = 40
+N = sqrtN^2
 
-dA = DistributedArrays.distribute(localA)
+function local_rows(I)
+  # DistributedArrays may pass a 1-tuple of a UnitRange to the init function on workers; extract the actual index range if necessary.
+  idx = isa(I, Tuple) ? I[1] : I
+  nn = length(idx)
+  # Return a vector of sparse row vectors, one per local row. This makes the DArray hold per-row SparseVector objects so the root can reassemble the full sparse matrix from triplets.
+  rows_vec = Vector{SparseVector{Float64}}(undef, nn)
+  for (local_i, global_i) in enumerate(idx)
+    i = div(global_i-1, sqrtN) + 1
+    j = (global_i-1) % sqrtN + 1
+    cols = Int[]; vals = Float64[]
+    push!(cols, global_i); push!(vals, 4.0)
+    if i > 1  push!(cols, global_i - sqrtN); push!(vals, -1.0) end
+    if i < sqrtN push!(cols, global_i + sqrtN); push!(vals, -1.0) end
+    if j > 1  push!(cols, global_i - 1); push!(vals, -1.0) end
+    if j < sqrtN push!(cols, global_i + 1); push!(vals, -1.0) end
+    rows_vec[local_i] = sparsevec(cols, vals, N)
+  end
+  return rows_vec
+end
+
+# Create a DArray of local sparse row-blocks
+dblocks = DArray(I -> local_rows(I), (N,))
 
 if rank == 0
-  A = Array(dA)
+  # Gather local blocks and assemble global sparse matrix on the root.
+  # Use vertical concatenation of sparse blocks to avoid slice-assignment edge
+  # cases when assigning sparse blocks into a sparse matrix.
+  # Collect per-row sparse vectors from the DArray and build triplets
+  blocks = collect(dblocks)   # blocks is a Vector of SparseVector objects
+  rows_idx = Int[]; cols_idx = Int[]; vals = Float64[]
+  global_row = 1
+  for sv in blocks
+    if nnz(sv) > 0
+      inds, valsv = findnz(sv)
+      append!(rows_idx, fill(global_row, length(inds)))
+      append!(cols_idx, inds)
+      append!(vals, valsv)
+    end
+    global_row += 1
+  end
+  A = sparse(rows_idx, cols_idx, vals, N, N)
 
-  Asp = sparse(A[1:3, 1:3])
-  b = ones(3)
+  b = ones(Float64, N)
 
-  m = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64)
-  associate_matrix!(m, Asp)
+  # Enable ScaLAPACK usage on the root frontal matrix
+  icntl = default_icntl[:]
+  icntl[13] = 0
+  m = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  associate_matrix!(m, A)
   factorize!(m)
   associate_rhs!(m, b)
   solve!(m)
   x = get_solution(m)
-  println("Solution on root: ", x)
+  println("Residual norm on root: ", norm(A * x - b))
   finalize(m)
 else
-  # non-root ranks typically do no work in this simple example
+  # non-root ranks finished after local assembly
 end
 
 MPI.Barrier(comm)
@@ -212,6 +252,7 @@ to point to the shared library before `using MUMPS`.
 Note that the same version of MUMPS as used by the `MUMPS_jll` artifact is needed.
 
 For example, macOS users may install precompiled MUMPS binaries from the Homebrew tap `dpo/mumps-jl` as follows:
+
 ```bash
 brew tap dpo/mumps-jl
 brew install mpich-mumps

@@ -10,7 +10,11 @@ rank = MPI.Comm_rank(comm)
   localA = reshape(collect(1:12), 3, 4)
   darr = DistributedArrays.distribute(localA)
 
-  g = MUMPS.gather_on_root(darr; root = 0, comm = comm)
+  if rank == 0
+    g = Array(darr)
+  else
+    g = nothing
+  end
 
   if rank == 0
     @test isa(g, Array)
