@@ -152,7 +152,6 @@ sqrtN = 40
 N = sqrtN^2
 
 function local_rows(I)
-  # DistributedArrays may pass a 1-tuple of a UnitRange to the init function on workers; extract the actual index range if necessary.
   idx = isa(I, Tuple) ? I[1] : I
   nn = length(idx)
   # Return a vector of sparse row vectors, one per local row. This makes the DArray hold per-row SparseVector objects so the root can reassemble the full sparse matrix from triplets.
@@ -171,15 +170,12 @@ function local_rows(I)
   return rows_vec
 end
 
-# Create a DArray of local sparse row-blocks
 dblocks = DArray(I -> local_rows(I), (N,))
 
 if rank == 0
-  # Gather local blocks and assemble global sparse matrix on the root.
-  # Use vertical concatenation of sparse blocks to avoid slice-assignment edge
-  # cases when assigning sparse blocks into a sparse matrix.
-  # Collect per-row sparse vectors from the DArray and build triplets
-  blocks = collect(dblocks)   # blocks is a Vector of SparseVector objects
+  # Use vertical concatenation of sparse blocks to avoid slice-assignment edge cases when assigning sparse blocks into a sparse matrix.
+  # Collect per-row sparse vectors from the DArray and build triplets.
+  blocks = collect(dblocks)
   rows_idx = Int[]; cols_idx = Int[]; vals = Float64[]
   global_row = 1
   for sv in blocks
@@ -252,7 +248,6 @@ to point to the shared library before `using MUMPS`.
 Note that the same version of MUMPS as used by the `MUMPS_jll` artifact is needed.
 
 For example, macOS users may install precompiled MUMPS binaries from the Homebrew tap `dpo/mumps-jl` as follows:
-
 ```bash
 brew tap dpo/mumps-jl
 brew install mpich-mumps
