@@ -1,8 +1,3 @@
-"""Tests for the distributed-array helpers.
-
-These tests require `DistributedArrays` to be available in the test environment.
-"""
-
 using Test
 using MPI
 using MUMPS
@@ -12,7 +7,6 @@ comm = MPI.COMM_WORLD
 rank = MPI.Comm_rank(comm)
 
 @testset "distributed helpers" begin
-  # create a small local array and distribute it
   localA = reshape(collect(1:12), 3, 4)
   darr = DistributedArrays.distribute(localA)
 
