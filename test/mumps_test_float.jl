@@ -38,9 +38,13 @@ A = sparse(Float32[1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.
 factorize!(mumps3, A)
 rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
 x = solve(mumps3, rhs)
+x2 = similar(x)
+rhs2 = 2 * rhs
+MUMPS.mumps_solve!(x2, mumps3, rhs2)
 finalize(mumps3)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
+@test(norm(x2 - 2 * x) <= tol * norm(x))
 
 mumps3_unsafe = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(Float32[1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0])

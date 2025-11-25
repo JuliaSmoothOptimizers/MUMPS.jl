@@ -94,8 +94,18 @@ end
 
 Set the phase to `job`. See MUMPS manual for options.
 """
-function set_job!(mumps::Mumps, i)
-  mumps.job = i
+function set_job!(mumps::Mumps, job::MUMPS_JOB)
+  mumps.job = job
+  return mumps
+end
+
+"""
+    set_job!(mumps,job::Integer)
+
+Reverse compatible version of `set_job!` that accepts an integer job code.
+"""
+function set_job!(mumps::Mumps, job::Integer)
+  mumps.job = MUMPS_JOB(job)
   return mumps
 end
 
@@ -398,7 +408,7 @@ See also: [`get_rhs!`](@ref), [`get_rhs`](@ref), [`get_sol`](@ref)
 """
 function get_sol!(x::Union{SubArray, Array}, mumps::Mumps)
   if !is_finalized(mumps)
-    if mumps.job ∉ [3, 5, 6]
+    if mumps.job ∉ SOLVE_JOBS
       @error "mumps has not passed through a solution phase"
     end
     if has_rhs(mumps)

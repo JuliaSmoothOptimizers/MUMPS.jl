@@ -20,31 +20,7 @@ function Base.show(io::IO, mumps::Mumps{TC, TR}) where {TC, TR}
   end
   println(io, "lib: ", lib)
   print(io, "job: ", mumps.job, " ")
-  if mumps.job == -3
-    println(io, "save/restore")
-  elseif mumps.job == -2
-    println(io, "terminate")
-  elseif mumps.job == -1
-    println(io, "initialize")
-  elseif mumps.job == 1
-    println(io, "analyze")
-  elseif mumps.job == 2
-    println(io, "factorize")
-  elseif mumps.job == 3
-    println(io, "solve")
-  elseif mumps.job == 4
-    println(io, "analyze + factorize")
-  elseif mumps.job == 5
-    println(io, "factorize + solve")
-  elseif mumps.job == 6
-    println(io, "analyze + factorize + solve")
-  elseif mumps.job == 7
-    println(io, "save")
-  elseif mumps.job == 8
-    println(io, "restore")
-  else
-    println(io, "unrecognized")
-  end
+  println(io, get_name(mumps.job))
   print(io, "sym: ", mumps.sym)
   if mumps.sym == 1
     println(io, " symmetric pos def")

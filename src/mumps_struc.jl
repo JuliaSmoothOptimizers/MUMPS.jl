@@ -21,7 +21,7 @@ Mirror of structre in `[sdcz]mumps_c.h`.
 mutable struct Mumps{TC, TR}
   sym::MUMPS_INT # MANDATORY 0 for unsymmetric, 1 for symmetric and posdef, 2 for general symmetric. All others treated as 0
   par::MUMPS_INT # MANDATORY 0 host not involved in parallel factorization and solve, 1 host is involved
-  job::MUMPS_INT # MANDATORY -1 initializes package, must come first, -2 terminates, 1 analysis, 2 factorization, 3 solve, 4=1&2, 5=2&3, 6=1&2&3
+  job::MUMPS_JOB # MANDATORY see MUMPS_JOB enum.
   comm_fortran::MUMPS_INT # MANDATORY valid MPI communicator
   icntl::NTuple{60, MUMPS_INT}
   keep::NTuple{500, MUMPS_INT}
@@ -156,7 +156,7 @@ mutable struct Mumps{TC, TR}
 
   function Mumps{T}(sym::Integer, par::Integer, comm::Integer) where {T <: MUMPSValueDataType}
     !MPI.Initialized() ? throw(MUMPSException("Initialize MPI first")) : nothing
-    mumps = new{T, real(T)}(sym, par, -1, comm)
+    mumps = new{T, real(T)}(sym, par, INITIALIZE, comm)
     invoke_mumps_unsafe!(mumps)
     mumps._finalized = false
     finalizer(finalize!, mumps)
