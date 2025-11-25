@@ -19,21 +19,21 @@ See also: [`mumps_solve`](@ref), [`get_sol!`](@ref), [`get_sol`](@ref)
 """
 function mumps_solve! end
 
-function mumps_solve!(mumps::Mumps)
-  if mumps.job ∈ [2, 4] # if already factored, just solve
-    mumps.job = 3
-  elseif mumps.job ∈ [1] # if analyzed only, factorize and solve
-    mumps.job = 5
-  elseif mumps.job ∈ [3, 5, 6] # is solved already, retrieve solution
+function mumps_solve!(mumps::Mumps; rhs_changed::Bool = false)
+  if mumps.job ∈ ONLY_FACTORED  || rhs_changed # if already factored, just solve
+    mumps.job = SOLVE
+  elseif mumps.job ∈ [ANALYZE] # if analyzed only, factorize and solve
+    mumps.job = FACTOR_SOLVE
+  elseif mumps.job ∈ SOLVE_JOBS # is solved already.
     return nothing
   else # else analyze, factor, solve
-    mumps.job = 6
+    mumps.job = ANALYZE_FACTOR_SOLVE
   end
   invoke_mumps!(mumps)
 end
 
-function mumps_solve!(x::AbstractArray, mumps::Mumps)
-  mumps_solve!(mumps)
+function mumps_solve!(x::AbstractArray, mumps::Mumps; kwargs...)
+  mumps_solve!(mumps; kwargs...)
   get_sol!(x, mumps)
 end
 
@@ -47,15 +47,7 @@ end
 
 function mumps_solve!(x::AbstractArray, mumps::Mumps, rhs::AbstractArray)
   associate_rhs!(mumps, rhs)
-  if mumps.job ∈ [2, 4] # if already factored, just solve
-  elseif mumps.job ∈ [1] # if analyzed only, factorize and solve
-    mumps.job = 5
-  elseif mumps.job ∈ [3, 5, 6] # is solved already, reset to solve only
-    mumps.job = 2
-  else # else analyze, factor, solve
-    mumps.job = 6
-  end
-  mumps_solve!(x, mumps)
+  mumps_solve!(x, mumps; rhs_changed = true)
 end
 
 """
@@ -72,7 +64,7 @@ See also: [`mumps_solve!`](@ref)
 function mumps_solve end
 
 function mumps_solve(mumps::Mumps)
-  if mumps.job ∈ [3, 5, 6]
+  if mumps.job ∈ SOLVE_JOBS
     x = get_sol(mumps)
   else
     x = get_rhs(mumps)
@@ -101,13 +93,13 @@ Useful for doing repeated solves downstream.
 See also: [`mumps_factorize`](@ref)
 """
 function mumps_factorize!(mumps::Mumps)
-  if mumps.job ∈ [2, 3, 4, 5, 6] # already factored
+  if mumps.job ∈ ONLY_FACTORED || mumps.job ∈ SOLVE_JOBS # already factored
     # @warn "already factored"
     return nothing
-  elseif mumps.job ∈ [1] # if analyzed only, factorize
-    mumps.job = 2
+  elseif mumps.job ∈ [ANALYZE] # if analyzed only, factorize
+    mumps.job = FACTOR
   else # else analyze, factor
-    mumps.job = 4
+    mumps.job = ANALYZE_FACTOR
   end
   invoke_mumps!(mumps)
 end
@@ -182,10 +174,10 @@ function mumps_schur_complement! end
 
 function mumps_schur_complement!(mumps::Mumps, schur_inds::AbstractArray{Int, 1})
   set_schur_centralized_by_column!(mumps, schur_inds)
-  if mumps.job ∈ [1] # if analyzed only, factorize
-    mumps.job = 2
+  if mumps.job ∈ [ANALYZE] # if analyzed only, factorize
+    mumps.job = FACTOR
   else # else analyze, factor
-    mumps.job = 4
+    mumps.job = ANALYZE_FACTOR
   end
   invoke_mumps!(mumps)
 end
@@ -231,12 +223,12 @@ function mumps_select_inv!(x::AbstractSparseArray, mumps::Mumps)
   set_icntl!(mumps, 30, 1)
   set_icntl!(mumps, 20, 3)
   associate_rhs!(mumps, x)
-  if mumps.job ∈ [2, 4] # if already factored, just solve
-    mumps.job = 3
-  elseif mumps.job ∈ [1] # if analyzed only, factorize and solve
-    mumps.job = 5
+  if mumps.job ∈ ONLY_FACTORED # if already factored, just solve
+    mumps.job = SOLVE
+  elseif mumps.job ∈ [ANALYZE] # if analyzed only, factorize and solve
+    mumps.job = FACTOR_SOLVE
   else # else analyze, factor, solve
-    mumps.job = 6
+    mumps.job = ANALYZE_FACTOR_SOLVE
   end
   invoke_mumps!(mumps)
   get_rhs!(x, mumps)
@@ -285,7 +277,7 @@ See also: [`finalize`](@ref)
 function initialize!(mumps::Mumps)
   suppress_display!(mumps)
   mumps._finalized = false
-  mumps.job = -1
+  mumps.job = INITIALIZE
   invoke_mumps!(mumps)
 end
 
@@ -303,13 +295,13 @@ end
 
 function finalize_unsafe!(mumps::Mumps)
   mumps._finalized = true
-  mumps.job = -2
+  mumps.job = TERMINATE
   invoke_mumps_unsafe!(mumps)
 end
 
 function Base.:\(mumps::Mumps, y)
   suppress_display!(mumps)
-  if mumps.job < 2
+  if !is_factored(mumps.job)
     mumps_factorize!(mumps)
   end
   x = mumps_solve(mumps, y)
@@ -318,10 +310,10 @@ end
 
 function LinearAlgebra.ldiv!(mumps::Mumps, y)
   suppress_display!(mumps)
-  if mumps.job < 2
+  if !is_factored(mumps.job)
     mumps_factorize!(mumps)
   else
-    mumps.job = 2
+    mumps.job = FACTOR
   end
   associate_rhs!(mumps, y)
   mumps_solve!(y, mumps)
@@ -329,7 +321,7 @@ end
 
 function LinearAlgebra.ldiv!(x, mumps::Mumps, y)
   suppress_display!(mumps)
-  if mumps.job < 2
+  if !is_factored(mumps.job)
     mumps_factorize!(mumps)
   end
   mumps_solve!(x, mumps, y)

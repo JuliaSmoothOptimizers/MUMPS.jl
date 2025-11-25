@@ -53,6 +53,7 @@ function __init__()
 end
 
 include("mumps_types.jl")
+include("mumps_job.jl")
 include("mumps_struc.jl")
 include("interface.jl")
 include("convenience.jl")
