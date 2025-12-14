@@ -159,7 +159,6 @@ mutable struct Mumps{TC, TR}
     mumps = new{T, real(T)}(sym, par, -1, comm)
     invoke_mumps_unsafe!(mumps)
     mumps._finalized = false
-    finalizer(finalize!, mumps)
     return mumps
   end
 end
