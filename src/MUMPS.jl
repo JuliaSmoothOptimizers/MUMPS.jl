@@ -31,9 +31,9 @@ module MUMPS
 
 using Libdl, LinearAlgebra, SparseArrays
 using MPI
+import OpenBLAS32_jll
 
 if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
-  @info("Custom Installation")
   const libsmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libsmumps.$dlext")
   const libdmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
   const libcmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
@@ -42,6 +42,14 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
 else
   using MUMPS_jll
   const MUMPS_INSTALLATION = "YGGDRASIL"
+end
+
+function __init__()
+    config = LinearAlgebra.BLAS.lbt_get_config()
+    if !any(lib -> lib.interface == :lp64, config.loaded_libs)
+        LinearAlgebra.BLAS.lbt_forward(OpenBLAS32_jll.libopenblas_path)
+    end
+    return
 end
 
 include("mumps_types.jl")
