@@ -20,7 +20,7 @@ See also: [`mumps_solve`](@ref), [`get_sol!`](@ref), [`get_sol`](@ref)
 function mumps_solve! end
 
 function mumps_solve!(mumps::Mumps; rhs_changed::Bool = false)
-  if mumps.job ∈ ONLY_FACTORED  || rhs_changed # if already factored, just solve
+  if mumps.job ∈ ONLY_FACTORED || rhs_changed # if already factored, just solve
     mumps.job = SOLVE
   elseif mumps.job ∈ [ANALYZE] # if analyzed only, factorize and solve
     mumps.job = FACTOR_SOLVE
