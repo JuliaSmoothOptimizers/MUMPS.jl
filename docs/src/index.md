@@ -137,6 +137,79 @@ Look for the lines that say `NUMBER OF WORKING PROCESSES` in the output of
 mpirun -np 4 julia examples/mumps_mpi.jl
 ```
 
+## Distributed arrays (DArray)
+
+`DistributedArrays` has been added for workflows that use distributed matrices and vectors. It allows tests to validate behavior when data is stored in `DArray` form and interoperates with MPI-backed workflows.
+
+```julia
+using Distributed, DistributedArrays, MPI, MUMPS, SparseArrays, LinearAlgebra
+
+MPI.Init()
+comm = MPI.COMM_WORLD
+rank = MPI.Comm_rank(comm)
+
+sqrtN = 40
+N = sqrtN^2
+
+function local_rows(I)
+  idx = isa(I, Tuple) ? I[1] : I
+  nn = length(idx)
+  # Return a vector of sparse row vectors, one per local row. This makes the DArray hold per-row SparseVector objects so the root can reassemble the full sparse matrix from triplets.
+  rows_vec = Vector{SparseVector{Float64}}(undef, nn)
+  for (local_i, global_i) in enumerate(idx)
+    i = div(global_i-1, sqrtN) + 1
+    j = (global_i-1) % sqrtN + 1
+    cols = Int[]; vals = Float64[]
+    push!(cols, global_i); push!(vals, 4.0)
+    if i > 1  push!(cols, global_i - sqrtN); push!(vals, -1.0) end
+    if i < sqrtN push!(cols, global_i + sqrtN); push!(vals, -1.0) end
+    if j > 1  push!(cols, global_i - 1); push!(vals, -1.0) end
+    if j < sqrtN push!(cols, global_i + 1); push!(vals, -1.0) end
+    rows_vec[local_i] = sparsevec(cols, vals, N)
+  end
+  return rows_vec
+end
+
+dblocks = DArray(I -> local_rows(I), (N,))
+
+if rank == 0
+  # Use vertical concatenation of sparse blocks to avoid slice-assignment edge cases when assigning sparse blocks into a sparse matrix.
+  # Collect per-row sparse vectors from the DArray and build triplets.
+  blocks = collect(dblocks)
+  rows_idx = Int[]; cols_idx = Int[]; vals = Float64[]
+  global_row = 1
+  for sv in blocks
+    if nnz(sv) > 0
+      inds, valsv = findnz(sv)
+      append!(rows_idx, fill(global_row, length(inds)))
+      append!(cols_idx, inds)
+      append!(vals, valsv)
+    end
+    global_row += 1
+  end
+  A = sparse(rows_idx, cols_idx, vals, N, N)
+
+  b = ones(Float64, N)
+
+  # Enable ScaLAPACK usage on the root frontal matrix
+  icntl = default_icntl[:]
+  icntl[13] = 0
+  m = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+  associate_matrix!(m, A)
+  factorize!(m)
+  associate_rhs!(m, b)
+  solve!(m)
+  x = get_solution(m)
+  println("Residual norm on root: ", norm(A * x - b))
+  finalize(m)
+else
+  # non-root ranks finished after local assembly
+end
+
+MPI.Barrier(comm)
+MPI.Finalize()
+```
+
 ### ScaLAPACK Support
 
 MUMPS is compiled with **ScaLAPACK** and **PARMETIS** support, which provides improved performance for parallel factorization, particularly for operations involving the Schur complement on the root node when using MPI parallelism.
