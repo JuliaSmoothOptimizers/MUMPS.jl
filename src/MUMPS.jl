@@ -39,6 +39,13 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   const libcmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
   const libzmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
   const MUMPS_INSTALLATION = "CUSTOM"
+elseif haskey(ENV, "MUMPS_SEQ") || Sys.iswindows()
+  using MUMPS_seq_jll
+  const libsmumpspar = MUMPS_seq_jll.libsmumps
+  const libdmumpspar = MUMPS_seq_jll.libdmumps
+  const libcmumpspar = MUMPS_seq_jll.libcmumps
+  const libzmumpspar = MUMPS_seq_jll.libzmumps
+  const MUMPS_INSTALLATION = "YGGDRASIL"
 else
   using MUMPS_jll
   const MUMPS_INSTALLATION = "YGGDRASIL"
