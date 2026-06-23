@@ -1,4 +1,4 @@
-icntl = get_icntl(det = true, ooc = true, itref = 1);
+icntl = get_icntl(det = true, itref = 1);
 tol = sqrt(eps(Float32))
 
 mumps1 = quiet_mumps(Float32; sym = mumps_definite)

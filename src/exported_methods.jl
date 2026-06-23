@@ -201,7 +201,7 @@ function get_icntl(;
   if !verbose
     icntl[1:4] .= 0
   end
-  #icntl[22] = ooc ? 1 : 0
+  icntl[22] = ooc ? 1 : 0
   icntl[10] = itref
   icntl[7] = user_perm ? 1 : 7  # 1 = user-supplied, 7 = automatic
   return icntl
