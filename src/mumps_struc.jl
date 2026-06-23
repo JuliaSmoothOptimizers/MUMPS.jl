@@ -113,7 +113,7 @@ mutable struct Mumps{TC, TR}
   pivnul_list::Ptr{MUMPS_INT}
   mapping::Ptr{MUMPS_INT}
   singular_values::Ptr{TR}
-  nb_singular_values::Cint
+  nb_singular_values::MUMPS_INT
 
   size_schur::MUMPS_INT
   listvar_schur::Ptr{MUMPS_INT}
