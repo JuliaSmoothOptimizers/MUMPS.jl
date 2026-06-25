@@ -110,10 +110,10 @@ mutable struct Mumps{TC, TR}
   rinfo::NTuple{40, TR}
   rinfog::NTuple{40, TR}
 
+  deficiency::MUMPS_INT
   pivnul_list::Ptr{MUMPS_INT}
   mapping::Ptr{MUMPS_INT}
   singular_values::Ptr{TR}
-  nb_singular_values::MUMPS_INT
 
   size_schur::MUMPS_INT
   listvar_schur::Ptr{MUMPS_INT}
