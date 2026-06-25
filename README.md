@@ -3,7 +3,6 @@
 [![docs-stable][docs-stable-img]][docs-stable-url]
 [![docs-dev][docs-dev-img]][docs-dev-url]
 [![build-gh][build-gh-img]][build-gh-url]
-[![build-cirrus][build-cirrus-img]][build-cirrus-url]
 [![codecov][codecov-img]][codecov-url]
 [![doi][doi-img]][doi-url]
 
@@ -13,8 +12,6 @@
 [docs-dev-url]: https://JuliaSmoothOptimizers.github.io/MUMPS.jl/dev
 [build-gh-img]: https://github.com/JuliaSmoothOptimizers/MUMPS.jl/workflows/CI/badge.svg?branch=main
 [build-gh-url]: https://github.com/JuliaSmoothOptimizers/MUMPS.jl/actions
-[build-cirrus-img]: https://img.shields.io/cirrus/github/JuliaSmoothOptimizers/MUMPS.jl?logo=Cirrus%20CI
-[build-cirrus-url]: https://cirrus-ci.com/github/JuliaSmoothOptimizers/MUMPS.jl
 [codecov-img]: https://codecov.io/gh/JuliaSmoothOptimizers/MUMPS.jl/branch/main/graph/badge.svg
 [codecov-url]: https://app.codecov.io/gh/JuliaSmoothOptimizers/MUMPS.jl
 [doi-img]: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3271646-blue.svg
