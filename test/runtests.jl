@@ -73,5 +73,9 @@ end
   include("mumps_test_scalapack.jl")
 end
 
+@testset "distributed helpers: " begin
+  include("mumps_test_distributed_helpers.jl")
+end
+
 MPI.Barrier(comm)
 MPI.Finalize()
