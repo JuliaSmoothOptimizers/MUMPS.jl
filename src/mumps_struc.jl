@@ -11,7 +11,7 @@ mutable struct MUMPSException <: Exception
 end
 const MUMPSValueDataType = Union{Float32, Float64, ComplexF32, ComplexF64}
 
-const MUMPS_VERSION = "5.8.2"
+const MUMPS_VERSION = "5.9.1"
 const MUMPS_VERSION_MAX_LEN = 30
 const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 
@@ -110,10 +110,10 @@ mutable struct Mumps{TC, TR}
   rinfo::NTuple{40, TR}
   rinfog::NTuple{40, TR}
 
-  deficiency::MUMPS_INT
   pivnul_list::Ptr{MUMPS_INT}
   mapping::Ptr{MUMPS_INT}
   singular_values::Ptr{TR}
+  nb_singular_values::MUMPS_INT
 
   size_schur::MUMPS_INT
   listvar_schur::Ptr{MUMPS_INT}
