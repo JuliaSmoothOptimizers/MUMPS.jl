@@ -10,7 +10,6 @@ MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 MUMPS_jll = "ca64183c-ec4f-5579-95d5-17e128c21291"
 MUMPS_seq_jll = "d7ed1dd3-d0ae-5e8e-bfb4-87a502085b8d"
 OpenBLAS32_jll = "656ef2d0-ae68-5445-9ca0-591084a874a2"
-SCALAPACK32_jll = "aabda75e-bfe4-5a37-92e3-ffe54af3c273"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
@@ -20,7 +19,6 @@ MPI = "0.20"
 MUMPS_jll = "~5.9.1"
 MUMPS_seq_jll = "~500.900.100"
 OpenBLAS32_jll = "0.3.23"
-SCALAPACK32_jll = "= 2.2.3"
 SparseArrays = "1.10"
 julia = "1.10"
 
