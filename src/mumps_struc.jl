@@ -155,7 +155,7 @@ mutable struct Mumps{TC, TR}
   _finalized::Bool
 
   function Mumps{T}(sym::Integer, par::Integer, comm::Integer) where {T <: MUMPSValueDataType}
-    !MPI.Initialized() ? throw(MUMPSException("Initialize MPI first")) : nothing
+    !MPI.Initialized() && !haskey(ENV, "MUMPS_SEQ") ? throw(MUMPSException("Initialize MPI first")) : nothing
     mumps = new{T, real(T)}(sym, par, INITIALIZE, comm)
     invoke_mumps_unsafe!(mumps)
     mumps._finalized = false
