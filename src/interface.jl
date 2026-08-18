@@ -26,7 +26,7 @@ for (fname, lname, elty, subty) in (
 )
   @eval begin
     function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty})
-      MPI.Initialized() ||
+      (MPI.Initialized() || isdefined(@__MODULE__, :MUMPS_seq_jll)) ||
         throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
       (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && isdefined(@__MODULE__, :MUMPS_seq_jll)) &&
         @warn "MUMPS.jl: using the out-of-core storage (ICNTL[22] > 0), does not work well with MUMPS_seq_jll, we encourage to either deactivate or use MUMPS_jll."
