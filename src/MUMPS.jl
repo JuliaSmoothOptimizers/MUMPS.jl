@@ -41,8 +41,6 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   const MUMPS_INSTALLATION = "CUSTOM"
 else
   using MUMPS_jll
-  # Not loaded with a custom library: on Linux, both would bind to each other's
-  # libmumps_common / libpord, which have the same names.
   using MUMPS_seq_jll
   const MUMPS_INSTALLATION = "YGGDRASIL"
 end
