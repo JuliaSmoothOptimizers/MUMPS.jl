@@ -201,8 +201,6 @@ MPI.Finalize()
 All other functions work the same with both backends. `MPI.Init()` must still be called before
 creating a `Mumps` object.
 
-The `MUMPS_SEQ` environment variable of previous versions is no longer used.
-
 ## Custom Installation
 
 **Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
