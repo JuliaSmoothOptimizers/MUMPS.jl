@@ -94,18 +94,20 @@ function solve(mumps::Mumps, A::AbstractArray, rhs::AbstractArray; transposed::B
 end
 
 """
-    solve(A, rhs; sym=mumps_unsymmetric)
+    solve(A, rhs; sym=mumps_unsymmetric, backend=MUMPS.Par())
 Combined initialize / analyze / factorize / solve.
 Presume that `A` and `rhs` are available on all nodes.
 The optional keyword argument `sym` indicates the symmetry of `A`.
+The optional keyword argument `backend` selects the MUMPS library (see [`Seq`](@ref)).
 The solution is retrieved and returned.
 """
 function solve(
   A::AbstractArray{T},
   rhs::AbstractArray{V};
   sym::Integer = mumps_unsymmetric,
+  backend::MumpsBackend = Par(),
 ) where {T, V}
-  mumps = Mumps{promote_type(T, V)}(sym)
+  mumps = Mumps{promote_type(T, V)}(sym; backend)
   # suppress_printing!(mumps)
   associate_matrix!(mumps, A)
   associate_rhs!(mumps, rhs)

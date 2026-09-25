@@ -18,24 +18,39 @@ See also: [`invoke_mumps!`](@ref)
 """
 function invoke_mumps_unsafe! end
 
-for (fname, lname, elty, subty) in (
-  ("smumps_c", libsmumpspar, Float32, Float32),
-  ("dmumps_c", libdmumpspar, Float64, Float64),
-  ("cmumps_c", libcmumpspar, ComplexF32, Float32),
-  ("zmumps_c", libzmumpspar, ComplexF64, Float64),
+for (B, fname, lname, elty, subty) in (
+  (Par, "smumps_c", libsmumpspar, Float32, Float32),
+  (Par, "dmumps_c", libdmumpspar, Float64, Float64),
+  (Par, "cmumps_c", libcmumpspar, ComplexF32, Float32),
+  (Par, "zmumps_c", libzmumpspar, ComplexF64, Float64),
+  # MUMPS_seq_jll is not loaded when JULIA_MUMPS_LIBRARY_PATH is set (see MUMPS.jl)
+  (
+    isdefined(@__MODULE__, :MUMPS_seq_jll) ?
+    (
+      (Seq, "smumps_c", MUMPS_seq_jll.libsmumps, Float32, Float32),
+      (Seq, "dmumps_c", MUMPS_seq_jll.libdmumps, Float64, Float64),
+      (Seq, "cmumps_c", MUMPS_seq_jll.libcmumps, ComplexF32, Float32),
+      (Seq, "zmumps_c", MUMPS_seq_jll.libzmumps, ComplexF64, Float64),
+    ) : ()
+  )...,
 )
   @eval begin
-    function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty})
+    function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty, $B})
       MPI.Initialized() ||
         throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
-      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && isdefined(@__MODULE__, :MUMPS_seq_jll)) &&
+      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && $(B === Seq)) &&
         @warn "MUMPS.jl: using the out-of-core storage (ICNTL[22] > 0), does not work well with MUMPS_seq_jll, we encourage to either deactivate or use MUMPS_jll."
-      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty}},), mumps)
+      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty, $B}},), mumps)
       mumps.err = mumps.infog[1]
       return mumps
     end
   end
 end
+
+# Only reached when the methods above were not generated for Seq.
+invoke_mumps_unsafe!(::Mumps{TC, TR, Seq}) where {TC, TR} = throw(
+  MUMPSException("backend = Seq() is not available when JULIA_MUMPS_LIBRARY_PATH is set"),
+)
 
 """
     invoke_mumps!(mumps)
