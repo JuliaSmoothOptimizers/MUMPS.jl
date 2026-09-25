@@ -18,30 +18,31 @@ const DEFAULT_FORTRAN_COMMUNICATOR = -987654
 """
     MumpsBackend
 
-Abstract type of the MUMPS libraries a `Mumps` object can call: [`Par`](@ref) or [`Seq`](@ref).
+Abstract type of the MUMPS libraries a `Mumps` object can call:
+[`Parallel`](@ref) or [`Sequential`](@ref).
 """
 abstract type MumpsBackend end
 
 """
-    Par()
+    Parallel()
 
 Parallel (MPI) MUMPS library from `MUMPS_jll`, or the custom library given by
 `JULIA_MUMPS_LIBRARY_PATH`. This is the default backend.
 """
-struct Par <: MumpsBackend end
+struct Parallel <: MumpsBackend end
 
 """
-    Seq()
+    Sequential()
 
 Sequential MUMPS library from `MUMPS_seq_jll`.
 Not available when `JULIA_MUMPS_LIBRARY_PATH` is set.
 """
-struct Seq <: MumpsBackend end
+struct Sequential <: MumpsBackend end
 
 """
 Mirror of structre in `[sdcz]mumps_c.h`.
-The type parameter `B` is the backend, `Par` or `Seq`, chosen with the `backend` keyword of
-the constructors.
+The type parameter `B` is the backend, `Parallel` or `Sequential`, chosen with the `backend`
+keyword of the constructors.
 """
 mutable struct Mumps{TC, TR, B <: MumpsBackend}
   sym::MUMPS_INT # MANDATORY 0 for unsymmetric, 1 for symmetric and posdef, 2 for general symmetric. All others treated as 0
@@ -183,7 +184,7 @@ mutable struct Mumps{TC, TR, B <: MumpsBackend}
     sym::Integer,
     par::Integer,
     comm::Integer;
-    backend::MumpsBackend = Par(),
+    backend::MumpsBackend = Parallel(),
   ) where {T <: MUMPSValueDataType}
     !MPI.Initialized() ? throw(MUMPSException("Initialize MPI first")) : nothing
     mumps = new{T, real(T), typeof(backend)}(sym, par, INITIALIZE, comm)
@@ -193,17 +194,24 @@ mutable struct Mumps{TC, TR, B <: MumpsBackend}
   end
 end
 
-Mumps{T}(sym::Integer, par::Integer = 1; kwargs...) where {T <: MUMPSValueDataType} =
-  Mumps{T}(sym, par, DEFAULT_FORTRAN_COMMUNICATOR; kwargs...)
-function Mumps{T}(sym::Integer, par::Integer = 1; kwargs...) where {T <: Number}
+Mumps{T}(
+  sym::Integer,
+  par::Integer = 1;
+  backend::MumpsBackend = Parallel(),
+) where {T <: MUMPSValueDataType} = Mumps{T}(sym, par, DEFAULT_FORTRAN_COMMUNICATOR; backend)
+function Mumps{T}(
+  sym::Integer,
+  par::Integer = 1;
+  backend::MumpsBackend = Parallel(),
+) where {T <: Number}
   if promote_type(T, Float32) <: MUMPSValueDataType
-    Mumps{promote_type(T, Float32)}(sym, par; kwargs...)
+    Mumps{promote_type(T, Float32)}(sym, par; backend)
   elseif promote_type(T, Float64) <: MUMPSValueDataType
-    Mumps{promote_type(T, Float32)}(sym, par; kwargs...)
+    Mumps{promote_type(T, Float32)}(sym, par; backend)
   elseif promote_type(T, ComplexF32) <: MUMPSValueDataType
-    Mumps{promote_type(T, Float32)}(sym, par; kwargs...)
+    Mumps{promote_type(T, Float32)}(sym, par; backend)
   elseif promote_type(T, ComplexF64) <: MUMPSValueDataType
-    Mumps{promote_type(T, Float32)}(sym, par; kwargs...)
+    Mumps{promote_type(T, Float32)}(sym, par; backend)
   else
     throw(MUMPSException("cannot promote type $T to a MUMPS-compatible type"))
   end
@@ -215,7 +223,7 @@ function Mumps{T}(
   cntl::Array{V, 1};
   par = 1,
   comm::Integer = DEFAULT_FORTRAN_COMMUNICATOR,
-  backend::MumpsBackend = Par(),
+  backend::MumpsBackend = Parallel(),
 ) where {TI <: Integer, T <: MUMPSValueDataType, V <: AbstractFloat}
   if length(icntl) ≥ 47 && icntl[47] != 0 && real(T) == Float32
     @warn "ICNTL(47) only applies to double precision instances, it is ignored for $T"

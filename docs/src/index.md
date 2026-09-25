@@ -104,7 +104,7 @@ supplied with:
   for complex data.
 * `icntl`: an integer parameters array (see the MUMPS Users's Manual)
 * `cntl`: a real parameters array (see the MUMPS Users's Manual)
-* `backend` (optional keyword): `MUMPS.Par()` (default) or `MUMPS.Seq()`, see
+* `backend` (optional keyword): `MUMPS.Parallel()` (default) or `MUMPS.Sequential()`, see
   [Sequential Backend](@ref)
 
 The convenience function `get_icntl()` returns an array of integer parameters
@@ -189,9 +189,9 @@ using MUMPS, MPI, SparseArrays, LinearAlgebra
 MPI.Init()
 A = sprand(10, 10, 0.2) + I
 rhs = rand(10)
-x = solve(A, rhs; backend = MUMPS.Seq())
+x = solve(A, rhs; backend = MUMPS.Sequential())
 
-mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64; backend = MUMPS.Seq())
+mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64; backend = MUMPS.Sequential())
 factorize!(mumps, A)
 x = solve(mumps, rhs)
 finalize(mumps)
@@ -221,5 +221,5 @@ Apple Silicon users should remember to use `arch x86_64 brew` to refer to Intel 
 The `JULIA_MUMPS_LIBRARY_PATH` environment variable may be set permanently in the shell's startup file, or in `$HOME/.julia/config/startup.jl`.
 
 The custom library replaces the parallel backend only.
-When `JULIA_MUMPS_LIBRARY_PATH` is set, `MUMPS_seq_jll` is not loaded and `backend = MUMPS.Seq()` throws an error:
+When `JULIA_MUMPS_LIBRARY_PATH` is set, `MUMPS_seq_jll` is not loaded and `backend = MUMPS.Sequential()` throws an error:
 on Linux, a custom build and `MUMPS_seq_jll` would bind to each other's libraries, which have the same names.

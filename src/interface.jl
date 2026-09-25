@@ -19,18 +19,18 @@ See also: [`invoke_mumps!`](@ref)
 function invoke_mumps_unsafe! end
 
 for (B, fname, lname, elty, subty) in (
-  (Par, "smumps_c", libsmumpspar, Float32, Float32),
-  (Par, "dmumps_c", libdmumpspar, Float64, Float64),
-  (Par, "cmumps_c", libcmumpspar, ComplexF32, Float32),
-  (Par, "zmumps_c", libzmumpspar, ComplexF64, Float64),
+  (Parallel, "smumps_c", libsmumpspar, Float32, Float32),
+  (Parallel, "dmumps_c", libdmumpspar, Float64, Float64),
+  (Parallel, "cmumps_c", libcmumpspar, ComplexF32, Float32),
+  (Parallel, "zmumps_c", libzmumpspar, ComplexF64, Float64),
   # MUMPS_seq_jll is not loaded when JULIA_MUMPS_LIBRARY_PATH is set (see MUMPS.jl)
   (
     isdefined(@__MODULE__, :MUMPS_seq_jll) ?
     (
-      (Seq, "smumps_c", MUMPS_seq_jll.libsmumps, Float32, Float32),
-      (Seq, "dmumps_c", MUMPS_seq_jll.libdmumps, Float64, Float64),
-      (Seq, "cmumps_c", MUMPS_seq_jll.libcmumps, ComplexF32, Float32),
-      (Seq, "zmumps_c", MUMPS_seq_jll.libzmumps, ComplexF64, Float64),
+      (Sequential, "smumps_c", MUMPS_seq_jll.libsmumps, Float32, Float32),
+      (Sequential, "dmumps_c", MUMPS_seq_jll.libdmumps, Float64, Float64),
+      (Sequential, "cmumps_c", MUMPS_seq_jll.libcmumps, ComplexF32, Float32),
+      (Sequential, "zmumps_c", MUMPS_seq_jll.libzmumps, ComplexF64, Float64),
     ) : ()
   )...,
 )
@@ -38,7 +38,7 @@ for (B, fname, lname, elty, subty) in (
     function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty, $B})
       MPI.Initialized() ||
         throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
-      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && $(B === Seq)) &&
+      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && $(B === Sequential)) &&
         @warn "MUMPS.jl: using the out-of-core storage (ICNTL[22] > 0), does not work well with MUMPS_seq_jll, we encourage to either deactivate or use MUMPS_jll."
       ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty, $B}},), mumps)
       mumps.err = mumps.infog[1]
@@ -47,9 +47,9 @@ for (B, fname, lname, elty, subty) in (
   end
 end
 
-# Only reached when the methods above were not generated for Seq.
-invoke_mumps_unsafe!(::Mumps{TC, TR, Seq}) where {TC, TR} = throw(
-  MUMPSException("backend = Seq() is not available when JULIA_MUMPS_LIBRARY_PATH is set"),
+# Only reached when the methods above were not generated for Sequential.
+invoke_mumps_unsafe!(::Mumps{TC, TR, Sequential}) where {TC, TR} = throw(
+  MUMPSException("backend = Sequential() is not available when JULIA_MUMPS_LIBRARY_PATH is set"),
 )
 
 """
