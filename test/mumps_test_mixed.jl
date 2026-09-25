@@ -59,3 +59,9 @@ x = solve(A, rhs, sym = mumps_unsymmetric)
 MPI.Barrier(comm)
 relres = norm(A * x - rhs) / norm(rhs)
 @test(relres <= eps(Float32)^(1 / 3))
+
+# Same, with the sequential library.
+x = solve(A, rhs, sym = mumps_unsymmetric, backend = MUMPS.Sequential())
+MPI.Barrier(comm)
+relres = norm(A * x - rhs) / norm(rhs)
+@test(relres <= eps(Float32)^(1 / 3))

@@ -46,6 +46,14 @@ MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 @test(norm(x2 - 2 * x) <= tol * norm(x))
 
+# Same as mumps3, with the sequential library.
+mumps3_seq = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32; backend = MUMPS.Sequential())
+factorize!(mumps3_seq, A)
+x = solve(mumps3_seq, rhs)
+finalize(mumps3_seq)
+MPI.Barrier(comm)
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
+
 mumps3_unsafe = Mumps{Float32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(Float32[1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0])
 associate_matrix!(mumps3_unsafe, A; unsafe = true)

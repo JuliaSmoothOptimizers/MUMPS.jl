@@ -53,6 +53,15 @@ finalize(mumps3)
 MPI.Barrier(comm)
 @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
+# Same as mumps3, with the sequential library.
+mumps3_seq =
+  Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32; backend = MUMPS.Sequential())
+factorize!(mumps3_seq, A)
+x = solve(mumps3_seq, rhs)
+finalize(mumps3_seq)
+MPI.Barrier(comm)
+@test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
+
 mumps3_unsafe = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32);
 A = sparse(
   ComplexF32[
