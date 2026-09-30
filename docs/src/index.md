@@ -114,6 +114,16 @@ corresponding to certain commonly-used options. Its arguments are all optional:
 * `ooc`: a boolean indicating whether factors should be stored out of core
   (default: `false`)
 * `itref`: the number of iterative refinement steps (default: 0).
+* `user_perm`: use a user-supplied permutation given with `set_user_perm!` (default: `false`).
+* `blr`: Block Low-Rank factorization, `0` (off), `1` (automatic), `2` (factorization and solve)
+  or `3` (factorization only) (default: `0`). The low-rank tolerance is `CNTL(7)`.
+* `nthreads`: number of OpenMP threads MUMPS should use, `0` meaning unchanged (default: `0`).
+* `tree_parallelism`: multithreading that exploits tree parallelism (default: `true`).
+* `rank_revealing`: rank-revealing factorization for null space detection (default: `false`).
+* `single_precision_factorization`: factorize in single precision within a `Float64` or
+  `ComplexF64` instance; combine with `itref` to recover double precision accuracy
+  (default: `false`, requires MUMPS ≥ 5.9).
+* `null_pivots`: detect null pivot rows (default: `false`).
 
 A `Mumps` object is destroyed by calling the `finalize()` method. Because
 `finalize` still issues MPI commands, it is important to call `finalize()`

@@ -187,9 +187,8 @@ function Mumps{T}(
   comm::Integer = DEFAULT_FORTRAN_COMMUNICATOR,
 ) where {TI <: Integer, T <: MUMPSValueDataType, V <: AbstractFloat}
 
-  # Set default pivot threshold if required.
-  if cntl[1] == -1
-    cntl[1] = (sym == mumps_definite) ? 0.0 : 0.01
+  if length(icntl) ≥ 47 && icntl[47] != 0 && real(T) == Float32
+    @warn "ICNTL(47) only applies to double precision instances, it is ignored for $T"
   end
   mumps = Mumps{T}(sym, par, comm)
   for i ∈ eachindex(icntl)

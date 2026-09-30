@@ -69,6 +69,9 @@ end
 @testset "user permutation: " begin
   include("mumps_test_user_perm.jl")
 end
+@testset "control parameters: " begin
+  include("mumps_test_icntl.jl")
+end
 @testset "ScaLAPACK: " begin
   include("mumps_test_scalapack.jl")
 end

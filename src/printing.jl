@@ -56,7 +56,7 @@ function Base.show(io::IO, mumps::Mumps{TC, TR}) where {TC, TR}
   end
 
   println(io, "ICNTL settings summary: ")
-  icntl_inds = [4, 9, 13, 19, 30, 33]
+  icntl_inds = [4, 9, 13, 19, 30, 33, 35, 47, 48, 56]
   for i ∈ eachindex(icntl_inds)
     print(io, "\t")
     display_icntl(io, mumps.icntl, icntl_inds[i], mumps.icntl[icntl_inds[i]])
@@ -137,7 +137,7 @@ function display_icntl(io::IO, icntl, i, val)
     elseif val ∈ [5, 6]
       print(io, "product of diagonal values is maximized")
     elseif val == 7
-      print(automatic)
+      print(io, automatic)
     else
       print(io, "none")
     end
@@ -158,7 +158,7 @@ function display_icntl(io::IO, icntl, i, val)
     elseif val == 6
       print(io, "Approximate Minimum Degree with quasi-dense row detection (QAMD)")
     else
-      print(automatic)
+      print(io, automatic)
     end
   elseif i == 8
     print(io, "scaling strategy: ")
@@ -169,15 +169,15 @@ function display_icntl(io::IO, icntl, i, val)
     elseif val == 1
       print(io, "diagonal, computed during factorization")
     elseif val == 3
-      print(io, "comlumn, computed during factorization")
+      print(io, "column, computed during factorization")
     elseif val == 4
       print(io, "row and column based on inf-norms, computed during factorization")
     elseif val == 7
-      print(io, "row and column iterative, computed during factorization")
+      print(io, "simultaneous row and column iterative, computed during factorization")
     elseif val == 8
-      print(io, "row and column iterative, computed during factorization")
+      print(io, "rigorous simultaneous row and column iterative, computed during factorization")
     elseif val == 77
-      print(automatic, " during analysis")
+      print(io, automatic, " during analysis")
     else
       print(io, "none")
     end
@@ -228,6 +228,29 @@ function display_icntl(io::IO, icntl, i, val)
     end
   elseif i == 14
     print(io, "percentage increase in estimated working space: $val%")
+  elseif i == 15
+    print(io, "analysis by blocks (compressed graph): ")
+    if val == 1
+      print(io, "blocks provided by user (NBLK, BLKPTR, BLKVAR)")
+    elseif val < 0
+      print(io, "regular blocks of size $(-val)")
+    else
+      print(io, "off")
+    end
+  elseif i == 16
+    print(io, "number of OpenMP threads set by MUMPS: ")
+    if val > 0
+      print(io, "$val")
+    else
+      print(io, "not set by MUMPS (OMP_NUM_THREADS)")
+    end
+  elseif i == 17
+    print(io, "MPI processes used as OpenMP resources: ")
+    if val == 0
+      print(io, "off")
+    else
+      print(io, "on ($val), see MUMPS users' guide")
+    end
   elseif i == 18
     print(io, "distributed input matrix: ")
     if val == 1
@@ -263,6 +286,10 @@ function display_icntl(io::IO, icntl, i, val)
       print(io, "sparsity not exploited in solution")
     elseif val == 3
       print(io, "sparsity exploited to accelerate solution")
+    elseif val == 10
+      print(io, "dense, distributed (IRHS_loc, RHS_loc)")
+    elseif val == 11
+      print(io, "dense, distributed, distribution suggested by MUMPS (JOB=9)")
     else
       print(io, "dense")
     end
@@ -275,19 +302,17 @@ function display_icntl(io::IO, icntl, i, val)
     end
   elseif i == 22
     print(io, "out-of-core (OOC) factorization and solve: ")
-    if val == 0
-      print(io, "false")
-    elseif val == 1
+    if val == 1
       print(io, "true")
     else
-      @warn "not sure this is a valid setting"
+      print(io, "false")
     end
   elseif i == 23
     print(io, "max size (in MB) of working memory per worker: ")
     if val > 0
       print(io, "$val MB")
     else
-      print(automatic)
+      print(io, automatic)
     end
   elseif i == 24
     print(io, "null pivot row detection: ")
@@ -317,7 +342,7 @@ function display_icntl(io::IO, icntl, i, val)
   elseif i == 27
     print(io, "blocking size for multiple rhs: ")
     if val < 0
-      print(automatic)
+      print(io, automatic)
     elseif val == 0
       print(io, "no blocking, same as 1")
     else
@@ -330,7 +355,7 @@ function display_icntl(io::IO, icntl, i, val)
     elseif val == 2
       print(io, "parallel")
     else
-      print(automatic)
+      print(io, automatic)
     end
   elseif i == 29
     print(io, "parallel ordering tool: ")
@@ -339,7 +364,7 @@ function display_icntl(io::IO, icntl, i, val)
     elseif val == 2
       print(io, "PARMETIS, if available")
     else
-      print(automatic)
+      print(io, automatic)
     end
   elseif i == 30
     print(io, "compute entries of A⁻¹: ")
@@ -353,7 +378,7 @@ function display_icntl(io::IO, icntl, i, val)
     if val == 1
       print(io, "all")
     elseif val == 2
-      print(io, "U, for unsymmetric")
+      print(io, "L, for unsymmetric")
     else
       print(io, "none, except for ooc factorization of unsymmetric")
     end
@@ -392,12 +417,70 @@ function display_icntl(io::IO, icntl, i, val)
   elseif i == 36
     print(io, "BLR variant: ")
     if val == 1
-      print(io, "UCFS with low-rank updates accumulation; compression is performed earlier")
+      print(io, "UCFS, compression performed earlier")
     else
-      print(io, "Standard UFSC")
+      print(io, "standard UFSC")
+    end
+  elseif i == 37
+    print(io, "BLR compression of contribution blocks: ")
+    if val == 1
+      print(io, "true")
+    else
+      print(io, "false")
     end
   elseif i == 38
-    print(io, "Estimated compression rate of LU factors in ppt: $val")
+    print(io, "estimated compression rate of LU factors (per mille): $val")
+  elseif i == 39
+    print(io, "estimated compression rate of contribution blocks (per mille): $val")
+  elseif i == 40
+    print(io, "mixed/adaptive precision BLR: ")
+    if val == 0
+      print(io, "off")
+    else
+      print(io, "on ($val), see MUMPS users' guide")
+    end
+  elseif i == 47
+    print(io, "single precision factorization in double precision instance: ")
+    if val == 1
+      print(io, "true")
+    else
+      print(io, "false")
+    end
+  elseif i == 48
+    print(io, "multithreading with tree parallelism (L0-threads): ")
+    if val == 1
+      print(io, "true")
+    else
+      print(io, "false")
+    end
+  elseif i == 49
+    print(io, "compact workarray S at end of factorization: ")
+    if val ∈ (1, 2)
+      print(io, "true (option $val)")
+    else
+      print(io, "false")
+    end
+  elseif i == 51
+    print(io, "offload activities to GPUs: ")
+    if val == 0
+      print(io, "off")
+    else
+      print(io, "on ($val), requires a GPU-enabled MUMPS build")
+    end
+  elseif i == 56
+    print(io, "rank-revealing factorization: ")
+    if val == 1
+      print(io, "true")
+    else
+      print(io, "false")
+    end
+  elseif i == 58
+    print(io, "symbolic factorization: ")
+    if val == 1
+      print(io, "quotient graph")
+    else
+      print(io, "column counts")
+    end
   else
     print(io, "not used")
   end
@@ -413,11 +496,13 @@ See also: [`set_cntl!`](@ref)
 """
 function display_cntl end
 
-display_cntl(io::IO, mumps::Mumps) = display_cntl(io, mumps.mumps.cntl)
+display_cntl(mumps::Mumps) = display_cntl(stdout, mumps)
+
+display_cntl(io::IO, mumps::Mumps) = display_cntl(io, mumps.cntl)
 
 function display_cntl(io::IO, cntl)
   for i ∈ eachindex(cntl)
-    display_icntl(io, cntl, i, cntl[i])
+    display_cntl(io, cntl, i, cntl[i])
   end
 end
 
@@ -425,16 +510,19 @@ function display_cntl(io::IO, cntl, i, val)
   print(io, "$i,\t$val\t")
   if i == 1
     print(io, "relative threshold for numerical pivoting")
+    val < 0 && print(io, " (automatic)")
   elseif i == 2
     print(io, "stopping criterion for iterative refinement")
   elseif i == 3
-    print(io, "null pivot?")
+    print(io, "threshold for null pivot detection")
   elseif i == 4
-    print(io, "threshold for state pivoting")
+    print(io, "threshold for static pivoting")
+    val < 0 && print(io, " (static pivoting off)")
   elseif i == 5
     print(io, "fixation for null pivots")
   elseif i == 7
-    print(io, "precision of dropping parameter in BLR compression")
+    print(io, "dropping parameter ε for BLR compression")
+    val == 0 && print(io, " (full precision)")
   else
     print(io, "not used")
   end
