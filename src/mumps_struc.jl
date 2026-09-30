@@ -186,7 +186,6 @@ function Mumps{T}(
   par = 1,
   comm::Integer = DEFAULT_FORTRAN_COMMUNICATOR,
 ) where {TI <: Integer, T <: MUMPSValueDataType, V <: AbstractFloat}
-
   if length(icntl) ≥ 47 && icntl[47] != 0 && real(T) == Float32
     @warn "ICNTL(47) only applies to double precision instances, it is ignored for $T"
   end
