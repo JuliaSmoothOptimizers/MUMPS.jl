@@ -186,7 +186,7 @@ mutable struct Mumps{TC, TR, B <: MumpsBackend}
     comm::Integer;
     backend::MumpsBackend = Parallel(),
   ) where {T <: MUMPSValueDataType}
-    !MPI.Initialized() ? throw(MUMPSException("Initialize MPI first")) : nothing
+    (backend === Parallel() && !MPI.Initialized()) ? throw(MUMPSException("Initialize MPI first")) : nothing
     mumps = new{T, real(T), typeof(backend)}(sym, par, INITIALIZE, comm)
     invoke_mumps_unsafe!(mumps)
     mumps._finalized = false

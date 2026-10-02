@@ -4,7 +4,7 @@
 # display_cntl
 
 function Base.show(io::IO, mumps::Mumps{TC, TR, B}) where {TC, TR, B}
-  print(io, "Mumps{$TC,$TR,$(nameof(B))}: ")
+  print(io, "Mumps{$TC,$TR,$B)}: ")
   if TC <: Float32
     println(io, "single precision real")
     lib = "smumps"
