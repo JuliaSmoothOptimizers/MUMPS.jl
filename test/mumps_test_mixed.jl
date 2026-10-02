@@ -2,7 +2,6 @@
 
 for backend in (MUMPS.Parallel(), MUMPS.Sequential())
   @testset "$backend" begin
-
     A = Float16[1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0]
     rhs = Array{Float32}([1.0, 4.0, 9.0, 16.0])
     x = solve(A, rhs, sym = mumps_unsymmetric, backend = backend)
