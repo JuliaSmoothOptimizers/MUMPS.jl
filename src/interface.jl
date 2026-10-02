@@ -18,19 +18,24 @@ See also: [`invoke_mumps!`](@ref)
 """
 function invoke_mumps_unsafe! end
 
-for (fname, lname, elty, subty) in (
-  ("smumps_c", libsmumpspar, Float32, Float32),
-  ("dmumps_c", libdmumpspar, Float64, Float64),
-  ("cmumps_c", libcmumpspar, ComplexF32, Float32),
-  ("zmumps_c", libzmumpspar, ComplexF64, Float64),
+for (B, fname, lname, elty, subty) in (
+  (Parallel, "smumps_c", libsmumpspar, Float32, Float32),
+  (Parallel, "dmumps_c", libdmumpspar, Float64, Float64),
+  (Parallel, "cmumps_c", libcmumpspar, ComplexF32, Float32),
+  (Parallel, "zmumps_c", libzmumpspar, ComplexF64, Float64),
+  (Sequential, "smumps_c", MUMPS_seq_jll.libsmumps, Float32, Float32),
+  (Sequential, "dmumps_c", MUMPS_seq_jll.libdmumps, Float64, Float64),
+  (Sequential, "cmumps_c", MUMPS_seq_jll.libcmumps, ComplexF32, Float32),
+  (Sequential, "zmumps_c", MUMPS_seq_jll.libzmumps, ComplexF64, Float64),
 )
   @eval begin
-    function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty})
-      MPI.Initialized() ||
-        throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
-      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && isdefined(@__MODULE__, :MUMPS_seq_jll)) &&
+    function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty, $B})
+      $(B === Parallel) ? (MPI.Initialized() ||
+        throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))) : nothing
+      (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && $(B === Sequential)) &&
         @warn "MUMPS.jl: using the out-of-core storage (ICNTL[22] > 0), does not work well with MUMPS_seq_jll, we encourage to either deactivate or use MUMPS_jll."
-      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty}},), mumps)
+      (mumps.icntl[48] == 1 && $(B === Sequential)) && set_icntl!(mumps, 48, 0) # inctl(48) is not supported in MUMPS_seq_jll
+      ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty, $B}},), mumps)
       mumps.err = mumps.infog[1]
       return mumps
     end

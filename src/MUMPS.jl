@@ -38,16 +38,14 @@ if haskey(ENV, "JULIA_MUMPS_LIBRARY_PATH")
   const libdmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
   const libcmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
   const libzmumpspar = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
+  const libsmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libsmumps.$dlext")
+  const libdmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libdmumps.$dlext")
+  const libcmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libcmumps.$dlext")
+  const libzmumps = joinpath(ENV["JULIA_MUMPS_LIBRARY_PATH"], "libzmumps.$dlext")
   const MUMPS_INSTALLATION = "CUSTOM"
-elseif haskey(ENV, "MUMPS_SEQ")
-  using MUMPS_seq_jll
-  const libsmumpspar = MUMPS_seq_jll.libsmumps
-  const libdmumpspar = MUMPS_seq_jll.libdmumps
-  const libcmumpspar = MUMPS_seq_jll.libcmumps
-  const libzmumpspar = MUMPS_seq_jll.libzmumps
-  const MUMPS_INSTALLATION = "YGGDRASIL"
 else
   using MUMPS_jll
+  using MUMPS_seq_jll
   const MUMPS_INSTALLATION = "YGGDRASIL"
 end
 

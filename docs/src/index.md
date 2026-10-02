@@ -104,6 +104,8 @@ supplied with:
   for complex data.
 * `icntl`: an integer parameters array (see the MUMPS Users's Manual)
 * `cntl`: a real parameters array (see the MUMPS Users's Manual)
+* `backend` (optional keyword): `MUMPS.Parallel()` (default) or `MUMPS.Sequential()`, see
+  [Sequential Backend](@ref)
 
 The convenience function `get_icntl()` returns an array of integer parameters
 corresponding to certain commonly-used options. Its arguments are all optional:
@@ -176,6 +178,29 @@ MPI.Finalize()
 
 For more details on control parameters, see Section 5 of the [MUMPS User's Manual](https://mumps-solver.org/index.php?page=doc).
 
+## Sequential Backend
+
+MUMPS.jl ships two builds of MUMPS: the parallel one from `MUMPS_jll`, used by default, and the
+sequential one from `MUMPS_seq_jll`. Both can be used in the same Julia session. The backend is
+chosen for each `Mumps` object with the `backend` keyword:
+
+```julia
+using MUMPS, MPI, SparseArrays, LinearAlgebra
+MPI.Init()
+A = sprand(10, 10, 0.2) + I
+rhs = rand(10)
+x = solve(A, rhs; backend = MUMPS.Sequential())
+
+mumps = Mumps{Float64}(mumps_unsymmetric, default_icntl, default_cntl64; backend = MUMPS.Sequential())
+factorize!(mumps, A)
+x = solve(mumps, rhs)
+finalize(mumps)
+MPI.Finalize()
+```
+
+All other functions work the same with both backends. `MPI.Init()` must still be called before
+creating a `Mumps` object.
+
 ## Custom Installation
 
 **Note: MUMPS is already precompiled with Yggdrasil for all platforms except Windows.**
@@ -194,3 +219,7 @@ export JULIA_MUMPS_LIBRARY_PATH=$(brew --prefix)/opt/mpich-mumps/lib
 Apple Silicon users should remember to use `arch x86_64 brew` to refer to Intel binaries run through Rosetta, as we do not (yet) ship Silicon binaries of MUMPS via Homebrew.
 
 The `JULIA_MUMPS_LIBRARY_PATH` environment variable may be set permanently in the shell's startup file, or in `$HOME/.julia/config/startup.jl`.
+
+The custom library replaces the parallel backend only.
+When `JULIA_MUMPS_LIBRARY_PATH` is set, `MUMPS_seq_jll` is not loaded and `backend = MUMPS.Sequential()` throws an error:
+on Linux, a custom build and `MUMPS_seq_jll` would bind to each other's libraries, which have the same names.
