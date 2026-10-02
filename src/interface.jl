@@ -30,10 +30,11 @@ for (B, fname, lname, elty, subty) in (
 )
   @eval begin
     function invoke_mumps_unsafe!(mumps::Mumps{$elty, $subty, $B})
-      (B === Parallel && MPI.Initialized()) ||
-        throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))
+      $(B === Parallel) ? (MPI.Initialized() ||
+        throw(MUMPSException("must call MPI.Init() exactly once before calling mumps"))) : nothing
       (mumps.icntl[7] == 7 && mumps.icntl[22] > 0 && $(B === Sequential)) &&
         @warn "MUMPS.jl: using the out-of-core storage (ICNTL[22] > 0), does not work well with MUMPS_seq_jll, we encourage to either deactivate or use MUMPS_jll."
+      (mumps.icntl[48] == 1 && $(B === Sequential)) && set_icntl!(mumps, 48, 0) # inctl(48) is not supported in MUMPS_seq_jll
       ccall(($fname, $lname), Cvoid, (Ref{Mumps{$elty, $subty, $B}},), mumps)
       mumps.err = mumps.infog[1]
       return mumps
