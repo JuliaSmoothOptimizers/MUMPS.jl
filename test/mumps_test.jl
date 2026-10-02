@@ -7,10 +7,9 @@ tol = sqrt(eps(Float64))
 
 for backend in (MUMPS.Parallel(), MUMPS.Sequential())
   @testset "$backend" begin
-
     mumps1 = quiet_mumps(Float64; sym = mumps_definite, backend = backend)
     A = sparse(Diagonal([1.0, 2.0, 3.0, 4.0]))
-    factorize!(mumps1, A);  # Analyze and factorize.
+    factorize!(mumps1, A)  # Analyze and factorize.
     rhs = [1.0, 4.0, 9.0, 16.0]
     x = solve(mumps1, rhs)
     finalize(mumps1)
@@ -20,7 +19,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     mumps1_unsafe = quiet_mumps(Float64; sym = mumps_definite, backend = backend)
     A = sparse(Diagonal([1.0, 2.0, 3.0, 4.0]))
     associate_matrix!(mumps1_unsafe, A; unsafe = true)
-    factorize!(mumps1_unsafe);  # Analyze and factorize.
+    factorize!(mumps1_unsafe)  # Analyze and factorize.
     rhs = [1.0, 4.0, 9.0, 16.0]
     orig_rhs = copy(rhs)
     associate_rhs!(mumps1_unsafe, rhs; unsafe = true)
@@ -31,28 +30,28 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     MPI.Barrier(comm)
     @test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
-    mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64, backend = backend);
-    A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0]);
-    factorize!(mumps2, A);
-    rhs = [1.0, 4.0, 9.0, 16.0];
-    x = solve(mumps2, rhs);
-    finalize(mumps2);
+    mumps2 = Mumps{Float64}(mumps_symmetric, icntl, default_cntl64, backend = backend)
+    A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0])
+    factorize!(mumps2, A)
+    rhs = [1.0, 4.0, 9.0, 16.0]
+    x = solve(mumps2, rhs)
+    finalize(mumps2)
     MPI.Barrier(comm)
-    @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
+    @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-    mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64, backend = backend);
-    A = sparse([1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0]);
-    factorize!(mumps3, A);
-    rhs = [1.0, 4.0, 9.0, 16.0];
-    x = solve(mumps3, rhs);
-    finalize(mumps3);
+    mumps3 = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64, backend = backend)
+    A = sparse([1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0])
+    factorize!(mumps3, A)
+    rhs = [1.0, 4.0, 9.0, 16.0]
+    x = solve(mumps3, rhs)
+    finalize(mumps3)
     MPI.Barrier(comm)
-    @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1));
+    @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-    mumps3_unsafe = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl32, backend = backend);
+    mumps3_unsafe = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl32, backend = backend)
     A = sparse([1.0 0.5 0.2 0.0; 0.3 2.0 0.5 0.1; 0.0 0.4 3.0 0.5; 0.1 0.0 0.3 4.0])
     associate_matrix!(mumps3_unsafe, A; unsafe = true)
-    factorize!(mumps3_unsafe);  # Analyze and factorize.
+    factorize!(mumps3_unsafe)  # Analyze and factorize.
     rhs = [1.0, 4.0, 9.0, 16.0]
     orig_rhs = copy(rhs)
     associate_rhs!(mumps3_unsafe, rhs; unsafe = true)
@@ -74,21 +73,21 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     if MPI.Comm_rank(comm) == root
       println("Test single rhs on div_grad matrix")
     end
-    rhs = ones(n3);
+    rhs = ones(n3)
 
-    x = solve(A, rhs, sym = mumps_definite, backend = backend);
+    x = solve(A, rhs, sym = mumps_definite, backend = backend)
     MPI.Barrier(comm)
-    relres = norm(A * x - rhs) / norm(rhs);
-    @test(relres <= tol);
+    relres = norm(A * x - rhs) / norm(rhs)
+    @test(relres <= tol)
 
     # Test with multiple rhs
     if MPI.Comm_rank(comm) == root
       println("Test multiple rhs on div_grad matrix")
     end
-    nrhs = 5;
+    nrhs = 5
     rhs = ones(n3, nrhs) * diagm(0 => collect(1:nrhs))
 
-    x = solve(A, rhs, sym = mumps_definite, backend = backend);
+    x = solve(A, rhs, sym = mumps_definite, backend = backend)
 
     MPI.Barrier(comm)
     relres = zeros(nrhs)

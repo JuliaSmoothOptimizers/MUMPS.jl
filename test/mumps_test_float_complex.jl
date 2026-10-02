@@ -7,10 +7,9 @@ tol = sqrt(eps(Float32))
 
 for backend in (MUMPS.Parallel(), MUMPS.Sequential())
   @testset "$backend" begin
-
     mumps1 = quiet_mumps(ComplexF32; sym = mumps_definite, backend = backend)
     A = sparse(Diagonal([1.0, 2.0, 3.0, 4.0]))
-    factorize!(mumps1, A);  # Analyze and factorize.
+    factorize!(mumps1, A)  # Analyze and factorize.
     rhs = [1.0, 4.0, 9.0, 16.0]
     x = solve(mumps1, rhs)
     finalize(mumps1)
@@ -20,7 +19,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     mumps1_unsafe = quiet_mumps(ComplexF32; sym = mumps_definite, backend = backend)
     A = sparse(Diagonal(Array{ComplexF32}([1.0, 2.0, 3.0, 4.0])))
     associate_matrix!(mumps1_unsafe, A; unsafe = true)
-    factorize!(mumps1_unsafe);  # Analyze and factorize.
+    factorize!(mumps1_unsafe)  # Analyze and factorize.
     rhs = Array{ComplexF32}([1.0, 4.0, 9.0, 16.0])
     orig_rhs = copy(rhs)
     associate_rhs!(mumps1_unsafe, rhs; unsafe = true)
@@ -32,7 +31,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     @test(norm(A * x - orig_rhs) <= tol * norm(orig_rhs) * norm(A, 1))
 
     mumps2 = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32, backend = backend)
-    A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0]);
+    A = sparse([1.0 0.5 0.0 0.0; 0.5 2.0 0.5 0.0; 0.0 0.5 3.0 0.5; 0.0 0.0 0.5 4.0])
     factorize!(mumps2, A)
     rhs = [1.0, 4.0, 9.0, 16.0]
     x = solve(mumps2, rhs)
@@ -48,7 +47,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
         0.0 0.4 3.0+0.3im 0.5;
         0.1 0.0 0.3 4.0+0.4im
       ],
-    );
+    )
     factorize!(mumps3, A)
     rhs = map(ComplexF32, [1.0, 4.0, 9.0, 16.0] + im * [1.0, 4.0, 9.0, 16.0])
     x = solve(mumps3, rhs)
@@ -56,7 +55,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     MPI.Barrier(comm)
     @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
 
-    mumps3_unsafe = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32, backend = backend);
+    mumps3_unsafe = Mumps{ComplexF32}(mumps_unsymmetric, icntl, default_cntl32, backend = backend)
     A = sparse(
       ComplexF32[
         1.0+0.1im 0.5 0.2 0.0;
@@ -66,7 +65,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
       ],
     )
     associate_matrix!(mumps3_unsafe, A; unsafe = true)
-    factorize!(mumps3_unsafe);  # Analyze and factorize.
+    factorize!(mumps3_unsafe)  # Analyze and factorize.
     rhs = Array{ComplexF32}([1.0, 4.0, 9.0, 16.0])
     orig_rhs = copy(rhs)
     associate_rhs!(mumps3_unsafe, rhs; unsafe = true)
@@ -79,7 +78,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
 
     # Test convenience interface.
 
-    n = 10;
+    n = 10
     n3 = n * n * n
     A = convert(SparseMatrixCSC{ComplexF32, Int32}, map(ComplexF32, get_div_grad(n, n, n)))
 
@@ -89,7 +88,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     end
     rhs = map(ComplexF32, ones(n3) + im * ones(n3))
 
-    x = solve(A, rhs, sym = mumps_unsymmetric, backend = backend);
+    x = solve(A, rhs, sym = mumps_unsymmetric, backend = backend)
     MPI.Barrier(comm)
     relres = norm(A * x - rhs) / norm(rhs) / norm(A, 1)
     @test(relres <= tol)
