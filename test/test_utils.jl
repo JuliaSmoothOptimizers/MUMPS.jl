@@ -17,8 +17,8 @@ end
 """quiet_mumps(T; sym=mumps_unsymmetric)
 Create a `Mumps{T}` instance using quiet ICNTL settings for tests.
 """
-function quiet_mumps(::Type{T}; sym = mumps_unsymmetric) where {T}
+function quiet_mumps(::Type{T}; sym = mumps_unsymmetric, backend = MUMPS.Sequential()) where {T}
   icntl = quiet_icntl()
   cntl = T <: Float32 ? default_cntl32 : default_cntl64
-  return Mumps{T}(sym, icntl, cntl)
+  return Mumps{T}(sym, icntl, cntl, backend = backend)
 end
