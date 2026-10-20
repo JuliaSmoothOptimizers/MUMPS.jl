@@ -76,7 +76,8 @@ The solution is retrieved and returned.
 function solve(mumps::Mumps, rhs::AbstractArray; transposed::Bool = false)
   associate_rhs!(mumps, rhs)
   solve!(mumps; transposed = transposed)
-  return get_sol(mumps)
+  x = get_sol(mumps)
+  return rhs isa AbstractVector ? vec(x) : x
 end
 
 """
@@ -113,6 +114,7 @@ function solve(
   associate_rhs!(mumps, rhs)
   solve!(mumps)
   x = get_sol(mumps)
+  rhs isa AbstractVector && (x = vec(x))
   finalize(mumps)
   return x
 end

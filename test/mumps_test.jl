@@ -12,6 +12,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     factorize!(mumps1, A)  # Analyze and factorize.
     rhs = [1.0, 4.0, 9.0, 16.0]
     x = solve(mumps1, rhs)
+    @test x isa Vector{Float64}
     finalize(mumps1)
     MPI.Barrier(comm)
     @test(norm(A * x - rhs) <= tol * norm(rhs) * norm(A, 1))
@@ -79,6 +80,7 @@ for backend in (MUMPS.Parallel(), MUMPS.Sequential())
     MPI.Barrier(comm)
     relres = norm(A * x - rhs) / norm(rhs)
     @test(relres <= tol)
+    @test x isa Vector{Float64}
 
     # Test with multiple rhs
     if MPI.Comm_rank(comm) == root
