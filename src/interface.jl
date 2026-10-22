@@ -165,6 +165,9 @@ modify the matrix in `mumps`.  If `A` is not already consistent, a copy will be 
 the type is converted. Warning: A dense, symmetric matrix will always be copied when it is
 converted to MUMPS's internal representation.
 
+If ICNTL[18]=3, the matrix is distributed: each process passes a sparse matrix of the global
+size that holds only its local entries. Entries found on several processes are summed.
+
 See also: [`associate_rhs!`](@ref)
 """
 function associate_matrix!(
@@ -215,7 +218,27 @@ function _associate_matrix_assembled_centralized!(mumps::Mumps{T}, A::SparseMatr
 end
 
 function _associate_matrix_assembled_distributed!(mumps::Mumps{T}, A::SparseMatrixCSC) where {T}
-  throw(MUMPSException("not written yet."))
+  mumps.icntl[18] == 3 || throw(
+    MUMPSException(
+      "only ICNTL[18]=3 is supported for distributed matrices, but ICNTL[18]=$(mumps.icntl[18])",
+    ),
+  )
+  if is_symmetric(mumps)
+    I, J, V = findnz(triu(A))
+  else
+    I, J, V = findnz(A)
+  end
+  irn_loc = convert(Vector{MUMPS_INT}, I)
+  jcn_loc = convert(Vector{MUMPS_INT}, J)
+  a_loc = convert(Vector{T}, V)
+  mumps.irn_loc, mumps.jcn_loc, mumps.a_loc = pointer.((irn_loc, jcn_loc, a_loc))
+  mumps.n = A.n
+  mumps.nnz_loc = length(V)
+  # centralized and distributed entries are never used together, so they share the same havens
+  mumps._irn_gc_haven = irn_loc
+  mumps._jcn_gc_haven = jcn_loc
+  mumps._a_gc_haven = a_loc
+  return mumps
 end
 
 function _associate_matrix_elemental!(mumps::Mumps{T}, A::Matrix) where {T}
