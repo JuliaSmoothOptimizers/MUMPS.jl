@@ -178,6 +178,46 @@ MPI.Finalize()
 
 For more details on control parameters, see Section 5 of the [MUMPS User's Manual](https://mumps-solver.org/index.php?page=doc).
 
+### Distributed Matrix Input
+
+By default, the matrix is assembled on the host and MUMPS distributes it to the other processes.
+With `ICNTL[18] = 3`, each process instead passes only its own entries, so the full matrix never has to be stored on a single process.
+Each process calls `associate_matrix!` with a sparse matrix of the global size that holds its local entries.
+Entries found on several processes are summed.
+The right-hand side and the solution remain centralized on the host.
+
+```julia
+using MUMPS, MPI, SparseArrays
+
+MPI.Init()
+comm = MPI.COMM_WORLD
+rank = MPI.Comm_rank(comm)
+nprocs = MPI.Comm_size(comm)
+
+# each process assembles the rows of the 1D Laplacian that it owns
+n = 1000
+rows = (1 + rank * n ÷ nprocs):((rank + 1) * n ÷ nprocs)
+I = Int[]; J = Int[]; V = Float64[]
+for i in rows
+  push!(I, i); push!(J, i); push!(V, 2.0)
+  i > 1 && (push!(I, i); push!(J, i - 1); push!(V, -1.0))
+  i < n && (push!(I, i); push!(J, i + 1); push!(V, -1.0))
+end
+A_loc = sparse(I, J, V, n, n)
+
+icntl = default_icntl[:]
+icntl[18] = 3
+mumps = Mumps{Float64}(mumps_unsymmetric, icntl, default_cntl64)
+associate_matrix!(mumps, A_loc)
+factorize!(mumps)
+associate_rhs!(mumps, ones(n))
+solve!(mumps)
+x = get_solution(mumps)  # only meaningful on the host
+
+finalize(mumps)
+MPI.Finalize()
+```
+
 ## Sequential Backend
 
 MUMPS.jl ships two builds of MUMPS: the parallel one from `MUMPS_jll`, used by default, and the

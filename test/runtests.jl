@@ -75,6 +75,9 @@ end
 @testset "ScaLAPACK: " begin
   include("mumps_test_scalapack.jl")
 end
+@testset "distributed matrix: " begin
+  include("mumps_test_distributed.jl")
+end
 
 MPI.Barrier(comm)
 MPI.Finalize()
